@@ -1,0 +1,10 @@
+{
+  "Name": "StardewTestMod",
+  "Author": "Tofu",
+  "Version": "1.0.0",
+  "Description": "StardewTestMod",
+  "UniqueID": "Tofu.StardewTestMod",
+  "EntryDll": "StardewTestMod.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": []
+}
