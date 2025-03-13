@@ -81,7 +81,7 @@ public static class ModAssets
     };
     
     public static readonly Spell[] modSpells = {
-        new Spell(0,"Teleport_Valley","Valley Teleport","Teleports you to the Pierre's Store in Pelican Town",0,0,
+        new Spell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",0,0,
             new Dictionary<int, int>() { {4295, 1},{4291,3},{4293,1} }),
         new Spell(1,"Teleport_Home","Farm Teleport","Teleports you to the Farm",1,1,
             new Dictionary<int, int>() { {4295, 1},{4291,1},{4294,1} })

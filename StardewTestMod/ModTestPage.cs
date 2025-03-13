@@ -45,6 +45,48 @@ public class ModTestPage : IClickableMenu
         }
     }
 
+    //Creates the tooltip for the hovered spell
+    public const int runesOffset = 15;
+    private void GenerateHoverBox(SpriteBatch b)
+    {
+        int x = Game1.getOldMouseX() + 32;
+        int y = Game1.getOldMouseY() + 32;
+        Spell hoveredSpell = ModAssets.modSpells[hoverSpellID];
+
+        //Find the required size of the tooltip box
+        int requiredWidth = (int)Math.Ceiling(
+            Math.Max(
+                Math.Max(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).X,(float)(hoveredSpell.requiredItems.Count * ((16 * 4) + runesOffset))),
+                Game1.smallFont.MeasureString(hoveredSpell.description).X + 16)
+            );
+        requiredWidth = requiredWidth < 100 ? 132 : 32 + requiredWidth;
+
+        int titleHeight = (int)Math.Ceiling(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).Y);
+        int descHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(hoveredSpell.description).Y);
+
+        int requiredHeight = 4 + titleHeight + 4 + descHeight + 36 + (16 * 4);
+        requiredHeight = requiredHeight < 50 ? 66 : 16 + requiredHeight;
+        
+        //Begin drawing
+        drawTextureBox(b, Game1.menuTexture, new Rectangle(0, 256, 60, 60), x, y, requiredWidth, requiredHeight, Color.White, 1f);
+        //Title
+        int nextYOffset = 16;
+        b.DrawString(Game1.dialogueFont, hoveredSpell.displayName, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
+        nextYOffset += titleHeight;
+            b.DrawString(Game1.smallFont, hoveredSpell.description, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
+        nextYOffset += 16 + (int)Math.Ceiling(Game1.smallFont.MeasureString(hoveredSpell.description).Y);
+
+        int nextXOffset = 16;
+        Texture2D runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture(); //TODO move this somewhere else - it may be loading item textures each frame
+        
+        foreach (KeyValuePair<int,int> runePair in hoveredSpell.requiredItems) //Key is ID, value is amount
+        {
+            Vector2 runePosition = new Vector2(x + nextXOffset, y + nextYOffset + 4);
+            b.Draw(runesTextures, runePosition, new Rectangle(((runePair.Key - 4290) * 16), 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
+            b.DrawString(Game1.dialogueFont, runePair.Value.ToString(), new Vector2(runePosition.X + (16*2) + 10,runePosition.Y + (16*2)), Color.Red);
+            nextXOffset += (16 * 4) + runesOffset;
+        }
+    }
     public override void draw(SpriteBatch b)
     {
         b.End();
@@ -54,7 +96,14 @@ public class ModTestPage : IClickableMenu
             b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(0,ModAssets.spellsY + (c.myID * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
         }
 
-        b.DrawString(Game1.dialogueFont, hoverSpellID.ToString(), new Vector2(xPositionOnScreen + IClickableMenu.borderWidth * 3 / 2 + 192 - 20 + 96 - (int)(Game1.dialogueFont.MeasureString(hoverSpellID.ToString()).X), yPositionOnScreen + 500), Game1.textColor);
+        //b.DrawString(Game1.dialogueFont, hoverSpellID.ToString(), new Vector2(xPositionOnScreen + IClickableMenu.borderWidth * 3 / 2 + 192 - 20 + 96 - (int)(Game1.dialogueFont.MeasureString(hoverSpellID.ToString()).X), yPositionOnScreen + 500), Game1.textColor);
+        
+        //Needs to be at end to prevent overlap
+        if (hoverSpellID != -1)
+        {
+            GenerateHoverBox(b);
+        }
+        
         b.End();
         b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
     }
