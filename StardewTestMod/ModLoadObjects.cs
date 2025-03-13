@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
+using StardewValley;
 using StardewValley.GameData.Objects;
 
 namespace StardewTestMod;
@@ -58,6 +59,23 @@ public struct Spell
         this.magicLevelRequirement = magicLevelRequirement;
         this.spriteIndex = spriteIndex;
         this.requiredItems = requiredItems;
+    }
+
+    public bool CanCastSpell()
+    {
+        bool canCast = true;
+        //TODO add magic level checking
+        foreach (int runeID in requiredItems.Keys)
+        {
+            canCast = canCast && HasRuneCost(runeID);
+        }
+        return canCast;
+    }
+
+    public bool HasRuneCost(int runeID)
+    {
+        //The non-obsolete method doesn't seem to work for this for some reason
+        return (Game1.player.getItemCount($"{runeID}") >= requiredItems[runeID]);
     }
 }
 

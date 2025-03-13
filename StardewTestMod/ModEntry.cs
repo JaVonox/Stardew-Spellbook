@@ -64,7 +64,7 @@ namespace StardewTestMod
             {
                 for (int i = 4290; i < 4299; i++)
                 {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O){i}");
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
                     Game1.player.addItemToInventory(item);
                 }
                 Monitor.Log($"Added custom item to inventory", LogLevel.Info);
