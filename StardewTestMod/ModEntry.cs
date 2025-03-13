@@ -6,7 +6,6 @@ using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.GameData.Objects;
 using StardewValley.Menus;
-using static StardewTestMod.ModLoadObjects;
 
 namespace StardewTestMod
 {
@@ -14,20 +13,6 @@ namespace StardewTestMod
     {
         public static ModEntry Instance;
         public static IMonitor ModMonitor { get; private set; }
-        
-        public static Texture2D extraTextures;
-        
-        private static readonly ModLoadObjects[] modLoadSet = {
-            new ModLoadObjects(4290,"Rune_Blank","Pure Essence","An unimbued rune of extra capability."),
-            new ModLoadObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes"),
-            new ModLoadObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes"),
-            new ModLoadObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes"),
-            new ModLoadObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes"),
-            new ModLoadObjects(4295,"Rune_Law","Law Rune","Used for teleport spells"),
-            new ModLoadObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells"),
-            new ModLoadObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells"),
-            new ModLoadObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells")
-        };
         
         private const string CustomTextureKey = "Mods.StardewTestMod.Assets.ModSprites";
         
@@ -37,8 +22,8 @@ namespace StardewTestMod
             ModMonitor = this.Monitor;
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll();
-            
-            extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
+
+            ModAssets.Load(helper);
             
             var customStrings = helper.Translation.Get("GameMenu_ModTest");
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
@@ -58,7 +43,7 @@ namespace StardewTestMod
                     {
                         var objectDict = asset.AsDictionary<string, ObjectData>().Data;
 
-                        foreach (ModLoadObjects newObject in modLoadSet)
+                        foreach (ModLoadObjects newObject in ModAssets.modItems)
                         {
                             newObject.AppendObject(CustomTextureKey,objectDict);
                         }
@@ -111,7 +96,7 @@ namespace StardewTestMod
             public static void Postfix(GameMenu __instance, bool playOpeningSound = true)
             {
                 __instance.pages.Add(new ModTestPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
-                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 704, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "modtest", "Jamie's Sweet Menu")
+                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 704, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "modtest", "Spellbook")
                 {
                     myID = 12350,
                     downNeighborID = 10,
@@ -132,7 +117,7 @@ namespace StardewTestMod
                 if(!__instance.invisible)
                 {
                     ClickableComponent c = __instance.tabs.Where(x => x.name == "modtest").First();
-                    b.Draw(extraTextures, new Vector2(c.bounds.X, c.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)), new Rectangle(newMenuIndex * 16, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
+                    b.Draw(ModAssets.extraTextures, new Vector2(c.bounds.X, c.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)), new Rectangle(newMenuIndex * 16, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
                     DuplicateDraws(__instance, b);
                 }
             }
