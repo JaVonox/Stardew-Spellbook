@@ -6,34 +6,37 @@ namespace StardewTestMod;
 
 public class BaseSpellEffects
 {
-    public static void StartTeleportAnim()
+    public static void PlayAnimationTeleport(Action onAnimationComplete)
     {
+        Game1.player.playNearbySoundAll("wand", null);
+    
+        // Callback function for when we finish the animation
+        FarmerSprite.endOfAnimationBehavior endBehavior = farmer => 
+        {
+            onAnimationComplete?.Invoke();
+        };
+        
+        Game1.player.faceDirection(2);
+        Game1.player.temporarilyInvincible = true;
+        Game1.player.temporaryInvincibilityTimer = -2000;
+        Game1.player.freezePause = 2000;
+        Game1.displayFarmer = true;
+        
         Game1.player.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[2]
         {
             new FarmerSprite.AnimationFrame(57, 2000, secondaryArm: false, flip: false),
-            new FarmerSprite.AnimationFrame((short)Game1.player.FarmerSprite.CurrentFrame, 0, secondaryArm: false, flip: false, null, behaviorAtEndOfFrame: true)
+            //
+            new FarmerSprite.AnimationFrame(
+                (short)Game1.player.FarmerSprite.CurrentFrame, 
+                0, 
+                false, 
+                false, 
+                endBehavior, 
+                true
+            )
         });
+        
     }
-
-    public static void MidTeleportAnim()
-    {
-        Game1.player.playNearbySoundAll("wand", null);
-        Game1.displayFarmer = false;
-        Game1.player.temporarilyInvincible = true;
-        Game1.player.temporaryInvincibilityTimer = -2000;
-        Game1.player.freezePause = 1000;
-        Game1.flashAlpha = 1f;
-    }
-
-    public static void EndTeleportAnim()
-    {
-        Game1.fadeToBlackAlpha = 0.99f;
-        Game1.screenGlow = false;
-        Game1.player.temporarilyInvincible = false;
-        Game1.player.temporaryInvincibilityTimer = 0;
-        Game1.displayFarmer = true;
-    }
-
     public static KeyValuePair<bool,string> Teleport(string Location, int x, int y, int dir)
     {
 
@@ -42,20 +45,17 @@ public class BaseSpellEffects
         {
             return new KeyValuePair<bool, string>(false,"It's dangerous to teleport on special days");
         }
-        /*
-        Game1.player.faceDirection(2);
-        Game1.player.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[2]
+
+        //Warp once the animation ends
+        PlayAnimationTeleport(() =>
         {
-            new FarmerSprite.AnimationFrame(57, 2000, secondaryArm: false, flip: false),
-            new FarmerSprite.AnimationFrame((short)Game1.player.FarmerSprite.CurrentFrame, 0, secondaryArm: false, flip: false, null, behaviorAtEndOfFrame: true)
+            Game1.warpFarmer(Location, x, y, dir);
+            Game1.player.temporarilyInvincible = false;
+            Game1.player.temporaryInvincibilityTimer = 0;
+            Game1.player.freezePause = 0;
         });
-        */
-        StartTeleportAnim();
-        Game1.warpFarmer(Location, x, y, dir);
-        /*
-        EndTeleportAnim();
-        */
-        return new KeyValuePair<bool, string>(true,"");;
+        
+        return new KeyValuePair<bool, string>(true,"");
     }
 }
 
