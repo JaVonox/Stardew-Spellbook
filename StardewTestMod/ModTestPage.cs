@@ -47,7 +47,7 @@ public class ModTestPage : IClickableMenu
 
     //Creates the tooltip for the hovered spell
     public const int runesOffset = 15;
-    private void GenerateHoverBox(SpriteBatch b, bool canCast)
+    private void GenerateHoverBox(SpriteBatch b, KeyValuePair<bool,string> canCast)
     {
         int x = Game1.getOldMouseX() + 32;
         int y = Game1.getOldMouseY() + 32;
@@ -55,16 +55,18 @@ public class ModTestPage : IClickableMenu
 
         //Find the required size of the tooltip box
         int requiredWidth = (int)Math.Ceiling(
-            Math.Max(
-                Math.Max(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).X,(float)(hoveredSpell.requiredItems.Count * ((16 * 4) + runesOffset))),
-                Game1.smallFont.MeasureString(hoveredSpell.description).X + 16)
-            );
+            Math.Max(Game1.smallFont.MeasureString(canCast.Value).X + 16,
+                Math.Max(
+                    Math.Max(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).X,(float)(hoveredSpell.requiredItems.Count * ((16 * 4) + runesOffset))),
+                    Game1.smallFont.MeasureString(hoveredSpell.description).X + 16)
+            ));
         requiredWidth = requiredWidth < 100 ? 132 : 32 + requiredWidth;
 
         int titleHeight = (int)Math.Ceiling(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).Y);
         int descHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(hoveredSpell.description).Y);
-
-        int requiredHeight = 4 + titleHeight + 4 + descHeight + 36 + (16 * 4);
+        int errorHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(canCast.Value).Y);
+        
+        int requiredHeight = 4 + titleHeight + 4 + descHeight + 36 + (16 * 4) + (!canCast.Key ? errorHeight : 0); //Adjust to add error message;
         requiredHeight = requiredHeight < 50 ? 66 : 16 + requiredHeight;
         
         //Begin drawing
@@ -74,8 +76,15 @@ public class ModTestPage : IClickableMenu
         b.DrawString(Game1.dialogueFont, hoveredSpell.displayName, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
         nextYOffset += titleHeight;
             b.DrawString(Game1.smallFont, hoveredSpell.description, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
-        nextYOffset += 16 + (int)Math.Ceiling(Game1.smallFont.MeasureString(hoveredSpell.description).Y);
+        nextYOffset += descHeight;
 
+        if (!canCast.Key)
+        {
+            b.DrawString(Game1.smallFont, canCast.Value, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Color.Red);
+            nextYOffset += errorHeight;
+        }
+        nextYOffset += 16;
+        
         int nextXOffset = 16;
         Texture2D runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture(); //TODO move this somewhere else - it may be loading item textures each frame
         
@@ -84,7 +93,7 @@ public class ModTestPage : IClickableMenu
             Vector2 runePosition = new Vector2(x + nextXOffset, y + nextYOffset + 4);
             b.Draw(runesTextures, runePosition, new Rectangle(((runePair.Key - 4290) * 16), 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
             
-            Color runeCountColour = hoveredSpell.HasRuneCost(runePair.Key) ? Color.Green : Color.Red;
+            Color runeCountColour = hoveredSpell.HasRuneCost(runePair.Key) ? Color.LawnGreen : Color.Red;
             b.DrawString(Game1.dialogueFont, runePair.Value.ToString(), new Vector2(runePosition.X + (16*2) + 10,runePosition.Y + (16*2)), runeCountColour);
             nextXOffset += (16 * 4) + runesOffset;
         }
@@ -95,12 +104,11 @@ public class ModTestPage : IClickableMenu
         b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
         foreach (ClickableComponent c in spellIcons)
         {
-            bool canCast = ModAssets.modSpells[c.myID].CanCastSpell();
+            bool canCast = ModAssets.modSpells[c.myID].CanCastSpell().Key;
             b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(canCast ? 0 : ModAssets.spellsSize,ModAssets.spellsY + (c.myID * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
         }
 
         //b.DrawString(Game1.dialogueFont, hoverSpellID.ToString(), new Vector2(xPositionOnScreen + IClickableMenu.borderWidth * 3 / 2 + 192 - 20 + 96 - (int)(Game1.dialogueFont.MeasureString(hoverSpellID.ToString()).X), yPositionOnScreen + 500), Game1.textColor);
-        
         //Needs to be at end to prevent overlap
         if (hoverSpellID != -1)
         {
@@ -113,14 +121,16 @@ public class ModTestPage : IClickableMenu
     
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
-        if (hoverSpellID != -1 && ModAssets.modSpells[hoverSpellID].CanCastSpell())
+        if (hoverSpellID != -1)
         {
-            Spell castSpell = ModAssets.modSpells[hoverSpellID];
-            //Move this to its own area - maybe play around with some kinda delegate or action to make it customisable?
-            Game1.warpFarmer("Farm", 50, 50, flip: false);
-            foreach (KeyValuePair<int,int> runeCost in castSpell.requiredItems)
+            KeyValuePair<bool,string> castReturn = ModAssets.modSpells[hoverSpellID].CastSpell();
+            if (castReturn.Key)
             {
-                Game1.player.Items.ReduceId($"{runeCost.Key}",runeCost.Value); //This doesn't work, seemingly for the same reason that Items.CountId doesn't work
+                exitThisMenu();
+            }
+            else
+            {
+                Game1.showRedMessage(castReturn.Value, true);
             }
         }
     }

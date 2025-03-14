@@ -69,9 +69,15 @@ namespace StardewTestMod
                 }
                 Monitor.Log($"Added custom item to inventory", LogLevel.Info);
             }
-            
+
+            if (e.Button == SButton.F6)
+            {
+                Monitor.Log($"Location name {Game1.player.currentLocation.name} tile x {Game1.player.Tile.X} y {Game1.player.Tile.Y}", LogLevel.Warn);
+            }
+
             this.Monitor.Log($"{Game1.player.Name} pressed {e.Button}.", LogLevel.Debug);
         }
+        
         //Add menu item to getTabNumberFromName
         [HarmonyPatch(typeof(GameMenu), "getTabNumberFromName")]
         public class GameMenuTabNumberPatch
@@ -135,5 +141,6 @@ namespace StardewTestMod
                 __instance.drawMouse(b, ignore_transparency: true);
             }
         }
+        
     }
 }
