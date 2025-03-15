@@ -107,6 +107,7 @@ public static class ModAssets
 
     public const int spellsY = 16;
     public const int spellsSize = 80;
+    private static object multiplayer;
     
     public static readonly ModLoadObjects[] modItems = {
         new ModLoadObjects(4290,"Rune_Blank","Pure Essence","An unimbued rune of extra capability."),
@@ -130,12 +131,23 @@ public static class ModAssets
         new Spell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",1,3,
             new Dictionary<int, int>() { {4296, 1},{4293,5}}, SpellEffects.TeleportToFarm),
         new Spell(4,"Area_Humidify","Humidify","Waters the ground around you",1,4,
-            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, SpellEffects.TeleportToFarm),
+            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, SpellEffects.WaterTiles),
         new Spell(5,"Area_Cure","Cure Plant","Replants Dead Crops",1,5,
             new Dictionary<int, int>() { {4298, 1},{4294,8}}, SpellEffects.TeleportToFarm),
     };
     public static void Load(IModHelper helper)
     {
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
+        multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
+    }
+
+    public static void BroadcastSprite(GameLocation location, TemporaryAnimatedSprite sprite)
+    {
+        var method = multiplayer.GetType().GetMethod("broadcastSprites", 
+            new[] { typeof(GameLocation), typeof(TemporaryAnimatedSprite[]) });
+        
+        var spriteArray = new TemporaryAnimatedSprite[] { sprite };
+        
+        method.Invoke(multiplayer, new object[] { location, spriteArray });
     }
 }
