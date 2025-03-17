@@ -1,9 +1,7 @@
-﻿using System.Linq.Expressions;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.TerrainFeatures;
-using StardewValley.Tools;
 
 namespace StardewTestMod;
 
@@ -31,9 +29,9 @@ public class BaseSpellEffects
             )
         });
     }
-    public static void PlayAnimationTeleport(Action onAnimationComplete)
+    public static void PlayAnimation(Action onAnimationComplete, string sound, int duration)
     {
-        Game1.player.playNearbySoundAll("wand", null);
+        Game1.player.playNearbySoundAll(sound, null);
     
         // Callback function for when we finish the animation
         FarmerSprite.endOfAnimationBehavior endBehavior = farmer => 
@@ -41,21 +39,9 @@ public class BaseSpellEffects
             onAnimationComplete?.Invoke();
         };
         
-        PlayCastAnim(endBehavior,2000);
+        PlayCastAnim(endBehavior,duration);
     }
 
-    public static void PlayAnimationHumidify(Action onAnimationComplete)
-    {
-        Game1.player.playNearbySoundAll("wand", null);
-    
-        // Callback function for when we finish the animation
-        FarmerSprite.endOfAnimationBehavior endBehavior = farmer => 
-        {
-            onAnimationComplete?.Invoke();
-        };
-        
-        PlayCastAnim(endBehavior,1000);
-    }
     public static KeyValuePair<bool,string> Teleport(string Location, int x, int y, int dir)
     {
 
@@ -66,13 +52,13 @@ public class BaseSpellEffects
         }
 
         //Warp once the animation ends
-        PlayAnimationTeleport(() =>
+        PlayAnimation(() =>
         {
             Game1.warpFarmer(Location, x, y, dir);
             Game1.player.temporarilyInvincible = false;
             Game1.player.temporaryInvincibilityTimer = 0;
             Game1.player.freezePause = 0;
-        });
+        },"wand",2000);
         
         return new KeyValuePair<bool, string>(true,"");
     }
@@ -97,28 +83,36 @@ public class BaseSpellEffects
 
         return tileLocations;
     }
+
+    public static KeyValuePair<bool, string> IsItemValidForOperation(ref Item? itemArgs, Predicate<Item?> predicate)
+    {
+        if (itemArgs == null || !predicate(itemArgs))
+        {
+            return new KeyValuePair<bool, string>(false,$"Invalid Item");
+        }
+        
+        return new KeyValuePair<bool, string>(true,$"");
+
+    }
 }
 
 public class SpellEffects : BaseSpellEffects
 {
-    public static KeyValuePair<bool,string> TeleportToFarm()
+    public static KeyValuePair<bool,string> TeleportToFarm(ref Item? itemArgs, Predicate<object>? castPredicate = null)
     {
         return Teleport("BusStop", 19, 23,2);
     }
     
-    public static KeyValuePair<bool,string> TeleportToPierre()
+    public static KeyValuePair<bool,string> TeleportToPierre(ref Item? itemArgs, Predicate<object>? castPredicate = null)
     {
         return Teleport("Town", 43, 60,0);
     }
     
-    public static KeyValuePair<bool,string> WaterTiles()
+    public static KeyValuePair<bool,string> Humidify(ref Item? itemArgs, Predicate<object>? castPredicate = null)
     {
         Farmer player = Game1.player;
         GameLocation currentLoc = player.currentLocation;
-        List<HoeDirt> tilesToCastOn = GetTiles(Game1.player.Tile, currentLoc, 10,
-            (tile => tile is HoeDirt hoeLand && 
-                     (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1))
-            .OfType<HoeDirt>().ToList();
+        List<HoeDirt> tilesToCastOn = GetTiles(Game1.player.Tile, currentLoc, 10,castPredicate).OfType<HoeDirt>().ToList();
         
         
         if (tilesToCastOn.Count == 0)
@@ -127,10 +121,9 @@ public class SpellEffects : BaseSpellEffects
         }
         else
         {
-            PlayAnimationHumidify(() =>
+            PlayAnimation(() =>
             {
                 int j = 0;
-                player.playNearbySoundAll("slosh", null);
                 foreach (HoeDirt appTile in tilesToCastOn)
                 {
                     if (j % 5 == 0)
@@ -148,10 +141,63 @@ public class SpellEffects : BaseSpellEffects
                 Game1.player.temporarilyInvincible = false;
                 Game1.player.temporaryInvincibilityTimer = 0;
                 Game1.player.freezePause = 0;
-            });
+            },"wand",1000);
             
             return new KeyValuePair<bool, string>(true,"");
         }
     }
     
+    public static KeyValuePair<bool,string> CurePlant(ref Item? itemArgs, Predicate<object>? castPredicate = null)
+    {
+        Farmer player = Game1.player;
+        GameLocation currentLoc = player.currentLocation;
+        List<HoeDirt> tilesToCastOn = GetTiles(Game1.player.Tile, currentLoc, 10, castPredicate).OfType<HoeDirt>().ToList();
+        
+        
+        if (tilesToCastOn.Count == 0)
+        {
+            return new KeyValuePair<bool, string>(false,$"I can't see any dead plants here");
+        }
+        else
+        {
+            PlayAnimation(() =>
+            {
+                foreach (HoeDirt appTile in tilesToCastOn)
+                {
+
+                    //Get a random seed from the current seasonal set and place it here
+                    string randomSeed = Crop.ResolveSeedId("770",currentLoc); //This gets a randoms seed from the mixed seeds set
+                    appTile.destroyCrop(true);
+                    appTile.plant(randomSeed,player,false);
+
+                }
+                Game1.player.temporarilyInvincible = false;
+                Game1.player.temporaryInvincibilityTimer = 0;
+                Game1.player.freezePause = 0;
+            },"wand",1000);
+            
+            return new KeyValuePair<bool, string>(true,"");
+        }
+    }
+    public static KeyValuePair<bool, string> HighAlchemy(ref Item? itemArgs, Predicate<object>? castPredicate = null)
+    {
+        KeyValuePair<bool, string> operationReturn = IsItemValidForOperation(ref itemArgs,castPredicate);
+
+        if (operationReturn.Key)
+        {
+            int postCastStackSize = itemArgs.Stack - 1;
+            Game1.player.Money += itemArgs.salePrice(false);
+            itemArgs.ConsumeStack(1);
+            if (postCastStackSize == 0)
+            {
+                itemArgs = null;
+            }
+        }
+        
+        return new KeyValuePair<bool, string>(true,"");
+    }
+    public static KeyValuePair<bool, string> SuperheatItem(ref Item? itemArgs, Predicate<object>? castPredicate = null)
+    {
+        return new KeyValuePair<bool, string>(true,"");
+    }
 }

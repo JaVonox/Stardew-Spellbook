@@ -5,6 +5,7 @@ using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.GameData.Objects;
+using StardewValley.GameData.Shops;
 using StardewValley.Menus;
 
 namespace StardewTestMod
@@ -100,7 +101,7 @@ namespace StardewTestMod
         {
             public static void Postfix(GameMenu __instance, bool playOpeningSound = true)
             {
-                __instance.pages.Add(new ModTestPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
+                __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
                 __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 704, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "modtest", "Spellbook")
                 {
                     myID = 12350,
@@ -141,5 +142,20 @@ namespace StardewTestMod
             }
         }
         
+        
+        /*
+        [HarmonyPatch(typeof(ShopMenu), MethodType.Constructor)]
+        [HarmonyPatch(new Type[] { typeof(string),typeof(ShopData),typeof(ShopOwnerData),typeof(NPC),typeof(ShopMenu.OnPurchaseDelegate),typeof(Func<ISalable, bool>),typeof(bool) })]
+        public class ShopMenuConstructorPatch
+        {
+            public static void Prefix(GameMenu __instance, string shopId, ShopData shopData, ShopOwnerData ownerData, NPC owner = null, ShopMenu.OnPurchaseDelegate onPurchase = null, Func<ISalable, bool> onSell = null, bool playOpenSound = true)
+            {
+                foreach (string salableItemTag in shopData.SalableItemTags)
+                {
+                    ModMonitor.Log($"Tag name {salableItemTag}", LogLevel.Warn);
+                }
+            }
+        }
+        */
     }
 }

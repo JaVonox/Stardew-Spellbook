@@ -6,16 +6,17 @@ using static StardewTestMod.ModLoadObjects;
 
 namespace StardewTestMod;
 
-public class ModTestPage : IClickableMenu
+public class SpellbookPage : IClickableMenu
 {
-    
     public List<ClickableComponent> spellIcons = new List<ClickableComponent>();
     
     public int hoverSpellID = -1;
 
-    public ModTestPage(int x, int y, int width, int height)
+    private Texture2D runesTextures;
+    public SpellbookPage(int x, int y, int width, int height)
         : base(x, y, width, height)
     {
+        runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
         int spellsMaxIndex = ModAssets.modSpells.Length - 1;
         foreach(Spell sp in ModAssets.modSpells)
         {
@@ -86,8 +87,6 @@ public class ModTestPage : IClickableMenu
         nextYOffset += 16;
         
         int nextXOffset = 16;
-        Texture2D runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture(); //TODO move this somewhere else - it may be loading item textures each frame
-        
         foreach (KeyValuePair<int,int> runePair in hoveredSpell.requiredItems) //Key is ID, value is amount
         {
             Vector2 runePosition = new Vector2(x + nextXOffset, y + nextYOffset + 4);
@@ -98,6 +97,24 @@ public class ModTestPage : IClickableMenu
             nextXOffset += (16 * 4) + runesOffset;
         }
     }
+    
+    public override void receiveLeftClick(int x, int y, bool playSound = true)
+    {
+        if (hoverSpellID != -1)
+        {
+            Item? nullItem = null;
+            KeyValuePair<bool,string> castReturn = ModAssets.modSpells[hoverSpellID].CastSpell(false, ref nullItem);
+            if (castReturn.Key)
+            {
+                exitThisMenu();
+            }
+            else
+            {
+                Game1.showRedMessage(castReturn.Value, true);
+            }
+        }
+    }
+    
     public override void draw(SpriteBatch b)
     {
         b.End();
@@ -117,21 +134,5 @@ public class ModTestPage : IClickableMenu
         
         b.End();
         b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
-    }
-    
-    public override void receiveLeftClick(int x, int y, bool playSound = true)
-    {
-        if (hoverSpellID != -1)
-        {
-            KeyValuePair<bool,string> castReturn = ModAssets.modSpells[hoverSpellID].CastSpell();
-            if (castReturn.Key)
-            {
-                exitThisMenu();
-            }
-            else
-            {
-                Game1.showRedMessage(castReturn.Value, true);
-            }
-        }
     }
 }

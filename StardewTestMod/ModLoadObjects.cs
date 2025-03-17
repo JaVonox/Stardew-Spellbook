@@ -2,8 +2,19 @@
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.Objects;
+using StardewValley.TerrainFeatures;
 
 namespace StardewTestMod;
+
+public enum SpellType
+{
+    Teleport,
+    MapUtility,
+    InventoryUtility,
+    Combat
+}
+
+public delegate KeyValuePair<bool, string> SpellMethod(ref Item? i, Predicate<object>? p);
 
 public struct ModLoadObjects
 {
@@ -46,21 +57,25 @@ public struct Spell
     public string name;
     public string displayName;
     public string description;
+    public SpellType spellType;
     public int magicLevelRequirement;
     public int spriteIndex;
-    public Func<KeyValuePair<bool,string>> DoAction;
+    
+    public SpellMethod DoAction; //The function to use. returns a bool for if it was successful, string as any output args, and may take an item as an Input
     public Dictionary<int,int> requiredItems; //Set of IDs for the required runes - add duplicates to designate more than 1 item required
-
-    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, int spriteIndex, Dictionary<int,int> requiredItems, Func<KeyValuePair<bool,string>> DoAction)
+    public Predicate<object>? castPredicate; //Miscellanious predicate to determine if there is any extra conditions that must be met - spell effects dictate where to use this
+    public Spell(int id, string name, string displayName, string description, SpellType spellType, int magicLevelRequirement, int spriteIndex, Dictionary<int,int> requiredItems, SpellMethod DoAction, Predicate<object>? castPredicate = null)
     {
         this.id = id;
         this.name = name;
         this.displayName = displayName;
         this.description = description;
+        this.spellType = spellType;
         this.magicLevelRequirement = magicLevelRequirement;
         this.spriteIndex = spriteIndex;
         this.requiredItems = requiredItems;
         this.DoAction = DoAction;
+        this.castPredicate = castPredicate;
     }
 
     public KeyValuePair<bool,string> CanCastSpell()
@@ -81,19 +96,37 @@ public struct Spell
         return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID]);
     }
 
-    public KeyValuePair<bool,string> CastSpell()
+    public KeyValuePair<bool,string> CastSpell(bool isInventorySpellMenu, ref Item? itemArgs)
     {
         KeyValuePair<bool,string> actionResult = CanCastSpell();
         if (actionResult.Key) //First pass of action result checks if we can actually cast the selected spell - either due to level or rune cost etc.
         {
-            actionResult = DoAction();
-            
-            if(actionResult.Key) //Second pass checks if there are any spell specific issues - like how teleporting is forbidden on festival days
+            switch (spellType)
             {
-                foreach (KeyValuePair<int, int> runeCost in requiredItems) //Remove runes if we have successfully cast the spell
-                {
-                    Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value); 
-                }
+                //If the spell is teleport or map utility, we can just cast the spell immediately
+                case SpellType.InventoryUtility: //If we are using an inventory utility spell, we need to open the inventory spell menu first
+                    if (!isInventorySpellMenu) //If we're not in the inventory menu,
+                    {
+                        Game1.activeClickableMenu = new InventorySpellMenu(this,castPredicate);
+                        break;
+                    }
+                    goto default; //Fallthrough if we are already in the inventory spell menu
+                case SpellType.Combat:
+                    break;
+                case SpellType.Teleport:
+                case SpellType.MapUtility:
+                default:
+                    actionResult = DoAction(ref itemArgs,castPredicate);
+            
+                    if(actionResult.Key) //Second pass checks if there are any spell specific issues - like how teleporting is forbidden on festival days
+                    {
+                        foreach (KeyValuePair<int, int> runeCost in requiredItems) //Remove runes if we have successfully cast the spell
+                        {
+                            Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value); 
+                        }
+                    }
+
+                    break;
             }
         }
 
@@ -122,18 +155,20 @@ public static class ModAssets
     };
     
     public static readonly Spell[] modSpells = {
-        new Spell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",0,0,
+        new Spell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",SpellType.Teleport,0,0,
             new Dictionary<int, int>() { {4295, 1},{4291,3},{4293,1} },SpellEffects.TeleportToPierre),
-        new Spell(1,"Teleport_Home","Farm Teleport","Teleports you to your Farm",1,1,
+        new Spell(1,"Teleport_Home","Farm Teleport","Teleports you to your Farm",SpellType.Teleport,1,1,
             new Dictionary<int, int>() { {4295, 1},{4291,1},{4294,1} }, SpellEffects.TeleportToFarm),
-        new Spell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",1,2,
-            new Dictionary<int, int>() { {4296, 1},{4293,4}}, SpellEffects.TeleportToFarm),
-        new Spell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",1,3,
-            new Dictionary<int, int>() { {4296, 1},{4293,5}}, SpellEffects.TeleportToFarm),
-        new Spell(4,"Area_Humidify","Humidify","Waters the ground around you",1,4,
-            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, SpellEffects.WaterTiles),
-        new Spell(5,"Area_Cure","Cure Plant","Replants Dead Crops",1,5,
-            new Dictionary<int, int>() { {4298, 1},{4294,8}}, SpellEffects.TeleportToFarm),
+        new Spell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",SpellType.InventoryUtility,1,2,
+            new Dictionary<int, int>() { {4296, 1},{4293,4}}, SpellEffects.SuperheatItem),
+        new Spell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",SpellType.InventoryUtility,1,3,
+            new Dictionary<int, int>() { {4296, 1},{4293,5}}, SpellEffects.HighAlchemy,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0)),
+        new Spell(4,"Area_Humidify","Humidify","Waters the ground around you",SpellType.MapUtility,1,4,
+            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, SpellEffects.Humidify,
+            (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
+        new Spell(5,"Area_Cure","Cure Plant","Replants dead crops",SpellType.MapUtility,1,5,
+            new Dictionary<int, int>() { {4298, 1},{4294,8}}, SpellEffects.CurePlant, 
+            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
     };
     public static void Load(IModHelper helper)
     {
