@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
+using StardewValley.Extensions;
 using StardewValley.Menus;
 
 namespace StardewTestMod;
-
 public class InventorySpellMenu : MenuWithInventory
 {
     private ClickableTextureComponent inputSpot;
@@ -16,13 +16,15 @@ public class InventorySpellMenu : MenuWithInventory
     
     private int centreY;
     private int casterX;
-
-    private bool playCast = false;
+    private int currentFrame;
+    
+    private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
     public InventorySpellMenu(Spell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
         this.targetSpell = targetSpell;
         this.selectablePredicate = selectablePredicate;
         descriptionText = targetSpell.description;
+        currentFrame = Game1.random.Next(16);
         if (yPositionOnScreen == IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder)
         {
             movePosition(0, -IClickableMenu.spaceToClearTopBorder);
@@ -39,7 +41,7 @@ public class InventorySpellMenu : MenuWithInventory
         caster = Game1.player;
 
         spellIcon = new ClickableTextureComponent(new Rectangle(casterX + 80,
-                centreY - (ModAssets.spellsSize / 2),
+                (centreY - 15) - (ModAssets.spellsSize / 2),
                 ModAssets.spellsSize, ModAssets.spellsSize),ModAssets.extraTextures, new Rectangle(0,ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), 1f);
     }
 
@@ -50,7 +52,41 @@ public class InventorySpellMenu : MenuWithInventory
     
     public override void update(GameTime time)
     {
+        currentFrame = currentFrame % 1000 == 0 ? 1 : currentFrame + 1;
+        
         descriptionText = targetSpell.longDescription;
+        
+        fluffSprites.RemoveWhere((TemporaryAnimatedSprite sprite) => sprite.update(time));
+        
+        bool cannotCast = inputSpot.item == null || !targetSpell.CanCastSpell().Key;
+        
+        spellIcon.bounds.X = casterX + 80 + (!cannotCast ? Game1.random.Next(-1, 1) : 0);
+        spellIcon.bounds.Y = (centreY - 15) - (ModAssets.spellsSize / 2) + (!cannotCast ? Game1.random.Next(-1, 1) : 0);
+        //TODO this might be too often an operation?
+        spellIcon.sourceRect = new Rectangle((cannotCast ? ModAssets.spellsSize : 0), 
+            ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize);
+        
+        if (!cannotCast)
+        {
+            if (currentFrame % 30 == 1)
+            {
+                fluffSprites.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(346, 392, 8, 8),
+                    new Vector2(spellIcon.bounds.X + Game1.random.Next(ModAssets.spellsSize),
+                        spellIcon.bounds.Y + Game1.random.Next(ModAssets.spellsSize)), flipped: false, 0.002f,
+                    new Color(255, 222, 198))
+                {
+                    alphaFade = 0.02f,
+                    motion = new Vector2(0, -1),
+                    interval = 99999f,
+                    layerDepth = 0.9f,
+                    scale = 3f,
+                    scaleChange = 0.01f,
+                    rotation = Game1.random.Next(360),
+                    delayBeforeAnimationStart = 0
+                });
+            }
+        }
+ 
     }
     
     public override void receiveLeftClick(int x, int y, bool playSound = true)
@@ -70,10 +106,6 @@ public class InventorySpellMenu : MenuWithInventory
                 if (!castReturn.Key)
                 {
                     Game1.showRedMessage(castReturn.Value, true);
-                }
-                else
-                {
-                    playCast = true;
                 }
             }
         }
@@ -114,11 +146,6 @@ public class InventorySpellMenu : MenuWithInventory
         base.heldItem = null;
         inputSpot.item = null;
     }
-
-    private void EndCastAnimation()
-    {
-        playCast = false;
-    }
     public override void draw(SpriteBatch b)
     {
         base.draw(b);
@@ -127,7 +154,8 @@ public class InventorySpellMenu : MenuWithInventory
         inputSpot.draw(b, Color.White, 0.96f);
         inputSpot.drawItem(b, 16, 16);
         
-        b.Draw(Game1.mouseCursors, spellIcon.bounds,new Rectangle(325, 318, 25, 18), Color.White); //Back icon for spell cast
+        b.Draw(Game1.mouseCursors, new Rectangle(casterX + 80, centreY - (ModAssets.spellsSize / 2),ModAssets.spellsSize,ModAssets.spellsSize),
+            new Rectangle(325, 318, 25, 18), Color.White); //Back icon for spell cast
         spellIcon.draw(b,Color.White,0.96f);
         
         FarmerRenderer.isDrawingForUI = true;
@@ -137,6 +165,11 @@ public class InventorySpellMenu : MenuWithInventory
             new Vector2(casterX - 8, centreY - 48), Vector2.Zero, 0.8f, 2, Color.White, 0f, 1f, caster);
 
         FarmerRenderer.isDrawingForUI = false;
+        
+        foreach (TemporaryAnimatedSprite fluffSprite in fluffSprites)
+        {
+            fluffSprite.draw(b, localPosition: true);
+        }
         
         base.heldItem?.drawInMenu(b, new Vector2(Game1.getOldMouseX() + 8, Game1.getOldMouseY() + 8), 1f);
         if (!Game1.options.hardwareCursor)
