@@ -60,11 +60,12 @@ public struct Spell
     public SpellType spellType;
     public int magicLevelRequirement;
     public int spriteIndex;
+    public string longDescription;
     
     public SpellMethod DoAction; //The function to use. returns a bool for if it was successful, string as any output args, and may take an item as an Input
     public Dictionary<int,int> requiredItems; //Set of IDs for the required runes - add duplicates to designate more than 1 item required
     public Predicate<object>? castPredicate; //Miscellanious predicate to determine if there is any extra conditions that must be met - spell effects dictate where to use this
-    public Spell(int id, string name, string displayName, string description, SpellType spellType, int magicLevelRequirement, int spriteIndex, Dictionary<int,int> requiredItems, SpellMethod DoAction, Predicate<object>? castPredicate = null)
+    public Spell(int id, string name, string displayName, string description, SpellType spellType, int magicLevelRequirement, int spriteIndex, Dictionary<int,int> requiredItems, SpellMethod DoAction, Predicate<object>? castPredicate = null, string longDescription = null)
     {
         this.id = id;
         this.name = name;
@@ -76,6 +77,7 @@ public struct Spell
         this.requiredItems = requiredItems;
         this.DoAction = DoAction;
         this.castPredicate = castPredicate;
+        this.longDescription = longDescription;
     }
 
     public KeyValuePair<bool,string> CanCastSpell()
@@ -160,9 +162,12 @@ public static class ModAssets
         new Spell(1,"Teleport_Home","Farm Teleport","Teleports you to your Farm",SpellType.Teleport,1,1,
             new Dictionary<int, int>() { {4295, 1},{4291,1},{4294,1} }, SpellEffects.TeleportToFarm),
         new Spell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",SpellType.InventoryUtility,1,2,
-            new Dictionary<int, int>() { {4296, 1},{4293,4}}, SpellEffects.SuperheatItem),
+            new Dictionary<int, int>() { {4296, 1},{4293,4}}, SpellEffects.SuperheatItem,
+            (i=>i is Item item && DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId))),
+            "Smelt any ores into bars instantly without any coal cost. Put an appropriate item in the slot and press the spell icon to cast."),
         new Spell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",SpellType.InventoryUtility,1,3,
-            new Dictionary<int, int>() { {4296, 1},{4293,5}}, SpellEffects.HighAlchemy,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0)),
+            new Dictionary<int, int>() { {4296, 1},{4293,5}}, SpellEffects.HighAlchemy,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
+            "Turn any sellable item into money. Provides 100% of the items shipping bin value. Put an appropriate item in the slot and press the spell icon to cast."),
         new Spell(4,"Area_Humidify","Humidify","Waters the ground around you",SpellType.MapUtility,1,4,
             new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, SpellEffects.Humidify,
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),

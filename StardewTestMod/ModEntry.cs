@@ -4,8 +4,8 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
+using StardewValley.GameData.Machines;
 using StardewValley.GameData.Objects;
-using StardewValley.GameData.Shops;
 using StardewValley.Menus;
 
 namespace StardewTestMod
@@ -67,6 +67,9 @@ namespace StardewTestMod
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
                     Game1.player.addItemToInventory(item);
+                    
+                    StardewValley.Object item2 = ItemRegistry.Create<StardewValley.Object>($"378");
+                    Game1.player.addItemToInventory(item2);
                 }
                 Monitor.Log($"Added custom item to inventory", LogLevel.Info);
             }
@@ -74,6 +77,8 @@ namespace StardewTestMod
             if (e.Button == SButton.F6)
             {
                 Monitor.Log($"Location name {Game1.player.currentLocation.name} tile x {Game1.player.Tile.X} y {Game1.player.Tile.Y}", LogLevel.Warn);
+                MachineData tmp = DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13");
+                Monitor.Log($"out {tmp.OutputRules[0].Id}", LogLevel.Warn);
             }
             
         }

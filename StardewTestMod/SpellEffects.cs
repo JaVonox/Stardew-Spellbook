@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.Extensions;
+using StardewValley.GameData.Machines;
 using StardewValley.TerrainFeatures;
 
 namespace StardewTestMod;
@@ -187,17 +188,61 @@ public class SpellEffects : BaseSpellEffects
         {
             int postCastStackSize = itemArgs.Stack - 1;
             Game1.player.Money += itemArgs.salePrice(false);
+            Game1.player.playNearbySoundAll("purchaseRepeat", null);
             itemArgs.ConsumeStack(1);
             if (postCastStackSize == 0)
             {
                 itemArgs = null;
             }
         }
+        else
+        {
+            return new KeyValuePair<bool, string>(false,"Couldn't convert item to money");
+        }
         
         return new KeyValuePair<bool, string>(true,"");
     }
     public static KeyValuePair<bool, string> SuperheatItem(ref Item? itemArgs, Predicate<object>? castPredicate = null)
     {
+        KeyValuePair<bool, string> operationReturn = IsItemValidForOperation(ref itemArgs,castPredicate);
+
+        if (!operationReturn.Key)
+        {
+            return new KeyValuePair<bool, string>(false,"This item can't be smelted");
+        }
+
+        string itemId = itemArgs.QualifiedItemId;
+        MachineOutputRule? furnaceRule = DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules
+            .FirstOrDefault(r => r.Triggers.Any(x => x.RequiredItemId == itemId));
+
+        if (furnaceRule == null)
+        {
+            return new KeyValuePair<bool, string>(false,"This item can't be smelted");
+        }
+        
+        int stackSizeRequired = furnaceRule.Triggers.First(x => x.RequiredItemId == itemId).RequiredCount;
+        string itemReturn = furnaceRule.OutputItem[0].ItemId;
+
+        if (itemArgs.Stack >= stackSizeRequired) //If we have enough of the item
+        {
+            int postCastStackSize = itemArgs.Stack - stackSizeRequired;
+            
+            StardewValley.Object furnaceItem = ItemRegistry.Create<StardewValley.Object>($"{itemReturn}");
+
+            Utility.CollectOrDrop(furnaceItem);
+            Game1.player.playNearbySoundAll("furnace", null);
+            itemArgs.ConsumeStack(stackSizeRequired);
+            
+            if (postCastStackSize == 0)
+            {
+                itemArgs = null;
+            }
+        }
+        else
+        {
+            return new KeyValuePair<bool, string>(false,$"I need atleast {stackSizeRequired} {itemArgs.DisplayName}");
+        }
+        
         return new KeyValuePair<bool, string>(true,"");
     }
 }

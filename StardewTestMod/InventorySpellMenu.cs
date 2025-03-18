@@ -16,10 +16,13 @@ public class InventorySpellMenu : MenuWithInventory
     
     private int centreY;
     private int casterX;
+
+    private bool playCast = false;
     public InventorySpellMenu(Spell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
         this.targetSpell = targetSpell;
         this.selectablePredicate = selectablePredicate;
+        descriptionText = targetSpell.description;
         if (yPositionOnScreen == IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder)
         {
             movePosition(0, -IClickableMenu.spaceToClearTopBorder);
@@ -35,7 +38,7 @@ public class InventorySpellMenu : MenuWithInventory
         
         caster = Game1.player;
 
-        spellIcon = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + 576 + ((width - 576) / 2) - (ModAssets.spellsSize / 2),
+        spellIcon = new ClickableTextureComponent(new Rectangle(casterX + 80,
                 centreY - (ModAssets.spellsSize / 2),
                 ModAssets.spellsSize, ModAssets.spellsSize),ModAssets.extraTextures, new Rectangle(0,ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), 1f);
     }
@@ -47,7 +50,7 @@ public class InventorySpellMenu : MenuWithInventory
     
     public override void update(GameTime time)
     {
-        
+        descriptionText = targetSpell.longDescription;
     }
     
     public override void receiveLeftClick(int x, int y, bool playSound = true)
@@ -67,6 +70,10 @@ public class InventorySpellMenu : MenuWithInventory
                 if (!castReturn.Key)
                 {
                     Game1.showRedMessage(castReturn.Value, true);
+                }
+                else
+                {
+                    playCast = true;
                 }
             }
         }
@@ -107,7 +114,11 @@ public class InventorySpellMenu : MenuWithInventory
         base.heldItem = null;
         inputSpot.item = null;
     }
-    
+
+    private void EndCastAnimation()
+    {
+        playCast = false;
+    }
     public override void draw(SpriteBatch b)
     {
         base.draw(b);
@@ -120,10 +131,11 @@ public class InventorySpellMenu : MenuWithInventory
         spellIcon.draw(b,Color.White,0.96f);
         
         FarmerRenderer.isDrawingForUI = true;
-        caster.FarmerRenderer.draw(b, new FarmerSprite.AnimationFrame(
-            caster.bathingClothes.Value ? 108 : 0, 0, secondaryArm: false, flip: false), caster.bathingClothes.Value ? 108 : 0,
-            new Rectangle(0, caster.bathingClothes.Value ? 576 : 0, 16, 32), 
-            new Vector2(casterX - 8,  centreY - 48), Vector2.Zero, 0.8f, 2, Color.White, 0f, 1f, caster);
+        
+        caster.FarmerRenderer.draw(b, new FarmerSprite.AnimationFrame(0, 0, secondaryArm: false, flip: false), 0,
+            new Rectangle(0, 0, 16, 32),
+            new Vector2(casterX - 8, centreY - 48), Vector2.Zero, 0.8f, 2, Color.White, 0f, 1f, caster);
+
         FarmerRenderer.isDrawingForUI = false;
         
         base.heldItem?.drawInMenu(b, new Vector2(Game1.getOldMouseX() + 8, Game1.getOldMouseY() + 8), 1f);
