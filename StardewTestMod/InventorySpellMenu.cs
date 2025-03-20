@@ -8,8 +8,9 @@ namespace StardewTestMod;
 public class InventorySpellMenu : MenuWithInventory
 {
     private ClickableTextureComponent inputSpot;
-
     private ClickableTextureComponent spellIcon;
+    
+    private Texture2D runesTextures;
     private Farmer caster;
     private Spell targetSpell;
     public Predicate<object>? selectablePredicate;
@@ -21,6 +22,7 @@ public class InventorySpellMenu : MenuWithInventory
     private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
     public InventorySpellMenu(Spell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
+        runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
         this.targetSpell = targetSpell;
         this.selectablePredicate = selectablePredicate;
         descriptionText = targetSpell.description;
@@ -62,7 +64,7 @@ public class InventorySpellMenu : MenuWithInventory
         
         spellIcon.bounds.X = casterX + 80 + (!cannotCast ? Game1.random.Next(-1, 1) : 0);
         spellIcon.bounds.Y = (centreY - 15) - (ModAssets.spellsSize / 2) + (!cannotCast ? Game1.random.Next(-1, 1) : 0);
-        //TODO this might be too often an operation?
+
         spellIcon.sourceRect = new Rectangle((cannotCast ? ModAssets.spellsSize : 0), 
             ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize);
         
@@ -79,7 +81,7 @@ public class InventorySpellMenu : MenuWithInventory
                     motion = new Vector2(0, -1),
                     interval = 99999f,
                     layerDepth = 0.9f,
-                    scale = 3f,
+                    scale = 2f,
                     scaleChange = 0.01f,
                     rotation = Game1.random.Next(360),
                     delayBeforeAnimationStart = 0
@@ -169,6 +171,26 @@ public class InventorySpellMenu : MenuWithInventory
         foreach (TemporaryAnimatedSprite fluffSprite in fluffSprites)
         {
             fluffSprite.draw(b, localPosition: true);
+        }
+        
+        int totalItems = targetSpell.requiredItems.Count;
+        float itemWidth = 16 * 4; // Each item is 16 pixels wide and scaled by 4
+        float spacing = 16; // 16 pixels spacing between items
+        float totalWidth = (totalItems * itemWidth) + ((totalItems - 1) * spacing);
+        float startX = (casterX + 16) - (totalWidth / 2);
+        
+        int itemIndex = 0;
+        foreach (KeyValuePair<int,int> runePair in targetSpell.requiredItems) //Key is ID, value is amount
+        {
+            float runeX = startX + (itemIndex * (itemWidth + spacing));
+            Vector2 runePos = new Vector2(runeX, centreY - (16 * 4 + 80));
+
+            b.Draw(runesTextures, new Vector2(runePos.X,runePos.Y), new Rectangle(((runePair.Key - 4290) * 16), 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
+            
+            Color runeCountColour = targetSpell.HasRuneCost(runePair.Key) ? Color.LawnGreen : Color.Red;
+            b.DrawString(Game1.dialogueFont, runePair.Value.ToString(), new Vector2(runePos.X + (16*2) + 10,runePos.Y + (16*2)), runeCountColour);
+
+            itemIndex++;
         }
         
         base.heldItem?.drawInMenu(b, new Vector2(Game1.getOldMouseX() + 8, Game1.getOldMouseY() + 8), 1f);

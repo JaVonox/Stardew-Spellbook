@@ -2,6 +2,7 @@
 using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.GameData.Machines;
+using StardewValley.Inventories;
 using StardewValley.TerrainFeatures;
 
 namespace StardewTestMod;
@@ -90,6 +91,17 @@ public class BaseSpellEffects
         if (itemArgs == null || !predicate(itemArgs))
         {
             return new KeyValuePair<bool, string>(false,$"Invalid Item");
+        }
+        
+        return new KeyValuePair<bool, string>(true,$"");
+
+    }
+    
+    public static KeyValuePair<bool, string> IsBuffValid(Farmer farmer, Predicate<Farmer> predicate)
+    {
+        if (!predicate(farmer))
+        {
+            return new KeyValuePair<bool, string>(false,$"I can't use this spell right now");
         }
         
         return new KeyValuePair<bool, string>(true,$"");
@@ -243,6 +255,55 @@ public class SpellEffects : BaseSpellEffects
             return new KeyValuePair<bool, string>(false,$"I need atleast {stackSizeRequired} {itemArgs.DisplayName}");
         }
         
+        return new KeyValuePair<bool, string>(true,"");
+    }
+
+    public static KeyValuePair<bool, string> VileVigour(ref Item? itemArgs, Predicate<object>? castPredicate = null)
+    {
+        Farmer caster = Game1.player;
+        KeyValuePair<bool, string> operationReturn = IsBuffValid(Game1.player,castPredicate);
+
+        if (!operationReturn.Key)
+        {
+            return new KeyValuePair<bool, string>(false,"My energy is already full!");
+        }
+
+        PlayAnimation(() =>
+        {
+            caster.health -= caster.maxHealth / 3;
+            caster.stamina = caster.MaxStamina;
+        },"yoba",500);
+
+        return new KeyValuePair<bool, string>(true,"");
+    }
+    
+    public static KeyValuePair<bool, string> BakePie(ref Item? itemArgs, Predicate<object>? castPredicate = null)
+    {
+        Farmer caster = Game1.player;
+        KeyValuePair<bool, string> operationReturn = IsBuffValid(Game1.player,castPredicate);
+
+        if (!operationReturn.Key)
+        {
+            return new KeyValuePair<bool, string>(false,"I don't know enough recipes to do this");
+        }
+        
+        CraftingRecipe? selectedRecipe = Game1.player.cookingRecipes.Keys
+            .Select(x => new CraftingRecipe(x, true))
+            .Where(x=>x.doesFarmerHaveIngredientsInInventory()).OrderBy(x=> Game1.random.Next()).FirstOrDefault();
+
+        if (selectedRecipe == null)
+        {
+            return new KeyValuePair<bool, string>(false,"I can't cook anything with these ingredients");
+        }
+        
+        PlayAnimation(() =>
+        {
+            Item crafted = selectedRecipe.createItem();
+            selectedRecipe.consumeIngredients(new List<IInventory>(){Game1.player.Items});
+            Utility.CollectOrDrop(crafted);
+            
+        },"wand",500);
+
         return new KeyValuePair<bool, string>(true,"");
     }
 }

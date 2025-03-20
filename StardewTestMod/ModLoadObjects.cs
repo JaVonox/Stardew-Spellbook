@@ -11,7 +11,8 @@ public enum SpellType
     Teleport,
     MapUtility,
     InventoryUtility,
-    Combat
+    Combat,
+    Buff
 }
 
 public delegate KeyValuePair<bool, string> SpellMethod(ref Item? i, Predicate<object>? p);
@@ -87,7 +88,7 @@ public struct Spell
         {
             if (!HasRuneCost(runeID))
             {
-                return new KeyValuePair<bool,string>(false, "You do not have enough runes to perform this spell");
+                return new KeyValuePair<bool,string>(false, "I do not have enough runes to perform this spell");
             }
         }
         return new KeyValuePair<bool,string>(true, "");;
@@ -117,6 +118,7 @@ public struct Spell
                     break;
                 case SpellType.Teleport:
                 case SpellType.MapUtility:
+                case SpellType.Buff:
                 default:
                     actionResult = DoAction(ref itemArgs,castPredicate);
             
@@ -157,22 +159,46 @@ public static class ModAssets
     };
     
     public static readonly Spell[] modSpells = {
-        new Spell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",SpellType.Teleport,0,0,
+        new Spell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",SpellType.Teleport,1,0,
             new Dictionary<int, int>() { {4295, 1},{4291,3},{4293,1} },SpellEffects.TeleportToPierre),
-        new Spell(1,"Teleport_Home","Farm Teleport","Teleports you to your Farm",SpellType.Teleport,1,1,
+        new Spell(1,"Teleport_Home","Farm Teleport","Teleports you to your Farm",SpellType.Teleport,5,1,
             new Dictionary<int, int>() { {4295, 1},{4291,1},{4294,1} }, SpellEffects.TeleportToFarm),
-        new Spell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",SpellType.InventoryUtility,1,2,
+        new Spell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",SpellType.InventoryUtility,2,2,
             new Dictionary<int, int>() { {4296, 1},{4293,4}}, SpellEffects.SuperheatItem,
             (i=>i is Item item && DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId))),
             "Smelt any ores into bars instantly without any coal cost. Put an appropriate item in the slot and press the spell icon to cast."),
-        new Spell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",SpellType.InventoryUtility,1,3,
+        new Spell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",SpellType.InventoryUtility,5,3,
             new Dictionary<int, int>() { {4296, 1},{4293,5}}, SpellEffects.HighAlchemy,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
             "Turn any sellable item into money. Provides 100% of the items shipping bin value. Put an appropriate item in the slot and press the spell icon to cast."),
-        new Spell(4,"Area_Humidify","Humidify","Waters the ground around you",SpellType.MapUtility,1,4,
+        new Spell(4,"Area_Humidify","Humidify","Waters the ground around you",SpellType.MapUtility,2,2,
             new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, SpellEffects.Humidify,
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
-        new Spell(5,"Area_Cure","Cure Plant","Replants dead crops",SpellType.MapUtility,1,5,
+        new Spell(5,"Area_Cure","Cure Plant","Replants dead crops",SpellType.MapUtility,6,5,
             new Dictionary<int, int>() { {4298, 1},{4294,8}}, SpellEffects.CurePlant, 
+            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new Spell(6,"Buff_VileVigour","Vile Vigour","Sacrifices a third of your max health to fill your energy",SpellType.Buff,3,6,
+            new Dictionary<int, int>() { {4297, 1},{4291,3}}, SpellEffects.VileVigour, 
+            (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina)),
+        new Spell(7,"Buff_PieMake","Bake Pie","Cooks a random recipe that you know using your held ingredients",SpellType.Buff,3,7,
+            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,1}}, SpellEffects.BakePie, 
+            (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0)),
+        new Spell(8,"Teleport_Desert","Desert Teleport","Teleports you to the desert, if you have access to it",SpellType.Teleport,4,8,
+            new Dictionary<int, int>() { {4295, 2},{4294,1},{4293,1}}, SpellEffects.CurePlant, 
+            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new Spell(9,"Teleport_Ginger","Ginger Island Teleport","Teleports you to ginger island, if you have access to it",SpellType.Teleport,7,9,
+            new Dictionary<int, int>() { {4295, 2},{4292,2},{4293,2}}, SpellEffects.CurePlant, 
+            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new Spell(9,"Teleport_Caves","Caves Teleport","Teleports you to the pelican town mines",SpellType.Teleport,2,10,
+            new Dictionary<int, int>() { {4295, 1},{4291,5}}, SpellEffects.CurePlant, 
+            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new Spell(10,"Menu_WaterOrb","Charge Water Orb","Turns aquamarine into strong slingshot ammo",SpellType.InventoryUtility,4,11,
+            new Dictionary<int, int>() { {4297, 3},{4292,5}}, SpellEffects.CurePlant, 
+            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new Spell(11,"Menu_EarthOrb","Charge Earth Orb","Turns emeralds into stronger slingshot ammo",SpellType.InventoryUtility,7,12,
+            new Dictionary<int, int>() { {4297, 3},{4294,5}}, SpellEffects.CurePlant, 
+            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new Spell(12,"Buff_DarkLure","Dark Lure","Lures more enemies to you",SpellType.InventoryUtility,6,13,
+            new Dictionary<int, int>() { {4297, 2},{4296,2}}, SpellEffects.CurePlant, 
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
     };
     public static void Load(IModHelper helper)

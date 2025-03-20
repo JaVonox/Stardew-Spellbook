@@ -77,8 +77,16 @@ namespace StardewTestMod
             if (e.Button == SButton.F6)
             {
                 Monitor.Log($"Location name {Game1.player.currentLocation.name} tile x {Game1.player.Tile.X} y {Game1.player.Tile.Y}", LogLevel.Warn);
-                MachineData tmp = DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13");
-                Monitor.Log($"out {tmp.OutputRules[0].Id}", LogLevel.Warn);
+                
+                List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
+
+                int spellsPlaced = 0;
+                foreach (Spell Spell in orderedSpells)
+                {
+                    Monitor.Log($"spell {Spell.name} req {Spell.magicLevelRequirement} x {spellsPlaced % 7} y {spellsPlaced / 7}" , LogLevel.Warn);
+                    spellsPlaced++;
+                }
+                
             }
             
         }

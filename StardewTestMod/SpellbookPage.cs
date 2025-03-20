@@ -13,15 +13,22 @@ public class SpellbookPage : IClickableMenu
     public int hoverSpellID = -1;
 
     private Texture2D runesTextures;
+
+    private const int spellsPerRow = 7;
     public SpellbookPage(int x, int y, int width, int height)
         : base(x, y, width, height)
     {
         runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
         int spellsMaxIndex = ModAssets.modSpells.Length - 1;
-        foreach(Spell sp in ModAssets.modSpells)
+        List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
+
+        //TODO this order is wrong??
+        int spellsPlaced = 0;
+        foreach(Spell sp in orderedSpells)
         {
             spellIcons.Add(
-                new ClickableComponent(new Rectangle(xPositionOnScreen + (70 + sp.id * 90),yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 4 - 12,ModAssets.spellsSize,ModAssets.spellsSize), name:sp.name)
+                new ClickableComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPlaced % spellsPerRow) * 90),yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 4 - 12 + ((ModAssets.spellsSize + 20) * (spellsPlaced / spellsPerRow) ),
+                    ModAssets.spellsSize,ModAssets.spellsSize), name:sp.name)
                 {
                     myID = sp.id,
                     leftNeighborID = sp.id - 1 < 0 ? 0 : sp.id - 1,
@@ -29,6 +36,7 @@ public class SpellbookPage : IClickableMenu
                     fullyImmutable = false
                 }
                 );
+            spellsPlaced++;
         }
     }
 
