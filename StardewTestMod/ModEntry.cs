@@ -1,11 +1,17 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Reflection;
+using System.Xml.Serialization;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.GameData.Objects;
+using StardewValley.GameData.Weapons;
+
 using StardewValley.Menus;
+using StardewValley.Projectiles;
+using StardewValley.Tools;
 
 namespace StardewTestMod
 {
@@ -14,7 +20,7 @@ namespace StardewTestMod
         public static ModEntry Instance;
         public static IMonitor ModMonitor { get; private set; }
         
-        private const string CustomTextureKey = "Mods.StardewTestMod.Assets.ModSprites";
+        private const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
         
         public override void Entry(IModHelper helper)
         {
@@ -28,15 +34,19 @@ namespace StardewTestMod
             var customStrings = helper.Translation.Get("GameMenu_ModTest");
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
+            
+            Monitor.Log("Successfully registered StaffWeapon type for XML serialization", LogLevel.Info);
         }
+
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
+            
             if (e.NameWithoutLocale.IsEquivalentTo(CustomTextureKey))
             {
                 Monitor.Log("LoadedCustom", LogLevel.Warn);
                 e.LoadFromModFile<Texture2D>("Assets/itemsprites", AssetLoadPriority.Medium);
             }
-            
+
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
             {
                 e.Edit(asset =>
@@ -45,12 +55,49 @@ namespace StardewTestMod
 
                         foreach (ModLoadObjects newObject in ModAssets.modItems)
                         {
-                            newObject.AppendObject(CustomTextureKey,objectDict);
+                            newObject.AppendObject("Mods.StardewTestMod.Assets.modsprites", objectDict);
                         }
+
+                        /*
+                        StaffWeapon tmp = new StaffWeapon();
+                        tmp.Name = "battlestaff";
+                        tmp.description = "a battlestaff";
+                        tmp.type =
+                        */
+
+                        /*
+                         ObjectData newItem = new ObjectData();
+                        newItem.Name = this.name;
+                        newItem.DisplayName = this.displayName;
+                        newItem.Description = this.description;
+                        newItem.Type = this.type;
+                        newItem.Texture = CustomTextureKey;
+                        newItem.SpriteIndex = this.spriteIndex;
+                        newItem.Category = this.category;
+                        ObjectsSet[$"{id}"] = newItem;
+                         */
+
                     }
                 );
             }
-            
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Weapons"))
+            {
+                e.Edit(asset =>
+                {
+                    var weaponDict = asset.AsDictionary<string, WeaponData>().Data;
+                    
+                    WeaponData newWeapon = new WeaponData();
+                    newWeapon.Name = "staff_battlestaff";
+                    newWeapon.DisplayName = "battlestaff";
+                    newWeapon.Description = "test battlestaff";
+                    newWeapon.Type = 4;
+                    newWeapon.Texture = CustomTextureKey;
+                    newWeapon.SpriteIndex = 11;
+                    weaponDict[$"4290"] = newWeapon;
+                });
+
+            }
         }
 
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
@@ -66,18 +113,47 @@ namespace StardewTestMod
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
                     Game1.player.addItemToInventory(item);
-                    
-                    /*
-                    StardewValley.Object item2 = ItemRegistry.Create<StardewValley.Object>($"378");
-                    Game1.player.addItemToInventory(item2);
-                    */
                 }
-                Monitor.Log($"Added custom item to inventory", LogLevel.Info);
+                
+                MeleeWeapon weapon = ItemRegistry.Create<MeleeWeapon>($"(W)4290");
+                Game1.player.addItemToInventory(weapon);
+                
+                Monitor.Log($"Added custom items to inventory", LogLevel.Info);
             }
 
             if (e.Button == SButton.F6)
             {
                 Monitor.Log($"Location name {Game1.player.currentLocation.name} tile x {Game1.player.Tile.X} y {Game1.player.Tile.Y}", LogLevel.Warn);
+                
+                /*
+                ParsedItemData itemData = ItemRegistry.GetDataOrErrorItem("(W)1");
+                ParsedItemData itemData2 = ItemRegistry.GetDataOrErrorItem("(W)21");
+                */
+                string[] IDs = { "1","21","4290"};
+                int iter = 0;
+                for (int i = 0; i < IDs.Length; i++)
+                {
+                    //ParsedItemData itemData = ItemRegistry.GetDataOrErrorItem(IDs[i]);
+                    Monitor.Log($"ID {IDs[i]}", LogLevel.Info);
+                    if (MeleeWeapon.TryGetData(IDs[i], out var data))
+                    {
+                        Monitor.Log($"in {IDs[i]}", LogLevel.Info);
+                        Monitor.Log($"item" +
+                                    $"Name {data.Name}" +
+                                    $"Min Damage {data.MinDamage}"+
+                                    $"Max Damage {data.MaxDamage}"+
+                                    $"KnockBack {data.Knockback}"+
+                                    $"speed {data.Speed}"+
+                                    $"addedPrec {data.Precision}"+
+                                    $"addedDef {data.Defense}"+
+                                    $"type {data.Type}"+
+                                    $"addedArea {data.AreaOfEffect}"+
+                                    $"critChance {data.CritChance}"+
+                                    $"critMult {data.CritMultiplier}"
+                            , LogLevel.Warn);
+                    }
+                }
+                
             }
             
         }
@@ -146,20 +222,56 @@ namespace StardewTestMod
             }
         }
         
-        
-        /*
-        [HarmonyPatch(typeof(ShopMenu), MethodType.Constructor)]
-        [HarmonyPatch(new Type[] { typeof(string),typeof(ShopData),typeof(ShopOwnerData),typeof(NPC),typeof(ShopMenu.OnPurchaseDelegate),typeof(Func<ISalable, bool>),typeof(bool) })]
-        public class ShopMenuConstructorPatch
+        //Add to weapon swipe
+        [HarmonyPatch(typeof(MeleeWeapon), "doSwipe")]
+        [HarmonyPatch(new Type[] { typeof(int), typeof(Vector2),typeof(int),typeof(float),typeof(Farmer) })]
+        public class SwipePatcher
         {
-            public static void Prefix(GameMenu __instance, string shopId, ShopData shopData, ShopOwnerData ownerData, NPC owner = null, ShopMenu.OnPurchaseDelegate onPurchase = null, Func<ISalable, bool> onSell = null, bool playOpenSound = true)
+            public static void Postfix(MeleeWeapon __instance, int type, Vector2 position, int facingDirection, float swipeSpeed, Farmer f)
             {
-                foreach (string salableItemTag in shopData.SalableItemTags)
+                if (type == 4)
                 {
-                    ModMonitor.Log($"Tag name {salableItemTag}", LogLevel.Warn);
+                    switch (f.FacingDirection)
+                    {
+                        case 0:
+                            ((FarmerSprite)f.Sprite).animateOnce(248, swipeSpeed, 6);
+                            __instance.Update(0, 0, f);
+                            break;
+                        case 1:
+                            ((FarmerSprite)f.Sprite).animateOnce(240, swipeSpeed, 6);
+                            __instance.Update(1, 0, f);
+                            break;
+                        case 2:
+                            ((FarmerSprite)f.Sprite).animateOnce(232, swipeSpeed, 6);
+                            __instance.Update(2, 0, f);
+                            break;
+                        case 3:
+                            ((FarmerSprite)f.Sprite).animateOnce(256, swipeSpeed, 6);
+                            __instance.Update(3, 0, f);
+                            break;
+                    }
+                    if (__instance.PlayUseSounds)
+                    {
+                        f.playNearbySoundLocal("clubswipe", null);
+                    }
                 }
             }
         }
-        */
+        
+        //Add to weapon swipe
+        [HarmonyPatch(typeof(MeleeWeapon), "FireProjectile")]
+        [HarmonyPatch(new Type[] { typeof(Farmer) })]
+        public class FireProjectilePatcher
+        {
+            public static void Prefix(MeleeWeapon __instance, Farmer who)
+            {
+                if(__instance.type.Value == 4)
+                {
+                    ModMonitor.Log($"Staff Projectile", LogLevel.Warn);
+                }
+                
+            }
+        }
+        
     }
 }

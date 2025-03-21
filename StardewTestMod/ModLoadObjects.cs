@@ -227,7 +227,7 @@ public static class ModAssets
             new Dictionary<int, int>() { {4300, 8},{4297,5}}, SpellEffects.CurePlant, 
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
         new Spell(22,"Menu_Plank","Plank Make","NA Turns hardwood into wood and vice versa",SpellType.InventoryUtility,3,22,
-            new Dictionary<int, int>() { {4300, 8},{4297,5}}, SpellEffects.CurePlant, 
+            new Dictionary<int, int>() { {4300, 2},{4298, 2},{4297,5}}, SpellEffects.CurePlant, 
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value), "Converts 1 hardwood into 9 wood, or 15 wood into 1 hardwood"),
         new Spell(23,"Buff_Heal","Heal","NA Restores your health in exchange for energy",SpellType.Buff,8,23,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}}, SpellEffects.CurePlant, 

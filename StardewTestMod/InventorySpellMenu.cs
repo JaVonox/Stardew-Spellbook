@@ -135,6 +135,8 @@ public class InventorySpellMenu : MenuWithInventory
     
     private void _OnCloseMenu()
     {
+        
+        //TODO theres a bug where leaving this menu, even without doing anything gives you Iframes. could be abused for infinite invincibility
         if (base.heldItem != null)
         {
             Utility.CollectOrDrop(base.heldItem);
