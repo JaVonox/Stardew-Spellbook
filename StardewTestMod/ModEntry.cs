@@ -4,7 +4,6 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
-using StardewValley.GameData.Machines;
 using StardewValley.GameData.Objects;
 using StardewValley.Menus;
 
@@ -63,13 +62,15 @@ namespace StardewTestMod
 
             if (e.Button == SButton.F5)
             {
-                for (int i = 4290; i < 4299; i++)
+                for (int i = 4290; i < 4301; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
                     Game1.player.addItemToInventory(item);
                     
+                    /*
                     StardewValley.Object item2 = ItemRegistry.Create<StardewValley.Object>($"378");
                     Game1.player.addItemToInventory(item2);
+                    */
                 }
                 Monitor.Log($"Added custom item to inventory", LogLevel.Info);
             }
@@ -77,16 +78,6 @@ namespace StardewTestMod
             if (e.Button == SButton.F6)
             {
                 Monitor.Log($"Location name {Game1.player.currentLocation.name} tile x {Game1.player.Tile.X} y {Game1.player.Tile.Y}", LogLevel.Warn);
-                
-                List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
-
-                int spellsPlaced = 0;
-                foreach (Spell Spell in orderedSpells)
-                {
-                    Monitor.Log($"spell {Spell.name} req {Spell.magicLevelRequirement} x {spellsPlaced % 7} y {spellsPlaced / 7}" , LogLevel.Warn);
-                    spellsPlaced++;
-                }
-                
             }
             
         }

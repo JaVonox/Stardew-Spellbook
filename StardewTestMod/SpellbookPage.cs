@@ -31,8 +31,6 @@ public class SpellbookPage : IClickableMenu
                     ModAssets.spellsSize,ModAssets.spellsSize), name:sp.name)
                 {
                     myID = sp.id,
-                    leftNeighborID = sp.id - 1 < 0 ? 0 : sp.id - 1,
-                    rightNeighborID = sp.id + 1 > spellsMaxIndex ? -1 : sp.id + 1,
                     fullyImmutable = false
                 }
                 );
@@ -62,20 +60,24 @@ public class SpellbookPage : IClickableMenu
         int y = Game1.getOldMouseY() + 32;
         Spell hoveredSpell = ModAssets.modSpells[hoverSpellID];
 
+        string levelReqText = $"Requires Lvl. {hoveredSpell.magicLevelRequirement}";
+
         //Find the required size of the tooltip box
         int requiredWidth = (int)Math.Ceiling(
+            Math.Max(Game1.smallFont.MeasureString(levelReqText).X + 16,
             Math.Max(Game1.smallFont.MeasureString(canCast.Value).X + 16,
                 Math.Max(
                     Math.Max(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).X,(float)(hoveredSpell.requiredItems.Count * ((16 * 4) + runesOffset))),
-                    Game1.smallFont.MeasureString(hoveredSpell.description).X + 16)
+                    Game1.smallFont.MeasureString(hoveredSpell.description).X + 16))
             ));
         requiredWidth = requiredWidth < 100 ? 132 : 32 + requiredWidth;
 
         int titleHeight = (int)Math.Ceiling(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).Y);
         int descHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(hoveredSpell.description).Y);
+        int levelHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(levelReqText).Y);
         int errorHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(canCast.Value).Y);
         
-        int requiredHeight = 4 + titleHeight + 4 + descHeight + 36 + (16 * 4) + (!canCast.Key ? errorHeight : 0); //Adjust to add error message;
+        int requiredHeight = 4 + titleHeight + 4 + descHeight + levelHeight + 4 + 36 + (16 * 4) + (!canCast.Key ? errorHeight : 0); //Adjust to add error message;
         requiredHeight = requiredHeight < 50 ? 66 : 16 + requiredHeight;
         
         //Begin drawing
@@ -84,6 +86,8 @@ public class SpellbookPage : IClickableMenu
         int nextYOffset = 16;
         b.DrawString(Game1.dialogueFont, hoveredSpell.displayName, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
         nextYOffset += titleHeight;
+        b.DrawString(Game1.smallFont, levelReqText, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
+        nextYOffset += levelHeight;
             b.DrawString(Game1.smallFont, hoveredSpell.description, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
         nextYOffset += descHeight;
 
