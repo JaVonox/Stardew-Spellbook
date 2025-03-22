@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.Objects;
@@ -14,8 +15,6 @@ public enum SpellType
     Combat,
     Buff
 }
-
-public delegate KeyValuePair<bool, string> SpellMethod(ref Item? i, Predicate<object>? p);
 
 public struct ModLoadObjects
 {
@@ -52,96 +51,11 @@ public struct ModLoadObjects
     }
 }
 
-public struct Spell
-{
-    public int id;
-    public string name;
-    public string displayName;
-    public string description;
-    public SpellType spellType;
-    public int magicLevelRequirement;
-    public int spriteIndex;
-    public string longDescription;
-    
-    public SpellMethod DoAction; //The function to use. returns a bool for if it was successful, string as any output args, and may take an item as an Input
-    public Dictionary<int,int> requiredItems; //Set of IDs for the required runes - add duplicates to designate more than 1 item required
-    public Predicate<object>? castPredicate; //Miscellanious predicate to determine if there is any extra conditions that must be met - spell effects dictate where to use this
-    public Spell(int id, string name, string displayName, string description, SpellType spellType, int magicLevelRequirement, int spriteIndex, Dictionary<int,int> requiredItems, SpellMethod DoAction, Predicate<object>? castPredicate = null, string longDescription = null)
-    {
-        this.id = id;
-        this.name = name;
-        this.displayName = displayName;
-        this.description = description;
-        this.spellType = spellType;
-        this.magicLevelRequirement = magicLevelRequirement;
-        this.spriteIndex = spriteIndex;
-        this.requiredItems = requiredItems;
-        this.DoAction = DoAction;
-        this.castPredicate = castPredicate;
-        this.longDescription = longDescription;
-    }
-
-    public KeyValuePair<bool,string> CanCastSpell()
-    {
-        //TODO add magic level checking
-        foreach (int runeID in requiredItems.Keys)
-        {
-            if (!HasRuneCost(runeID))
-            {
-                return new KeyValuePair<bool,string>(false, "I do not have enough runes to perform this spell");
-            }
-        }
-        return new KeyValuePair<bool,string>(true, "");;
-    }
-
-    public bool HasRuneCost(int runeID)
-    {
-        return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID]);
-    }
-
-    public KeyValuePair<bool,string> CastSpell(bool isInventorySpellMenu, ref Item? itemArgs)
-    {
-        KeyValuePair<bool,string> actionResult = CanCastSpell();
-        if (actionResult.Key) //First pass of action result checks if we can actually cast the selected spell - either due to level or rune cost etc.
-        {
-            switch (spellType)
-            {
-                //If the spell is teleport or map utility, we can just cast the spell immediately
-                case SpellType.InventoryUtility: //If we are using an inventory utility spell, we need to open the inventory spell menu first
-                    if (!isInventorySpellMenu) //If we're not in the inventory menu,
-                    {
-                        Game1.activeClickableMenu = new InventorySpellMenu(this,castPredicate);
-                        break;
-                    }
-                    goto default; //Fallthrough if we are already in the inventory spell menu
-                case SpellType.Combat:
-                    break;
-                case SpellType.Teleport:
-                case SpellType.MapUtility:
-                case SpellType.Buff:
-                default:
-                    actionResult = DoAction(ref itemArgs,castPredicate);
-            
-                    if(actionResult.Key) //Second pass checks if there are any spell specific issues - like how teleporting is forbidden on festival days
-                    {
-                        foreach (KeyValuePair<int, int> runeCost in requiredItems) //Remove runes if we have successfully cast the spell
-                        {
-                            Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value); 
-                        }
-                    }
-
-                    break;
-            }
-        }
-
-        return actionResult;
-    }
-}
-
 public static class ModAssets
 {
     public static Texture2D extraTextures;
-
+    public static Texture2D animTextures;
+    
     public const int spellsY = 16;
     public const int spellsSize = 80;
     private static object multiplayer;
@@ -202,30 +116,23 @@ public static class ModAssets
         new Spell(13,"Buff_DarkLure","Dark Lure","NA Lures more enemies to you",SpellType.InventoryUtility,6,13,
             new Dictionary<int, int>() { {4296, 2},{4297,2}}, SpellEffects.CurePlant, 
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
-        new Spell(14,"Combat_Wind","Wind Strike","NA A basic air missile",SpellType.Combat,1,14,
-            new Dictionary<int, int>() { {4299, 1},{4291,1}}, SpellEffects.CurePlant, 
-            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
-        new Spell(15,"Combat_Water","Water Bolt","NA A low level water missile",SpellType.Combat,2,15,
-            new Dictionary<int, int>() { {4299, 2},{4291,2},{4292,2}}, SpellEffects.CurePlant, 
-            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
-        new Spell(16,"Combat_Undead","Crumble Undead","NA Hits undead monsters for extra damage",SpellType.Combat,4,16,
-            new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}}, SpellEffects.CurePlant, 
-            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
-        new Spell(17,"Combat_Earth","Earth Blast","NA A medium level earth missile",SpellType.Combat,6,17,
-            new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,4}}, SpellEffects.CurePlant, 
-            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
-        new Spell(18,"Combat_Fire","Fire Wave","NA A high level fire missile",SpellType.Combat,8,18,
-            new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}}, SpellEffects.CurePlant, 
-            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new CombatSpell(14,"Combat_Wind","Wind Strike","NA A basic air missile",1,14,
+            new Dictionary<int, int>() { {4299, 1},{4291,1}}, 10,1,0,Color.White),
+        new CombatSpell(15,"Combat_Water","Water Bolt","NA A low level water missile",2,15,
+            new Dictionary<int, int>() { {4299, 2},{4291,2},{4292,2}}, 10,1,1,Color.LightBlue),
+        new CombatSpell(16,"Combat_Undead","Crumble Undead","NA Hits undead monsters for extra damage",4,16,
+            new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}}, 10,1,3,Color.White),
+        new CombatSpell(17,"Combat_Earth","Earth Blast","NA A medium level earth missile",6,17,
+            new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,4}}, 10,1,1,Color.DarkGreen),
+        new CombatSpell(18,"Combat_Fire","Fire Wave","NA A high level fire missile",8,18,
+            new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}}, 10,1,2,Color.OrangeRed),
         new Spell(19,"Buff_Charge","Charge","NA Increases the power of combat spells while active",SpellType.Buff,7,19,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}}, SpellEffects.CurePlant, 
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
-        new Spell(20,"Combat_Demonbane","Demonbane","NA Hits undead monsters for a lot of extra damage",SpellType.Combat,9,20,
-            new Dictionary<int, int>() { {4300, 2},{4297,2},{4293,8}}, SpellEffects.CurePlant, 
-            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
-        new Spell(21,"Combat_Blood","Blood Barrage","NA Fires a strong vampiric blood missile",SpellType.Combat,10,21,
-            new Dictionary<int, int>() { {4300, 8},{4297,5}}, SpellEffects.CurePlant, 
-            (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
+        new CombatSpell(20,"Combat_Demonbane","Demonbane","NA Hits undead monsters for a lot of extra damage",9,20,
+            new Dictionary<int, int>() { {4300, 2},{4297,2},{4293,8}}, 10,1,3,Color.Purple),
+        new CombatSpell(21,"Combat_Blood","Blood Barrage","NA Fires a strong vampiric blood missile",10,21,
+            new Dictionary<int, int>() { {4300, 8},{4297,5}}, 10,1,1,Color.Crimson),
         new Spell(22,"Menu_Plank","Plank Make","NA Turns hardwood into wood and vice versa",SpellType.InventoryUtility,3,22,
             new Dictionary<int, int>() { {4300, 2},{4298, 2},{4297,5}}, SpellEffects.CurePlant, 
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value), "Converts 1 hardwood into 9 wood, or 15 wood into 1 hardwood"),
@@ -236,6 +143,7 @@ public static class ModAssets
     public static void Load(IModHelper helper)
     {
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
+        animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
     }
 
@@ -247,5 +155,13 @@ public static class ModAssets
         var spriteArray = new TemporaryAnimatedSprite[] { sprite };
         
         method.Invoke(multiplayer, new object[] { location, spriteArray });
+    }
+    
+    public static void GlobalChatMessage(string messageKey, params string[] args)
+    {
+        var method = multiplayer.GetType().GetMethod("globalChatInfoMessage", 
+            new[] { typeof(string), typeof(string[]) });
+        
+        method.Invoke(multiplayer, new object[] { messageKey, args });
     }
 }

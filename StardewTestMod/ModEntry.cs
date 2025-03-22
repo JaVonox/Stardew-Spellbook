@@ -21,6 +21,7 @@ namespace StardewTestMod
         public static IMonitor ModMonitor { get; private set; }
         
         private const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
+        public static int tmpID = 14;
         
         public override void Entry(IModHelper helper)
         {
@@ -91,7 +92,7 @@ namespace StardewTestMod
                     newWeapon.Name = "staff_battlestaff";
                     newWeapon.DisplayName = "battlestaff";
                     newWeapon.Description = "test battlestaff";
-                    newWeapon.Type = 4;
+                    newWeapon.Type = 429;
                     newWeapon.Texture = CustomTextureKey;
                     newWeapon.SpriteIndex = 11;
                     weaponDict[$"4290"] = newWeapon;
@@ -118,42 +119,13 @@ namespace StardewTestMod
                 MeleeWeapon weapon = ItemRegistry.Create<MeleeWeapon>($"(W)4290");
                 Game1.player.addItemToInventory(weapon);
                 
-                Monitor.Log($"Added custom items to inventory", LogLevel.Info);
             }
 
             if (e.Button == SButton.F6)
             {
-                Monitor.Log($"Location name {Game1.player.currentLocation.name} tile x {Game1.player.Tile.X} y {Game1.player.Tile.Y}", LogLevel.Warn);
-                
-                /*
-                ParsedItemData itemData = ItemRegistry.GetDataOrErrorItem("(W)1");
-                ParsedItemData itemData2 = ItemRegistry.GetDataOrErrorItem("(W)21");
-                */
-                string[] IDs = { "1","21","4290"};
-                int iter = 0;
-                for (int i = 0; i < IDs.Length; i++)
-                {
-                    //ParsedItemData itemData = ItemRegistry.GetDataOrErrorItem(IDs[i]);
-                    Monitor.Log($"ID {IDs[i]}", LogLevel.Info);
-                    if (MeleeWeapon.TryGetData(IDs[i], out var data))
-                    {
-                        Monitor.Log($"in {IDs[i]}", LogLevel.Info);
-                        Monitor.Log($"item" +
-                                    $"Name {data.Name}" +
-                                    $"Min Damage {data.MinDamage}"+
-                                    $"Max Damage {data.MaxDamage}"+
-                                    $"KnockBack {data.Knockback}"+
-                                    $"speed {data.Speed}"+
-                                    $"addedPrec {data.Precision}"+
-                                    $"addedDef {data.Defense}"+
-                                    $"type {data.Type}"+
-                                    $"addedArea {data.AreaOfEffect}"+
-                                    $"critChance {data.CritChance}"+
-                                    $"critMult {data.CritMultiplier}"
-                            , LogLevel.Warn);
-                    }
-                }
-                
+                tmpID = (tmpID + 1) % 19 == 0 ? 20 : tmpID + 1;
+                tmpID = tmpID % 22 == 0 ? 14 : tmpID;
+                Monitor.Log($"Loaded Spell {ModAssets.modSpells[tmpID].name}" , LogLevel.Warn);
             }
             
         }
@@ -229,7 +201,7 @@ namespace StardewTestMod
         {
             public static void Postfix(MeleeWeapon __instance, int type, Vector2 position, int facingDirection, float swipeSpeed, Farmer f)
             {
-                if (type == 4)
+                if (type == 429)
                 {
                     switch (f.FacingDirection)
                     {
@@ -265,13 +237,16 @@ namespace StardewTestMod
         {
             public static void Prefix(MeleeWeapon __instance, Farmer who)
             {
-                if(__instance.type.Value == 4)
+                if(__instance.type.Value == 429)
                 {
-                    ModMonitor.Log($"Staff Projectile", LogLevel.Warn);
+                    who.currentLocation.projectiles.Add(ModAssets.modSpells[tmpID].CreateCombatProjectile(who));
                 }
                 
             }
         }
         
+        //TODO add selected spell to farmer, and then use that projectile in the FireProjectile method
+        //TODO like how inventory works, we should on page cast we set the farmer variable, then on fire projectile we do the second cast which will decrement the runes
+        //TODO also use mouse pos for the angle of the spell?
     }
 }
