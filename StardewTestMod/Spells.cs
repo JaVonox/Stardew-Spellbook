@@ -358,32 +358,15 @@ public class CombatSpell : Spell
     }
     
     ///<summary> Generates the projectile specified by the spell to be spawned elsewhere </summary>
-    public MagicProjectile? CreateCombatProjectile(Farmer caster)
+    public MagicProjectile? CreateCombatProjectile(Farmer caster, int x, int y)
     {
-        float shotAngle = 0f;
-        float rotationRequired = 0f;
-        switch (caster.facingDirection.Value)
-        {
-            case 0: //Up
-                shotAngle = 90f;
-                rotationRequired = 0f;
-                break;
-            case 1: //Right
-                shotAngle = 0f;
-                rotationRequired = 90f;
-                break;
-            case 2: //Down
-                shotAngle = 270f;
-                rotationRequired = 180f;
-                break;
-            case 3: //Left
-                shotAngle = 180f;
-                rotationRequired = 270f;
-                break;
-        }
-
-        rotationRequired *= (float)Math.PI / 180f;
-        shotAngle *= (float)Math.PI / 180f;
+        Vector2 mousePos = new Vector2(x, y);
+        Vector2 characterPos = caster.getStandingPosition();
+        
+        //TODO maybe add gamepad functionality??
+        Vector2 v = Utility.getVelocityTowardPoint(characterPos,mousePos,velocity);
+        float projectileAngle = (float)(Math.Atan2(v.Y,v.X)) + (float)(Math.PI / 2);
+        caster.faceGeneralDirection(mousePos);
         
         MagicProjectile generatedProjectile = new MagicProjectile(
             damage,
@@ -391,10 +374,10 @@ public class CombatSpell : Spell
             0, 
             0, 
             0, 
-            (float)velocity * (float)Math.Cos(shotAngle), 
-            (float)velocity * (float)(0.0 - Math.Sin(shotAngle)),
+            0f - (v.X * -1f), 
+            0f - (v.Y * -1f),
             caster.getStandingPosition() - new Vector2(32f, 32f), 
-            rotationRequired,
+            projectileAngle,
             projectileColor,
             firingSound: firingSound, 
             collisionSound: collisionSound,

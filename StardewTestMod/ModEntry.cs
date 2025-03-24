@@ -1,9 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
+using Netcode;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 
@@ -54,7 +57,7 @@ namespace StardewTestMod
                         {
                             newObject.AppendObject("Mods.StardewTestMod.Assets.modsprites", objectDict);
                         }
-
+                        
                         /*
                         StaffWeapon tmp = new StaffWeapon();
                         tmp.Name = "battlestaff";
@@ -237,7 +240,11 @@ namespace StardewTestMod
                 if(__instance.type.Value == 429)
                 {
                     CombatSpell spell = (CombatSpell)ModAssets.modSpells[tmpID];
-                    who.currentLocation.projectiles.Add(spell.CreateCombatProjectile(who));
+                    Point mousePos = Game1.getMousePosition();
+                    int mouseX = mousePos.X + Game1.viewport.X;
+                    int mouseY = mousePos.Y + Game1.viewport.Y;
+
+                    who.currentLocation.projectiles.Add(spell.CreateCombatProjectile(who,mouseX,mouseY));
                 }
                 
             }
