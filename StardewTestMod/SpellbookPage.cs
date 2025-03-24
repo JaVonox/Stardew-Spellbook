@@ -115,7 +115,7 @@ public class SpellbookPage : IClickableMenu
         if (hoverSpellID != -1)
         {
             Item? nullItem = null;
-            KeyValuePair<bool,string> castReturn = ModAssets.modSpells[hoverSpellID].CastSpell(false, ref nullItem);
+            KeyValuePair<bool,string> castReturn = ModAssets.modSpells[hoverSpellID].SelectSpell(); //This may either cast the spell or run alternate effects like opening a new menu
             if (castReturn.Key)
             {
                 exitThisMenu();

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using System.Xml.Serialization;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -10,7 +8,6 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 
 using StardewValley.Menus;
-using StardewValley.Projectiles;
 using StardewValley.Tools;
 
 namespace StardewTestMod
@@ -22,7 +19,6 @@ namespace StardewTestMod
         
         private const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
         public static int tmpID = 14;
-        
         public override void Entry(IModHelper helper)
         {
             Instance = this;
@@ -123,6 +119,7 @@ namespace StardewTestMod
 
             if (e.Button == SButton.F6)
             {
+                Monitor.Log($"Loca x {Game1.player.Tile.X}, y {Game1.player.Tile.Y}" , LogLevel.Warn);
                 tmpID = (tmpID + 1) % 19 == 0 ? 20 : tmpID + 1;
                 tmpID = tmpID % 22 == 0 ? 14 : tmpID;
                 Monitor.Log($"Loaded Spell {ModAssets.modSpells[tmpID].name}" , LogLevel.Warn);
@@ -239,7 +236,8 @@ namespace StardewTestMod
             {
                 if(__instance.type.Value == 429)
                 {
-                    who.currentLocation.projectiles.Add(ModAssets.modSpells[tmpID].CreateCombatProjectile(who));
+                    CombatSpell spell = (CombatSpell)ModAssets.modSpells[tmpID];
+                    who.currentLocation.projectiles.Add(spell.CreateCombatProjectile(who));
                 }
                 
             }

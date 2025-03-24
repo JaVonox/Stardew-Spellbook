@@ -37,10 +37,11 @@ public class MagicProjectile : BasicProjectile
                 piercesLeft.Value--;
             }
         }
-        else if (itemId.Value != null)
+        else
         {
             n.getHitByPlayer(player, location);
             string projectileTokenizedName = TokenStringBuilder.ItemName(itemId.Value);
+            //TODO This is bugged
             ModAssets.GlobalChatMessage("Slingshot_Hit", player.Name, n.GetTokenizedDisplayName(), Lexicon.prependTokenizedArticle(projectileTokenizedName));
             piercesLeft.Value--;
         }

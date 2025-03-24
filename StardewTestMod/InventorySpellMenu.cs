@@ -12,7 +12,7 @@ public class InventorySpellMenu : MenuWithInventory
     
     private Texture2D runesTextures;
     private Farmer caster;
-    private Spell targetSpell;
+    private InventorySpell targetSpell;
     public Predicate<object>? selectablePredicate;
     
     private int centreY;
@@ -20,7 +20,7 @@ public class InventorySpellMenu : MenuWithInventory
     private int currentFrame;
     
     private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
-    public InventorySpellMenu(Spell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
+    public InventorySpellMenu(InventorySpell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
         runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
         this.targetSpell = targetSpell;
@@ -103,7 +103,8 @@ public class InventorySpellMenu : MenuWithInventory
         {
             if (inputSpot.item != null)
             {
-                KeyValuePair<bool, string> castReturn = targetSpell.CastSpell(true,ref inputSpot.item); //Cast the specified spell
+                //TODO set cast spell
+                KeyValuePair<bool, string> castReturn = targetSpell.CastSpell(ref inputSpot.item); //Cast the specified spell
 
                 if (!castReturn.Key)
                 {
