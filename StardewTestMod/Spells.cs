@@ -346,54 +346,61 @@ public class CombatSpell : Spell
     
     ///<summary> The effects when a player clicks the spell in the spellbook menu - this should set it so that the spell is selected for combat casts </summary>
     /// <returns>Bool for if the cast was successful, string for the error message</returns>
-    public virtual KeyValuePair<bool, string> SelectSpell()
+    public override KeyValuePair<bool, string> SelectSpell()
     {
         KeyValuePair<bool,string> actionResult = CanCastSpell();
-        if (actionResult.Key) 
+        if (actionResult.Key)
         {
-            
+            ModAssets.localFarmerData.selectedSpellID = this.id;
         }
         
         return actionResult;
     }
     
     ///<summary> Generates the projectile specified by the spell to be spawned elsewhere </summary>
-    public MagicProjectile? CreateCombatProjectile(Farmer caster, int x, int y)
+    public KeyValuePair<bool, string> CreateCombatProjectile(Farmer caster, int x, int y, out MagicProjectile? projectile)
     {
-        Vector2 mousePos = new Vector2(x, y);
-        Vector2 characterPos = caster.getStandingPosition();
-        
-        //TODO maybe add gamepad functionality??
-        Vector2 v = Utility.getVelocityTowardPoint(characterPos,mousePos,velocity);
-        float projectileAngle = (float)(Math.Atan2(v.Y,v.X)) + (float)(Math.PI / 2);
-        caster.faceGeneralDirection(mousePos);
-        
-        MagicProjectile generatedProjectile = new MagicProjectile(
-            damage,
-            projectileSpriteID, 
-            0, 
-            0, 
-            0, 
-            0f - (v.X * -1f), 
-            0f - (v.Y * -1f),
-            caster.getStandingPosition() - new Vector2(32f, 32f), 
-            projectileAngle,
-            projectileColor,
-            firingSound: firingSound, 
-            collisionSound: collisionSound,
-            bounceSound: firingSound, 
-            explode: explode, 
-            damagesMonsters: true, 
-            location: caster.currentLocation, 
-            firer: caster);
-        
-        generatedProjectile.ignoreTravelGracePeriod.Value = true;
-        generatedProjectile.ignoreMeleeAttacks.Value = true;
-        generatedProjectile.maxTravelDistance.Value = 12 * 64;
-        generatedProjectile.height.Value = 32f;
-        
-        RemoveRunes();
-        
-        return generatedProjectile;
+        projectile = null;
+        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        if (actionResult.Key)
+        {
+            Vector2 mousePos = new Vector2(x, y);
+            Vector2 characterPos = caster.getStandingPosition();
+
+            //TODO maybe add gamepad functionality??
+            Vector2 v = Utility.getVelocityTowardPoint(characterPos, mousePos, velocity);
+            float projectileAngle = (float)(Math.Atan2(v.Y, v.X)) + (float)(Math.PI / 2);
+            caster.faceGeneralDirection(mousePos);
+
+            MagicProjectile generatedProjectile = new MagicProjectile(
+                damage,
+                projectileSpriteID,
+                0,
+                0,
+                0,
+                0f - (v.X * -1f),
+                0f - (v.Y * -1f),
+                caster.getStandingPosition() - new Vector2(32f, 32f),
+                projectileAngle,
+                projectileColor,
+                firingSound: firingSound,
+                collisionSound: collisionSound,
+                bounceSound: firingSound,
+                explode: explode,
+                damagesMonsters: true,
+                location: caster.currentLocation,
+                firer: caster);
+
+            generatedProjectile.ignoreTravelGracePeriod.Value = true;
+            generatedProjectile.ignoreMeleeAttacks.Value = true;
+            generatedProjectile.maxTravelDistance.Value = 12 * 64;
+            generatedProjectile.height.Value = 32f;
+
+            RemoveRunes();
+
+            projectile = generatedProjectile;
+        }
+
+        return actionResult;
     }
 }

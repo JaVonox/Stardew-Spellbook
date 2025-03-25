@@ -44,8 +44,10 @@ public struct ModLoadObjects
 
 public static class ModAssets
 {
-    public static Texture2D extraTextures;
+    public static Texture2D extraTextures; //Includes spells + basic icons
     public static Texture2D animTextures;
+
+    public static PlayerModData localFarmerData;
     
     public const int spellsY = 16;
     public const int spellsSize = 80;
@@ -118,28 +120,28 @@ public static class ModAssets
         new Spell(13,"Buff_DarkLure","Dark Lure","NA Lures more enemies to you",6,
             new Dictionary<int, int>() { {4296, 2},{4297,2}}),
         
-        new CombatSpell(14,"Combat_Wind","Wind Strike","NA A basic air missile",1,
+        new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",1,
             new Dictionary<int, int>() { {4299, 1},{4291,1}}, 25,15,0,Color.White),
        
-        new CombatSpell(15,"Combat_Water","Water Bolt","NA A low level water missile",2,
+        new CombatSpell(15,"Combat_Water","Water Bolt","A low level water missile",2,
             new Dictionary<int, int>() { {4299, 2},{4291,2},{4292,2}}, 35,16,1,Color.DarkCyan),
         
-        new CombatSpell(16,"Combat_Undead","Crumble Undead","NA Hits undead monsters for extra damage",4,
+        new CombatSpell(16,"Combat_Undead","Crumble Undead","Hits undead monsters for extra damage",4,
             new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}}, 30,13,3,Color.Yellow),
         
-        new CombatSpell(17,"Combat_Earth","Earth Blast","NA A medium level earth missile",6,
+        new CombatSpell(17,"Combat_Earth","Earth Blast","A medium level earth missile",6,
             new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,4}}, 60,16,1,Color.DarkGreen),
         
-        new CombatSpell(18,"Combat_Fire","Fire Wave","NA A high level fire missile",8,
+        new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
             new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}}, 95,15,2,Color.OrangeRed),
         
         new Spell(19,"Buff_Charge","Charge","NA Increases the power of combat spells while active",7,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}}),
         
-        new CombatSpell(20,"Combat_Demonbane","Demonbane","NA Hits undead monsters for a lot of extra damage",9,
+        new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
             new Dictionary<int, int>() { {4300, 2},{4297,2},{4293,8}}, 65,13,3,Color.Purple),
         
-        new CombatSpell(21,"Combat_Blood","Blood Barrage","NA Fires a strong vampiric blood missile",10,
+        new CombatSpell(21,"Combat_Blood","Blood Barrage","Fires a strong vampiric blood missile",10,
             new Dictionary<int, int>() { {4300, 8},{4297,5}}, 80,15,1,Color.Crimson),
         
         new Spell(22,"Menu_Plank","Plank Make","NA Turns hardwood into wood and vice versa",3,
@@ -153,6 +155,7 @@ public static class ModAssets
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
         animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
+        localFarmerData = new PlayerModData();
     }
 
     public static void BroadcastSprite(GameLocation location, TemporaryAnimatedSprite sprite)
@@ -171,5 +174,14 @@ public static class ModAssets
             new[] { typeof(string), typeof(string[]) });
         
         method.Invoke(multiplayer, new object[] { messageKey, args });
+    }
+}
+
+public class PlayerModData
+{
+    public int selectedSpellID;
+    public void FirstGameTick()
+    {
+        selectedSpellID = -1;
     }
 }

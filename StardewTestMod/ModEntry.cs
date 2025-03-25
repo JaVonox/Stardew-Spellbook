@@ -21,10 +21,10 @@ namespace StardewTestMod
         public static IMonitor ModMonitor { get; private set; }
         
         private const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
-        public static int tmpID = 14;
         public override void Entry(IModHelper helper)
         {
             Instance = this;
+            
             ModMonitor = this.Monitor;
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll();
@@ -112,6 +112,7 @@ namespace StardewTestMod
                 for (int i = 4290; i < 4301; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                    item.stack.Value = 10;
                     Game1.player.addItemToInventory(item);
                 }
                 
@@ -123,9 +124,6 @@ namespace StardewTestMod
             if (e.Button == SButton.F6)
             {
                 Monitor.Log($"Loca x {Game1.player.Tile.X}, y {Game1.player.Tile.Y}" , LogLevel.Warn);
-                tmpID = (tmpID + 1) % 19 == 0 ? 20 : tmpID + 1;
-                tmpID = tmpID % 22 == 0 ? 14 : tmpID;
-                Monitor.Log($"Loaded Spell {ModAssets.modSpells[tmpID].name}" , LogLevel.Warn);
             }
             
         }
@@ -239,14 +237,46 @@ namespace StardewTestMod
             {
                 if(__instance.type.Value == 429)
                 {
-                    CombatSpell spell = (CombatSpell)ModAssets.modSpells[tmpID];
-                    Point mousePos = Game1.getMousePosition();
-                    int mouseX = mousePos.X + Game1.viewport.X;
-                    int mouseY = mousePos.Y + Game1.viewport.Y;
+                    if (ModAssets.localFarmerData.selectedSpellID != -1 &&
+                        ModAssets.modSpells[ModAssets.localFarmerData.selectedSpellID].GetType() == typeof(CombatSpell))
+                    {
+                        CombatSpell spell = (CombatSpell)ModAssets.modSpells[ModAssets.localFarmerData.selectedSpellID];
+                        Point mousePos = Game1.getMousePosition();
+                        int mouseX = mousePos.X + Game1.viewport.X;
+                        int mouseY = mousePos.Y + Game1.viewport.Y;
 
-                    who.currentLocation.projectiles.Add(spell.CreateCombatProjectile(who,mouseX,mouseY));
+                        MagicProjectile? generatedProjectile;
+                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, mouseX, mouseY, out generatedProjectile);
+
+                        if (castReturn.Key && generatedProjectile != null)
+                        {
+                            who.currentLocation.projectiles.Add(generatedProjectile);
+                        }
+                        else
+                        {
+                            Game1.showRedMessage(castReturn.Value, true);
+                        }
+                    }
+                    else
+                    {
+                        Game1.showRedMessage("No Selected Spell", true);
+                    }
                 }
                 
+            }
+        }
+        
+        //this patch adds to the first post load - so it maintains between days but if you save and reload it will reset
+        [HarmonyPatch(typeof(Game1), "_update")]
+        [HarmonyPatch(new Type[] {typeof(GameTime)})]
+        public class FirstSaveLoadPatcher
+        {
+            public static void Postfix(Game1 __instance, GameTime gameTime)
+            {
+                if (Game1.gameMode == 3 && Game1.gameModeTicks == 1)
+                {
+                    ModAssets.localFarmerData.FirstGameTick();
+                }
             }
         }
         

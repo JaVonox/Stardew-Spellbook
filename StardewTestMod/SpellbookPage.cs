@@ -19,10 +19,8 @@ public class SpellbookPage : IClickableMenu
         : base(x, y, width, height)
     {
         runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
-        int spellsMaxIndex = ModAssets.modSpells.Length - 1;
         List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
-
-        //TODO this order is wrong??
+        
         int spellsPlaced = 0;
         foreach(Spell sp in orderedSpells)
         {
@@ -131,13 +129,20 @@ public class SpellbookPage : IClickableMenu
     {
         b.End();
         b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
+        
         foreach (ClickableComponent c in spellIcons)
         {
             bool canCast = ModAssets.modSpells[c.myID].CanCastSpell().Key;
+            
             b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(canCast ? 0 : ModAssets.spellsSize,ModAssets.spellsY + (c.myID * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
+
+            if (c.myID == ModAssets.localFarmerData.selectedSpellID) //If this is the selected spell
+            {
+                //Draw a box behind the selected spell
+                b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(160,25,ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
+            }
         }
 
-        //b.DrawString(Game1.dialogueFont, hoverSpellID.ToString(), new Vector2(xPositionOnScreen + IClickableMenu.borderWidth * 3 / 2 + 192 - 20 + 96 - (int)(Game1.dialogueFont.MeasureString(hoverSpellID.ToString()).X), yPositionOnScreen + 500), Game1.textColor);
         //Needs to be at end to prevent overlap
         if (hoverSpellID != -1)
         {
