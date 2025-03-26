@@ -338,7 +338,7 @@ public class BuffSpell : Spell
 ///<summary> A type of spell that specifies the effects of a spell when cast from a battlestaff </summary>
 public class CombatSpell : Spell
 {
-    private int damage;
+    public int damage;
     private int projectileSpriteID;
     private float velocity;
     private bool explode;
@@ -428,10 +428,20 @@ public class CombatSpell : Spell
             float projectileAngle = (float)(Math.Atan2(v.Y, v.X)) + (float)(Math.PI / 2);
             caster.faceGeneralDirection(mousePos);
 
+            //Precompute the chance of crit so that we can give it a 1 or 0 chance for the projectile to sync crits
+            float critChance = castingWeapon.CritChance +
+                                (caster.hasBuff("statue_of_blessings_5") ? 0.1f : 0f) *
+                                (caster.professions.Contains(25) ? 1.5f : 1f);
+            
+            //if critdamage does not equal 0 we have not crit. anything else is used as the crit damage
+            float critDamage = (Game1.random.NextDouble() < (double)(critChance + (float)caster.LuckLevel * (critChance / 40f))) ?
+                castingWeapon.CritMultiplier : 0;
+            
             //Damage is +/- 20%
             MagicProjectile generatedProjectile = new MagicProjectile(
-                (int)Math.Floor((float)damage * (castingWeapon.projectileDamageModifier +
-                                 (float)((0.4 * Game1.random.NextDouble()) - 0.2) )),
+                (int)Math.Floor(((float)damage * (castingWeapon.projectileDamageModifier +
+                                 (float)((0.4 * Game1.random.NextDouble()) - 0.2) )))
+                ,
                 projectileSpriteID,
                 0,
                 0,
@@ -441,6 +451,7 @@ public class CombatSpell : Spell
                 caster.getStandingPosition() - new Vector2(32f, 32f),
                 projectileAngle,
                 projectileColor,
+                critDamage,
                 firingSound: firingSound,
                 collisionSound: collisionSound,
                 bounceSound: firingSound,

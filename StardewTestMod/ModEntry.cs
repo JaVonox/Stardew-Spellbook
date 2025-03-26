@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -312,7 +313,7 @@ namespace StardewTestMod
             }
         }
         
-        //Add to weapon swipe
+        //TODO remove forge + enchant ability from staves
         [HarmonyPatch(typeof(MeleeWeapon), "FireProjectile")]
         [HarmonyPatch(new Type[] { typeof(Farmer) })]
         public class FireProjectilePatcher

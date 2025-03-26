@@ -89,7 +89,7 @@ public static class ModAssets
             1.2f, 4293),
         new StaffWeaponData("4356", "Staff_Ancient", "Ancient Staff", "A magical battlestaff of ancient origin...",
             25, 40, 16,
-            1.4f),
+            1.4f,-1,0,0,0,0.05f),
         new StaffWeaponData("4357", "Staff_Ahrims", "Ahrims Staff", "Ahrim the Blighted's quarterstaff", 30, 45, 17,
             1.6f),
         new StaffWeaponData("4358", "Staff_Bluemoon", "Blue moon spear",
