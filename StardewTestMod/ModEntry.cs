@@ -21,6 +21,7 @@ namespace StardewTestMod
         public static IMonitor ModMonitor { get; private set; }
         
         private const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
+        private static string MESSAGE_SYNC_PLAYER_LEVEL = "SYNC_PLAYER_LEVEL";
         public override void Entry(IModHelper helper)
         {
             Instance = this;
@@ -31,13 +32,13 @@ namespace StardewTestMod
 
             ModAssets.Load(helper);
             
-            var customStrings = helper.Translation.Get("GameMenu_ModTest");
             helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
+            helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             
             Monitor.Log("Successfully registered StaffWeapon type for XML serialization", LogLevel.Info);
         }
-
+            
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
             
@@ -55,7 +56,7 @@ namespace StardewTestMod
 
                         foreach (ModLoadObjects newObject in ModAssets.modItems)
                         {
-                            newObject.AppendObject("Mods.StardewTestMod.Assets.modsprites", objectDict);
+                            newObject.AppendObject(CustomTextureKey, objectDict);
                         }
                         
                         /*
@@ -87,14 +88,10 @@ namespace StardewTestMod
                 {
                     var weaponDict = asset.AsDictionary<string, WeaponData>().Data;
                     
-                    WeaponData newWeapon = new WeaponData();
-                    newWeapon.Name = "staff_battlestaff";
-                    newWeapon.DisplayName = "battlestaff";
-                    newWeapon.Description = "test battlestaff";
-                    newWeapon.Type = 429;
-                    newWeapon.Texture = CustomTextureKey;
-                    newWeapon.SpriteIndex = 11;
-                    weaponDict[$"4290"] = newWeapon;
+                    foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
+                    {
+                        weaponDict.Add(newWeapon.id, newWeapon);
+                    }
                 });
 
             }
@@ -112,20 +109,107 @@ namespace StardewTestMod
                 for (int i = 4290; i < 4301; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.stack.Value = 10;
+                    item.stack.Value = 20;
                     Game1.player.addItemToInventory(item);
                 }
-                
-                MeleeWeapon weapon = ItemRegistry.Create<MeleeWeapon>($"(W)4290");
-                Game1.player.addItemToInventory(weapon);
-                
             }
 
             if (e.Button == SButton.F6)
             {
-                Monitor.Log($"Loca x {Game1.player.Tile.X}, y {Game1.player.Tile.Y}" , LogLevel.Warn);
+                foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
+                {
+                    MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id);
+                    Game1.player.addItemToInventory(item);
+                }
             }
             
+            
+            if (e.Button == SButton.F7)
+            {
+                Monitor.Log($"Loca x {Game1.player.Tile.X}, y {Game1.player.Tile.Y}" , LogLevel.Warn);
+                Monitor.Log($"Current shared player level: {ModAssets.farmerSharedData.playerLevel.Value}", LogLevel.Info);
+                if (Context.IsMainPlayer)
+                {
+                    // Host can update the value
+                    int newLevel = Game1.random.Next(1, 1500);
+                    ModAssets.farmerSharedData.playerLevel.Value = newLevel;
+            
+                    // Broadcast the change
+                    Helper.Multiplayer.SendMessage(
+                        newLevel,
+                        MESSAGE_SYNC_PLAYER_LEVEL,
+                        modIDs: new[] { ModManifest.UniqueID },
+                        playerIDs: null // Send to all players
+                    );
+            
+                    Monitor.Log($"Changed player level to: {newLevel}", LogLevel.Info);
+                    Game1.addHUDMessage(new HUDMessage($"Set Level: {newLevel}", HUDMessage.newQuest_type));
+                }
+                else
+                {
+                    // Non-host players just show the current value
+                    Game1.addHUDMessage(new HUDMessage($"Current Level: {ModAssets.farmerSharedData.playerLevel.Value}", HUDMessage.newQuest_type));
+                }
+            }
+
+            if (e.Button == SButton.F8)
+            {
+                ModAssets.farmerSharedData.playerLevel.Value += 10;
+                
+                Instance.Helper.Multiplayer.SendMessage(
+                    ModAssets.farmerSharedData.playerLevel.Value,
+                    MESSAGE_SYNC_PLAYER_LEVEL,
+                    modIDs: new[] { this.ModManifest.UniqueID },
+                    playerIDs: null // Send to all players
+                );
+            }
+        }
+        
+        //Multiplayer
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            // We'll use Game1's netWorldState to store our shared data
+            Instance.Helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+        }
+        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
+        {
+            Instance.Helper.Events.Multiplayer.ModMessageReceived += OnModMessageReceived;
+    
+            // If host, set initial value and broadcast it
+            if (Context.IsMainPlayer)
+            {
+                // Initialize with new random value if not already set
+                if (ModAssets.farmerSharedData.playerLevel.Value == 0)
+                {
+                    ModAssets.farmerSharedData.playerLevel.Value = Game1.random.Next(1, 1500);
+                }
+
+                // Broadcast the current value to all players
+                Instance.Helper.Multiplayer.SendMessage(
+                    ModAssets.farmerSharedData.playerLevel.Value,
+                    MESSAGE_SYNC_PLAYER_LEVEL,
+                    modIDs: new[] { this.ModManifest.UniqueID },
+                    playerIDs: null // Send to all players
+                );
+
+                Monitor.Log($"Host initialized player level to: {ModAssets.farmerSharedData.playerLevel.Value}",
+                    LogLevel.Info);
+            }
+        }
+    
+        private void OnModMessageReceived(object sender, ModMessageReceivedEventArgs e)
+        {
+            if (e.FromModID == ModManifest.UniqueID)
+            {
+                if (e.Type == MESSAGE_SYNC_PLAYER_LEVEL)
+                {
+                    int newLevel = e.ReadAs<int>();
+                    
+                    ModAssets.farmerSharedData.playerLevel.Value = newLevel;
+        
+                    Monitor.Log($"Received player level update: {newLevel}", LogLevel.Info);
+                }
+            }
         }
         
         //Add menu item to getTabNumberFromName
@@ -246,7 +330,8 @@ namespace StardewTestMod
                         int mouseY = mousePos.Y + Game1.viewport.Y;
 
                         MagicProjectile? generatedProjectile;
-                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, mouseX, mouseY, out generatedProjectile);
+                        StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
+                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, staffWeaponData, mouseX, mouseY, out generatedProjectile);
 
                         if (castReturn.Key && generatedProjectile != null)
                         {
@@ -269,19 +354,33 @@ namespace StardewTestMod
         //this patch adds to the first post load - so it maintains between days but if you save and reload it will reset
         [HarmonyPatch(typeof(Game1), "_update")]
         [HarmonyPatch(new Type[] {typeof(GameTime)})]
-        public class FirstSaveLoadPatcher
+        public class FirstFrameAfterLoadPatcher
         {
             public static void Postfix(Game1 __instance, GameTime gameTime)
             {
                 if (Game1.gameMode == 3 && Game1.gameModeTicks == 1)
                 {
                     ModAssets.localFarmerData.FirstGameTick();
+            
+                    // If host and connected, broadcast the current level
+                    if (Context.IsMultiplayer && Context.IsMainPlayer && Context.IsWorldReady)
+                    {
+                        ModEntry.Instance.Helper.Multiplayer.SendMessage(
+                            ModAssets.farmerSharedData.playerLevel.Value,
+                            ModEntry.MESSAGE_SYNC_PLAYER_LEVEL,
+                            modIDs: new[] { ModEntry.Instance.ModManifest.UniqueID }
+                        );
+                
+                        ModEntry.ModMonitor.Log($"Initial player level sync: {ModAssets.farmerSharedData.playerLevel.Value}", LogLevel.Info);
+                    }
+                    
                 }
             }
         }
         
-        //TODO add selected spell to farmer, and then use that projectile in the FireProjectile method
-        //TODO like how inventory works, we should on page cast we set the farmer variable, then on fire projectile we do the second cast which will decrement the runes
-        //TODO also use mouse pos for the angle of the spell?
+        
+        //TODO farmerID -> new FarmerDataClass dictionary
+        //TODO stores magic level on server, exp gained locally. at night we send the exp gained to the host (maybe also with disconnect?)
+        //TODO host updates exp + level for all people at night. 
     }
 }

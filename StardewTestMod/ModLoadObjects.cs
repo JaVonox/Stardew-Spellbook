@@ -1,8 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.Objects;
+using StardewValley.GameData.Weapons;
+using StardewValley.Network;
 using StardewValley.TerrainFeatures;
 
 namespace StardewTestMod;
@@ -48,6 +51,7 @@ public static class ModAssets
     public static Texture2D animTextures;
 
     public static PlayerModData localFarmerData;
+    public static FarmerSharedData farmerSharedData = new FarmerSharedData();
     
     public const int spellsY = 16;
     public const int spellsSize = 80;
@@ -66,6 +70,35 @@ public static class ModAssets
         new ModLoadObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells"),
         new ModLoadObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells")
     };
+    
+    //These are custom melee weapons that use 
+    public static readonly StaffWeaponData[] staffWeapons =
+    {
+        new StaffWeaponData("4351", "Staff_Magic", "Magic Staff", "A magical battlestaff", 5, 10, 11),
+        new StaffWeaponData("4352", "Staff_Air", "Staff of Air",
+            "A magical battlestaff imbued with air magic. Provides air runes for combat spells.", 20, 30, 12,
+            1.2f, 4291),
+        new StaffWeaponData("4353", "Staff_Water", "Staff of Water",
+            "A magical battlestaff imbued with water magic. Provides water runes for combat spells.", 20, 30, 13,
+            1.2f, 4292),
+        new StaffWeaponData("4354", "Staff_Earth", "Staff of Earth",
+            "A magical battlestaff imbued with earth magic. Provides earth runes for combat spells.", 20, 30, 14,
+            1.2f, 4294),
+        new StaffWeaponData("4355", "Staff_Fire", "Staff of Fire",
+            "A magical battlestaff imbued with fire magic. Provides fire runes for combat spells.", 20, 30, 15,
+            1.2f, 4293),
+        new StaffWeaponData("4356", "Staff_Ancient", "Ancient Staff", "A magical battlestaff of ancient origin...",
+            25, 40, 16,
+            1.4f),
+        new StaffWeaponData("4357", "Staff_Ahrims", "Ahrims Staff", "Ahrim the Blighted's quarterstaff", 30, 45, 17,
+            1.6f),
+        new StaffWeaponData("4358", "Staff_Bluemoon", "Blue moon spear",
+            "An ancient battlestaff that doubles as a spear", 60, 80, 18,
+            1.5f)
+    };
+
+    //This dictionary provides a quick reference for which weapons provide what rune
+    public static Dictionary<int, List<string>> infiniteRuneReferences;
     
     public static readonly Spell[] modSpells = {
         new TeleportSpell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",1,
@@ -156,6 +189,21 @@ public static class ModAssets
         animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
         localFarmerData = new PlayerModData();
+        farmerSharedData = new FarmerSharedData();
+
+        infiniteRuneReferences = new Dictionary<int, List<string>>();
+        //Generate the lookup dictionary for determining what weapons give infinite values for each rune
+        foreach (StaffWeaponData weapon in staffWeapons.Where(x=>x.providesRune != -1))
+        {
+            if (!infiniteRuneReferences.ContainsKey(weapon.providesRune))
+            {
+                infiniteRuneReferences.Add(weapon.providesRune,new List<string>(){weapon.id});
+            }
+            else
+            {
+                infiniteRuneReferences[weapon.providesRune].Add(weapon.id);
+            }
+        }
     }
 
     public static void BroadcastSprite(GameLocation location, TemporaryAnimatedSprite sprite)
@@ -180,8 +228,38 @@ public static class ModAssets
 public class PlayerModData
 {
     public int selectedSpellID;
+
+    public PlayerModData()
+    {
+        selectedSpellID = -1;
+    }
     public void FirstGameTick()
     {
         selectedSpellID = -1;
+    }
+    
+}
+
+public class FarmerSharedData : INetObject<NetFields>
+{
+    public NetInt playerLevel = new NetInt();
+    public FarmerSharedData()
+    {
+        NetFields = new NetFields(NetFields.GetNameForInstance(this));
+        InitNetFields();
+    }
+    public NetFields NetFields { get; }
+    protected void InitNetFields()
+    {
+        NetFields.SetOwner(this).AddField(playerLevel, "playerLevel");
+    }
+    public void FirstGameTick()
+    {
+        if (playerLevel.Value == 0 && Context.IsMainPlayer)
+        {
+            playerLevel.Value = Game1.random.Next(1, 1500);
+            // Mark as dirty to ensure it syncs
+            playerLevel.MarkDirty();
+        }
     }
 }

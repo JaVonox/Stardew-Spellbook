@@ -1,5 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Security.AccessControl;
+using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.GameData.Weapons;
 using StardewValley.TerrainFeatures;
 
 namespace StardewTestMod;
@@ -26,9 +28,17 @@ public class Spell
         this.requiredItems = requiredItems;
     }
     
-    public KeyValuePair<bool,string> CanCastSpell()
+    protected bool HasMagicLevel()
     {
-        //TODO add magic level checking
+        return true;
+    }
+    public virtual KeyValuePair<bool,string> CanCastSpell()
+    {
+        if (!HasMagicLevel())
+        {
+            return new KeyValuePair<bool,string>(false, "My magic level is not high enough to perform this spell");;
+        }
+
         foreach (int runeID in requiredItems.Keys)
         {
             if (!HasRuneCost(runeID))
@@ -39,7 +49,7 @@ public class Spell
         return new KeyValuePair<bool,string>(true, "");;
     }
 
-    public bool HasRuneCost(int runeID)
+    public virtual bool HasRuneCost(int runeID)
     {
         return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID]);
     }
@@ -55,11 +65,18 @@ public class Spell
         return new KeyValuePair<bool, string>(false,"Spell not yet implemented");
     }
     
-    public void RemoveRunes()
+    /// <summary>
+    /// Removes the runes that are required for the cast spell 
+    /// </summary>
+    /// <param name="ignoreRune">Any runes that should not be decremented</param>
+    protected void RemoveRunes(int ignoreRune = -1)
     {
         foreach (KeyValuePair<int, int> runeCost in requiredItems) //Remove runes if we have successfully cast the spell
         {
-            Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value); 
+            if (runeCost.Key != ignoreRune)
+            {
+                Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value);
+            }
         }
     }
 
@@ -344,24 +361,63 @@ public class CombatSpell : Spell
         this.projectileColor = projectileColor;
     }
     
+    public override bool HasRuneCost(int runeID)
+    {
+        if (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID])
+        {
+            return true;
+        }
+
+        //If we have a weapon in our inventory that allows for this, we can select Rune
+        List<string> weaponIDs;
+        if (ModAssets.infiniteRuneReferences.TryGetValue(runeID, out weaponIDs))
+        {
+            return weaponIDs.Any(x => Game1.player.Items.ContainsId(x));
+        }
+        
+        return false;
+    }
+
+    ///<summary>This variant of can cast spell checks each step to see if we can cast the spell with our held item, not just from the inventory as
+    /// the select spell method does for casting spells</summary>
+    private KeyValuePair<bool, string> CanCastSpell(StaffWeaponData castingWeapon)
+    {
+        KeyValuePair<bool, string> canCast = base.CanCastSpell(); //First we check if we can cast using the base (magic level + has runes or any staff weapons in inventory)
+        if (!canCast.Key)
+        {
+            return canCast;
+        }
+        
+        foreach (int runeID in requiredItems.Keys) //If we can cast it, then we have to check if the weapon is the reason we can get the rune
+        {
+            //we now check every rune that the weapon doesnt provide, and if the base HasRuneCost says the rune cost is not sufficientt
+            //then the spell cannot be cast (this catches the case where a player has a staff in their inventory that provides infinite runes but is not using it)
+            if (castingWeapon.providesRune != runeID && !base.HasRuneCost(runeID))
+            {
+                return new KeyValuePair<bool, string>(false,$"I do not have enough runes to cast this spell with this staff");
+            }
+        }
+        
+        return new KeyValuePair<bool, string>(true,$"");
+    }
+
+    
     ///<summary> The effects when a player clicks the spell in the spellbook menu - this should set it so that the spell is selected for combat casts </summary>
     /// <returns>Bool for if the cast was successful, string for the error message</returns>
     public override KeyValuePair<bool, string> SelectSpell()
     {
-        KeyValuePair<bool,string> actionResult = CanCastSpell();
-        if (actionResult.Key)
-        {
-            ModAssets.localFarmerData.selectedSpellID = this.id;
-        }
+        KeyValuePair<bool,string> actionResult = base.CanCastSpell(); //we use the base can cast spell to check if it is selectable - which is using the custom HasRuneCost
+        
+        ModAssets.localFarmerData.selectedSpellID = actionResult.Key && ModAssets.localFarmerData.selectedSpellID != this.id ? this.id : -1;
         
         return actionResult;
     }
     
     ///<summary> Generates the projectile specified by the spell to be spawned elsewhere </summary>
-    public KeyValuePair<bool, string> CreateCombatProjectile(Farmer caster, int x, int y, out MagicProjectile? projectile)
+    public KeyValuePair<bool, string> CreateCombatProjectile(Farmer caster, StaffWeaponData castingWeapon, int x, int y, out MagicProjectile? projectile)
     {
         projectile = null;
-        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        KeyValuePair<bool, string> actionResult = CanCastSpell(castingWeapon);
         if (actionResult.Key)
         {
             Vector2 mousePos = new Vector2(x, y);
@@ -372,8 +428,10 @@ public class CombatSpell : Spell
             float projectileAngle = (float)(Math.Atan2(v.Y, v.X)) + (float)(Math.PI / 2);
             caster.faceGeneralDirection(mousePos);
 
+            //Damage is +/- 20%
             MagicProjectile generatedProjectile = new MagicProjectile(
-                damage,
+                (int)Math.Floor((float)damage * (castingWeapon.projectileDamageModifier +
+                                 (float)((0.4 * Game1.random.NextDouble()) - 0.2) )),
                 projectileSpriteID,
                 0,
                 0,
@@ -396,7 +454,7 @@ public class CombatSpell : Spell
             generatedProjectile.maxTravelDistance.Value = 12 * 64;
             generatedProjectile.height.Value = 32f;
 
-            RemoveRunes();
+            RemoveRunes(castingWeapon.providesRune);
 
             projectile = generatedProjectile;
         }
