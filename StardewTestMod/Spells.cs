@@ -30,7 +30,7 @@ public class Spell
     
     protected bool HasMagicLevel()
     {
-        return true;
+        return ModAssets.GetFarmerMagicLevel(Game1.player) >= magicLevelRequirement;
     }
     public virtual KeyValuePair<bool,string> CanCastSpell()
     {

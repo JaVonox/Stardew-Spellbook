@@ -51,7 +51,6 @@ public static class ModAssets
     public static Texture2D animTextures;
 
     public static PlayerModData localFarmerData;
-    public static FarmerSharedData farmerSharedData = new FarmerSharedData();
     
     public const int spellsY = 16;
     public const int spellsSize = 80;
@@ -189,7 +188,6 @@ public static class ModAssets
         animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
         localFarmerData = new PlayerModData();
-        farmerSharedData = new FarmerSharedData();
 
         infiniteRuneReferences = new Dictionary<int, List<string>>();
         //Generate the lookup dictionary for determining what weapons give infinite values for each rune
@@ -223,12 +221,107 @@ public static class ModAssets
         
         method.Invoke(multiplayer, new object[] { messageKey, args });
     }
+
+    public static List<Farmer> GetFarmers()
+    {
+        List<Farmer> farmers = new List<Farmer>();
+        farmers.Add(Game1.player);
+        foreach (Farmer value in Game1.otherFarmers.Values)
+        {
+            farmers.Add(value);
+        }
+        
+        return farmers;
+    }
+
+    public static int GetFarmerMagicLevel(Farmer farmer)
+    {
+        int level = -1;
+        int.TryParse(farmer.modData["TofuMagicLevel"],out level);
+        return level;
+    }
+    
+    public static int GetFarmerExperience(Farmer farmer)
+    {
+        int experience = -1;
+        int.TryParse(farmer.modData["TofuMagicExperience"],out experience);
+        return experience;
+    }
+
+    public static void IncrementMagicExperience(Farmer farmer, int gainedExperience)
+    {
+        int experience = GetFarmerExperience(farmer);
+        
+        if (experience != -1 && experience <= Farmer.getBaseExperienceForLevel(10)) //If our exp should still be tracked then increment it
+        {
+            int newTotalExperience = (experience + gainedExperience);
+            farmer.modData["TofuMagicExperience"] = newTotalExperience.ToString();
+            int currentLevel = GetFarmerMagicLevel(farmer);
+            int expTilNextLevel = Farmer.getBaseExperienceForLevel(currentLevel + 1);
+
+            int messageTier = 0;
+            if (newTotalExperience >= expTilNextLevel)
+            {
+                while (currentLevel + 1 <= 10 && newTotalExperience >= expTilNextLevel)
+                {
+                    currentLevel++;
+                    expTilNextLevel = Farmer.getBaseExperienceForLevel(currentLevel);
+                    
+                    if (currentLevel > 0 && currentLevel % 5 == 0)
+                    {
+                        messageTier = 2;
+                    }
+                    else
+                    {
+                        messageTier = messageTier != 2 ? 1 : 0;
+                    }
+                }
+                
+                farmer.modData["TofuMagicLevel"] = (currentLevel).ToString();
+            }
+
+            switch (messageTier)
+            {
+                case 1:
+                    Game1.addHUDMessage(new HUDMessage("I feel like my magical power has reached new heights", 2));
+                    break;
+                case 2:
+                    Game1.addHUDMessage(new HUDMessage("I feel like I can choose a new magical profession", 2));
+                    break;
+            }
+        }
+    }
+    public static List<int> PerksAssigned(Farmer farmer)
+    {
+        List<int> perkIDs = new List<int>();
+        int id1 = -1;
+        int.TryParse(farmer.modData["TofuMagicProfession1"],out id1);
+        if (id1 != -1)
+        {
+            perkIDs.Add(id1);
+        }
+        
+        int id2 = -1;
+        int.TryParse(farmer.modData["TofuMagicProfession2"],out id2);
+        if (id2 != -1)
+        {
+            perkIDs.Add(id2);
+        }
+        
+        return perkIDs;
+    }
+    
+    //Perks:
+    //Sapphire - Teleports are free but grant no xp
+    //Emerald - Infinite Air Runes
+    //Ruby - 15% chance of non-combat spells taking no runes
+    //Dragonstone - Combat Spells give + 2 projectiles
+
 }
 
 public class PlayerModData
 {
     public int selectedSpellID;
-
     public PlayerModData()
     {
         selectedSpellID = -1;
@@ -238,28 +331,4 @@ public class PlayerModData
         selectedSpellID = -1;
     }
     
-}
-
-public class FarmerSharedData : INetObject<NetFields>
-{
-    public NetInt playerLevel = new NetInt();
-    public FarmerSharedData()
-    {
-        NetFields = new NetFields(NetFields.GetNameForInstance(this));
-        InitNetFields();
-    }
-    public NetFields NetFields { get; }
-    protected void InitNetFields()
-    {
-        NetFields.SetOwner(this).AddField(playerLevel, "playerLevel");
-    }
-    public void FirstGameTick()
-    {
-        if (playerLevel.Value == 0 && Context.IsMainPlayer)
-        {
-            playerLevel.Value = Game1.random.Next(1, 1500);
-            // Mark as dirty to ensure it syncs
-            playerLevel.MarkDirty();
-        }
-    }
 }

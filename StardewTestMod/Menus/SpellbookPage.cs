@@ -11,10 +11,15 @@ public class SpellbookPage : IClickableMenu
     public List<ClickableComponent> spellIcons = new List<ClickableComponent>();
     
     public int hoverSpellID = -1;
+    public int tempMagicLevel;
 
     private Texture2D runesTextures;
 
-    private const int spellsPerRow = 7;
+    private const int spellsPerRow = 6;
+
+    private ClickableTextureComponent magicIcon;
+    List<ClickableTextureComponent> perkIcons = new List<ClickableTextureComponent>();
+    private List<int> perksAssigned = new List<int>();
     public SpellbookPage(int x, int y, int width, int height)
         : base(x, y, width, height)
     {
@@ -33,6 +38,35 @@ public class SpellbookPage : IClickableMenu
                 }
                 );
             spellsPlaced++;
+        }
+
+        magicIcon = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPerRow) * 90) + 30, 
+            yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder - 14,80,80),
+            ModAssets.extraTextures,new Rectangle(160,105,80,80),1f,true);
+        
+        tempMagicLevel = ModAssets.GetFarmerMagicLevel(Game1.player);
+        perksAssigned = ModAssets.PerksAssigned(Game1.player);
+        
+        int newPerkPoints = perksAssigned.Count - (tempMagicLevel / 5);
+        
+        int perksPlaced = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            int yValue = perksAssigned.Contains(i) ? 182 + ((i+1) * 160) :
+                    (newPerkPoints == 0 ? 182 : 262 + (i * 160));
+                
+            perkIcons.Add(
+                new ClickableTextureComponent(
+                    new Rectangle(magicIcon.bounds.X, magicIcon.bounds.Y + 140 + (perksPlaced * 90) ,80,80),
+                    ModAssets.extraTextures,
+                    new Rectangle(160,yValue,80,80),
+                    1f,true)
+                {
+                    myID = i,
+                    fullyImmutable = false
+                }
+            );
+            perksPlaced++;
         }
     }
 
@@ -62,7 +96,7 @@ public class SpellbookPage : IClickableMenu
         string damageText = "";
         if (hoveredSpell.GetType() == typeof(CombatSpell))
         {
-            damageText = $"Damage: {Math.Floor((float)((CombatSpell)hoveredSpell).damage * 0.8f)}-{Math.Floor((float)((CombatSpell)hoveredSpell).damage * 1.2f)}";
+            damageText = $"{Math.Floor((float)((CombatSpell)hoveredSpell).damage * 0.8f)}-{Math.Floor((float)((CombatSpell)hoveredSpell).damage * 1.2f)} Damage";
         }
         
         //Find the required size of the tooltip box
@@ -79,7 +113,7 @@ public class SpellbookPage : IClickableMenu
         int titleHeight = (int)Math.Ceiling(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).Y);
         int descHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(hoveredSpell.description).Y);
         int levelHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(levelReqText).Y);
-        int damageHeight = damageText != "" ? (int)Math.Ceiling(Math.Max(10,Game1.smallFont.MeasureString(damageText).Y)) : 0;
+        int damageHeight = damageText != "" ? (int)Math.Ceiling(Math.Max(10,Game1.smallFont.MeasureString(damageText).Y)) + 4 : 0;
         int errorHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(canCast.Value).Y);
         
         int requiredHeight = 4 + titleHeight + 4 + descHeight + levelHeight + damageHeight + 4 + 36 + (16 * 4) + (!canCast.Key ? errorHeight : 0); //Adjust to add error message;
@@ -150,12 +184,24 @@ public class SpellbookPage : IClickableMenu
             bool canCast = ModAssets.modSpells[c.myID].CanCastSpell().Key;
             
             b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(canCast ? 0 : ModAssets.spellsSize,ModAssets.spellsY + (c.myID * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
+            b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(canCast ? 0 : ModAssets.spellsSize,ModAssets.spellsY + (c.myID * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
 
             if (c.myID == ModAssets.localFarmerData.selectedSpellID) //If this is the selected spell
             {
                 //Draw a box behind the selected spell
                 b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(160,25,ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
             }
+        }
+        
+        //Magic Level
+        magicIcon.draw(b);
+        string levelText = $"Level {tempMagicLevel}";
+        int spacing = (int)(magicIcon.bounds.Width - Game1.dialogueFont.MeasureString(levelText).X) / 2;
+        b.DrawString(Game1.dialogueFont,$"Level {tempMagicLevel}",new Vector2(magicIcon.bounds.X + spacing,magicIcon.bounds.Y + 90),Game1.textColor);
+
+        foreach (ClickableTextureComponent perk in perkIcons)
+        {
+            perk.draw(b);
         }
 
         //Needs to be at end to prevent overlap
