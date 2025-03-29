@@ -112,19 +112,17 @@ namespace StardewTestMod
             
             if (e.Button == SButton.F8)
             {
-                Game1.player.modData["TofuMagicLevel"] = "0";
-                Game1.player.modData["TofuMagicExperience"] = "0";
-                Game1.player.modData["TofuMagicProfession1"] = "-1";
-                Game1.player.modData["TofuMagicProfession2"] = "-1";
-                Game1.player.modData["HasUnlockedMagic"] = "1";
-                ModAssets.IncrementMagicExperience(Game1.player,15000);
-                Monitor.Log("Set Max EXP", LogLevel.Info);
-                /*
+                ModAssets.IncrementMagicExperience(Game1.player,5000);
+                Monitor.Log("Set Extra EXP", LogLevel.Info);
+            }
+            
+            if (e.Button == SButton.F9)
+            {
                 foreach (Farmer farmerRoot in ModAssets.GetFarmers())
                 {
-                    ModMonitor.Log("Farmer: " + farmerRoot.Name + $"{farmerRoot.modData["TofuMagicLevel"]}",LogLevel.Warn);
+                    ModMonitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Warn);
+                    ModMonitor.Log($"Exp: {farmerRoot.modData["TofuMagicExperience"]}",LogLevel.Warn);
                 }
-                */
             }
         }
         

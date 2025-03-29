@@ -18,7 +18,8 @@ public class Spell
     public string description;
     public int magicLevelRequirement;
     public Dictionary<int,int> requiredItems; //Set of IDs for the required runes
-    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int,int> requiredItems)
+    public int expReward;
+    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int,int> requiredItems, int expReward)
     {
         this.id = id;
         this.name = name;
@@ -26,6 +27,7 @@ public class Spell
         this.description = description;
         this.magicLevelRequirement = magicLevelRequirement;
         this.requiredItems = requiredItems;
+        this.expReward = expReward;
     }
     
     protected bool HasMagicLevel()
@@ -80,6 +82,11 @@ public class Spell
         }
     }
 
+    protected virtual void AddExperience()
+    {
+        ModAssets.IncrementMagicExperience(Game1.player,expReward);
+    }
+
 }
 
 ///<summary>Subclass of spell which permits teleporting to a set location on the map </summary>
@@ -94,9 +101,9 @@ public class TeleportSpell : Spell
     /// the island has not yet been unlocked </summary>
     /// <returns>True if the requirements for the teleport are met</returns>
     private Predicate<Farmer>? extraTeleportReqs;
-    public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems,
+    public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
         string location, int xPos, int yPos, int dir,Predicate<Farmer>? extraTeleportReqs = null):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems)
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
     {
         this.location = location;
         this.xPos = xPos;
@@ -104,7 +111,6 @@ public class TeleportSpell : Spell
         this.dir = dir;
         this.extraTeleportReqs = extraTeleportReqs;
     }
-
     public KeyValuePair<bool,string> Teleport()
     {
         //Disable teleporting if there is an active festival or event
@@ -138,12 +144,21 @@ public class TeleportSpell : Spell
             
             if(actionResult.Key) //Second pass checks if there are any spell specific issues - like how teleporting is forbidden on festival days
             {
-                RemoveRunes();
+                if (!ModAssets.CheckHasPerkByName(Game1.player, "Sapphire")) //Having the sapphire perk means no exp for teleport spells
+                {
+                    RemoveRunes();
+                    AddExperience();
+                }
             }
             
         }
         
         return actionResult;
+    }
+    
+    public override bool HasRuneCost(int runeID)
+    {
+        return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || ModAssets.CheckHasPerkByName(Game1.player, "Sapphire"));
     }
 }
 
@@ -152,6 +167,7 @@ public class TilesSpell : Spell
 {
     private int baseSize;
     private string noTilesMessage;
+    private float perTileExp;
     
     ///<summary>Requirements for selecting the specific terrain that the spell will impact - such as if the spot is unwatered for humidity</summary>
     ///<returns>True if the requirements for the teleport are met</returns>
@@ -159,14 +175,15 @@ public class TilesSpell : Spell
     
     ///<summary>Specifies a function to be ran with the set of tiles collected via the terrainReqs predicate</summary>
     private TilesMethod doAction; 
-    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, TilesMethod doAction, int baseSize,
+    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize,
         Predicate<TerrainFeature>? terrainReqs = null, string noTilesMessage = "Couldn't find any tiles to cast on"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems)
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0)
     {
         this.terrainReqs = terrainReqs;
         this.doAction = doAction;
         this.baseSize = baseSize;
         this.noTilesMessage = noTilesMessage;
+        this.perTileExp = perTileExp;
     }
     public List<TerrainFeature> GetTiles(Vector2 playerTile, GameLocation currentLoc, int size)
     {
@@ -204,12 +221,18 @@ public class TilesSpell : Spell
             doAction(tilesToCastOn);
             
             RemoveRunes();
+            AddExperiencePerTile(tilesToCastOn.Count);
             
             return new KeyValuePair<bool, string>(true,"");
             
         }
         
         return actionResult;
+    }
+    
+    protected void AddExperiencePerTile(int tileCount)
+    {
+        ModAssets.IncrementMagicExperience(Game1.player,Math.Max(2,(int)Math.Floor(perTileExp * (float)tileCount)));
     }
 }
 ///<summary> Subclass of spell which opens a new menu, allowing a user to specify which item the spell will be applied upon </summary>
@@ -225,8 +248,8 @@ public class InventorySpell : Spell
     
     ///<summary>Description placed on the side menu to detail specific mechanics</summary>
     public string longDescription;
-    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems)
+    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription):
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
     {
         this.highlightPredicate = highlightPredicate;
         this.doAction = doAction;
@@ -275,6 +298,7 @@ public class InventorySpell : Spell
             if (operationReturn.Key)
             {
                 RemoveRunes();
+                AddExperience();
             }
         }
         
@@ -294,8 +318,8 @@ public class BuffSpell : Spell
     
     ///<summary>The message to display when a player does not meet the requirements for the spell specified in the farmerConditions predicate</summary>
     private string buffInvalidMessage;
-    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, Predicate<Farmer> farmerConditions, BuffMethod doAction, string buffInvalidMessage = "Couldn't cast spell"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems)
+    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, string buffInvalidMessage = "Couldn't cast spell"):
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
     {
         this.farmerConditions = farmerConditions;
         this.buffInvalidMessage = buffInvalidMessage;
@@ -328,6 +352,8 @@ public class BuffSpell : Spell
             else
             {
                 actionResult = doAction();
+                RemoveRunes();
+                AddExperience();
             }
         }
         
@@ -348,9 +374,9 @@ public class CombatSpell : Spell
 
     //Sprite rotation offset is the amount of rotation we need to have to make it point upwards in the projectile (in degrees)
     public CombatSpell(int id, string name, string displayName, string description,
-        int magicLevelRequirement, Dictionary<int, int> requiredItems
-        , int damage,float velocity,int projectileSpriteID, Color projectileColor, bool explode = false, string firingSound = "wand", string collisionSound = "wand")
-        : base(id, name, displayName, description, magicLevelRequirement, requiredItems)
+        int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
+        int damage,float velocity,int projectileSpriteID, Color projectileColor, bool explode = false, string firingSound = "wand", string collisionSound = "wand")
+        : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
     {
         this.damage = damage;
         this.projectileSpriteID = projectileSpriteID;
@@ -413,6 +439,11 @@ public class CombatSpell : Spell
         return actionResult;
     }
     
+    protected override void AddExperience()
+    {
+        ModAssets.IncrementMagicExperience(Game1.player,expReward);
+    }
+    
     ///<summary> Generates the projectile specified by the spell to be spawned elsewhere </summary>
     public KeyValuePair<bool, string> CreateCombatProjectile(Farmer caster, StaffWeaponData castingWeapon, int x, int y, out MagicProjectile? projectile)
     {
@@ -466,6 +497,7 @@ public class CombatSpell : Spell
             generatedProjectile.height.Value = 32f;
 
             RemoveRunes(castingWeapon.providesRune);
+            AddExperience(); //TODO maybe this should only count if you hit an enemy
 
             projectile = generatedProjectile;
         }
