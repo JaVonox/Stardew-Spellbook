@@ -180,7 +180,7 @@ public static class ModAssets
         new CombatSpell(15,"Combat_Water","Water Bolt","A low level water missile",2,
             new Dictionary<int, int>() { {4299, 2},{4291,2},{4292,2}},2, 35,16,1,Color.DarkCyan),
         
-        new CombatSpell(16,"Combat_Undead","Crumble Undead","Hits undead monsters for extra damage",4,
+        new CombatSpell(16,"Combat_Undead","Crumble Undead","NA Hits undead monsters for extra damage",4,
             new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}},4, 30,13,3,Color.Yellow),
         
         new CombatSpell(17,"Combat_Earth","Earth Blast","A medium level earth missile",6,
@@ -192,10 +192,10 @@ public static class ModAssets
         new Spell(19,"Buff_Charge","Charge","NA Increases the power of combat spells while active",7,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10),
         
-        new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
+        new CombatSpell(20,"Combat_Demonbane","Demonbane","NA Hits undead monsters for a lot of extra damage",9,
             new Dictionary<int, int>() { {4300, 2},{4297,2},{4293,8}},6, 65,13,3,Color.Purple),
         
-        new CombatSpell(21,"Combat_Blood","Blood Barrage","Fires a strong vampiric blood missile",10,
+        new CombatSpell(21,"Combat_Blood","Blood Barrage","NA Fires a strong vampiric blood missile",10,
             new Dictionary<int, int>() { {4300, 8},{4297,5}}, 10,80,15,1,Color.Crimson),
         
         new Spell(22,"Menu_Plank","Plank Make","NA Turns hardwood into wood and vice versa",3,
@@ -208,9 +208,9 @@ public static class ModAssets
     public static readonly List<PerkData> perks = new List<PerkData>()
     {
         new PerkData(0,"Sapphire","Sapphire","All teleportation spells are free","Teleportation spells no longer grant experience"),
-        new PerkData(1,"Emerald","Emerald","NA All spells no longer require air runes"),
-        new PerkData(2,"Ruby","Ruby","NA 15% chance of non-combat spells taking no runes"),
-        new PerkData(3,"Dragonstone","Dragonstone","NA All combat spells fire two extra free projectiles","Additional projectiles fire at 45 degree angles")
+        new PerkData(1,"Emerald","Emerald","All spells no longer require air runes"),
+        new PerkData(2,"Ruby","Ruby","20% chance of non-combat spells taking no runes"),
+        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing two extra free projectiles","Additional projectiles fire at 10 degree angles")
     };
 
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)
@@ -218,12 +218,6 @@ public static class ModAssets
         PerkData? perk = perks.FirstOrDefault(x => x.perkName == perkName);
         return perk == null ? false : perk.HasPerk(farmer);
     }
-    
-    //Perks:
-    //Sapphire - Teleports are free but grant no xp
-    //Emerald - Infinite Air Runes
-    //Ruby - 15% chance of non-combat spells taking no runes
-    //Dragonstone - Combat Spells give + 2 projectiles
     public static void Load(IModHelper helper)
     {
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 

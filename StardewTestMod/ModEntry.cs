@@ -243,13 +243,16 @@ namespace StardewTestMod
                         int mouseX = mousePos.X + Game1.viewport.X;
                         int mouseY = mousePos.Y + Game1.viewport.Y;
 
-                        MagicProjectile? generatedProjectile;
+                        List<MagicProjectile> generatedProjectiles;
                         StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, staffWeaponData, mouseX, mouseY, out generatedProjectile);
+                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, staffWeaponData, mouseX, mouseY, out generatedProjectiles);
 
-                        if (castReturn.Key && generatedProjectile != null)
+                        if (castReturn.Key && generatedProjectiles.Count > 0)
                         {
-                            who.currentLocation.projectiles.Add(generatedProjectile);
+                            foreach (MagicProjectile projectile in generatedProjectiles)
+                            {
+                                who.currentLocation.projectiles.Add(projectile);
+                            }
                         }
                         else
                         {

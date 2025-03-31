@@ -1,6 +1,8 @@
 ﻿using System.Security.AccessControl;
+using Force.DeepCloner;
 using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.Extensions;
 using StardewValley.GameData.Weapons;
 using StardewValley.TerrainFeatures;
 
@@ -53,7 +55,8 @@ public class Spell
 
     public virtual bool HasRuneCost(int runeID)
     {
-        return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID]);
+        return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || 
+                (runeID == 4291 && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")));
     }
 
         
@@ -73,12 +76,20 @@ public class Spell
     /// <param name="ignoreRune">Any runes that should not be decremented</param>
     protected void RemoveRunes(int ignoreRune = -1)
     {
+        //Remove all required runes - any granted by staffs (ignoreRune) and air runes if we have the emerald perk
+        bool hasInfiniteAir = ModAssets.CheckHasPerkByName(Game1.player, "Emerald");
+        List<int> skippedItems = requiredItems.Where(x=>x.Key == ignoreRune || (x.Key == 4291 && hasInfiniteAir)).Select(x=>x.Key).ToList();
+
+        //If we have the ruby perk we have a 20% chance of skipping the cost entirely
+        if (GetType() != typeof(CombatSpell) && ModAssets.CheckHasPerkByName(Game1.player, "Ruby") && Game1.random.NextDouble() <= 0.2)
+        {
+            return;
+        }
+        
         foreach (KeyValuePair<int, int> runeCost in requiredItems) //Remove runes if we have successfully cast the spell
         {
-            if (runeCost.Key != ignoreRune)
-            {
-                Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value);
-            }
+            if(skippedItems.Contains(runeCost.Key)) {continue;}
+            Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value);
         }
     }
 
@@ -158,7 +169,9 @@ public class TeleportSpell : Spell
     
     public override bool HasRuneCost(int runeID)
     {
-        return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || ModAssets.CheckHasPerkByName(Game1.player, "Sapphire"));
+        return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] ||
+                (runeID == 4291 && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")) 
+                || ModAssets.CheckHasPerkByName(Game1.player, "Sapphire"));
     }
 }
 
@@ -389,7 +402,7 @@ public class CombatSpell : Spell
     
     public override bool HasRuneCost(int runeID)
     {
-        if (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID])
+        if (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || (runeID == 4291 && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")))
         {
             return true;
         }
@@ -444,8 +457,10 @@ public class CombatSpell : Spell
         ModAssets.IncrementMagicExperience(Game1.player,expReward);
     }
     
+    const float extraProjectileOffsets = (float)(10 * (Math.PI/180));
+    
     ///<summary> Generates the projectile specified by the spell to be spawned elsewhere </summary>
-    public KeyValuePair<bool, string> CreateCombatProjectile(Farmer caster, StaffWeaponData castingWeapon, int x, int y, out MagicProjectile? projectile)
+    public KeyValuePair<bool, string> CreateCombatProjectile(Farmer caster, StaffWeaponData castingWeapon, int x, int y, out List<MagicProjectile> projectile)
     {
         projectile = null;
         KeyValuePair<bool, string> actionResult = CanCastSpell(castingWeapon);
@@ -456,50 +471,77 @@ public class CombatSpell : Spell
 
             //TODO maybe add gamepad functionality??
             Vector2 v = Utility.getVelocityTowardPoint(characterPos, mousePos, velocity);
-            float projectileAngle = (float)(Math.Atan2(v.Y, v.X)) + (float)(Math.PI / 2);
             caster.faceGeneralDirection(mousePos);
-
+            
             //Precompute the chance of crit so that we can give it a 1 or 0 chance for the projectile to sync crits
             float critChance = castingWeapon.CritChance +
-                                (caster.hasBuff("statue_of_blessings_5") ? 0.1f : 0f) *
-                                (caster.professions.Contains(25) ? 1.5f : 1f);
+                               (caster.hasBuff("statue_of_blessings_5") ? 0.1f : 0f) *
+                               (caster.professions.Contains(25) ? 1.5f : 1f);
             
-            //if critdamage does not equal 0 we have not crit. anything else is used as the crit damage
-            float critDamage = (Game1.random.NextDouble() < (double)(critChance + (float)caster.LuckLevel * (critChance / 40f))) ?
-                castingWeapon.CritMultiplier : 0;
+            int projectileCount = ModAssets.CheckHasPerkByName(Game1.player, "Dragonstone") && Game1.random.NextDouble() <= 0.2 ? 3 : 1;
             
-            //Damage is +/- 20%
-            MagicProjectile generatedProjectile = new MagicProjectile(
-                (int)Math.Floor(((float)damage * (castingWeapon.projectileDamageModifier +
-                                 (float)((0.4 * Game1.random.NextDouble()) - 0.2) )))
-                ,
-                projectileSpriteID,
-                0,
-                0,
-                0,
-                0f - (v.X * -1f),
-                0f - (v.Y * -1f),
-                caster.getStandingPosition() - new Vector2(32f, 32f),
-                projectileAngle,
-                projectileColor,
-                critDamage,
-                firingSound: firingSound,
-                collisionSound: collisionSound,
-                bounceSound: firingSound,
-                explode: explode,
-                damagesMonsters: true,
-                location: caster.currentLocation,
-                firer: caster);
+            List<MagicProjectile> generatedProjectiles = new List<MagicProjectile>();
+            for(int i = 0; i < projectileCount; i++)
+            {
+                //The angle to offset projectiles from (first projectile is offset by 0, extras are +/- extraProjectileOffsets)
+                Vector2 projectileVelocity;
+                if (i == 0)
+                {
+                    projectileVelocity = v;
+                }
+                else //add extra projectiles if we have the perk and the random chance hits
+                {
+                    float instanceOffset = i % 2 == 0 ? extraProjectileOffsets : -extraProjectileOffsets;
+                    float cosAngle = (float)Math.Cos(instanceOffset);
+                    float sinAngle = (float)Math.Sin(instanceOffset);
+                    projectileVelocity.X = v.X * cosAngle - v.Y * sinAngle;
+                    projectileVelocity.Y = v.X * sinAngle + v.Y * cosAngle;
+                }
+                
+                float projectileAngle = (float)(Math.Atan2(projectileVelocity.Y, projectileVelocity.X)) + (float)(Math.PI / 2);
+            
+                //if critdamage does not equal 0 we have not crit. anything else is used as the crit damage
+                float critDamage = (Game1.random.NextDouble() < (double)(critChance + (float)caster.LuckLevel * (critChance / 40f))) ?
+                    castingWeapon.CritMultiplier : 0;
 
-            generatedProjectile.ignoreTravelGracePeriod.Value = true;
-            generatedProjectile.ignoreMeleeAttacks.Value = true;
-            generatedProjectile.maxTravelDistance.Value = 12 * 64;
-            generatedProjectile.height.Value = 32f;
+                //Damage is +/- 20%
+                MagicProjectile generatedProjectile = new MagicProjectile(
+                    (int)Math.Floor(((float)damage * (castingWeapon.projectileDamageModifier +
+                                                      (float)((0.4 * Game1.random.NextDouble()) - 0.2))))
+                    ,
+                    projectileSpriteID,
+                    0,
+                    0,
+                    0,
+                    projectileVelocity.X,
+                    projectileVelocity.Y,
+                    caster.getStandingPosition() - new Vector2(32f, 32f),
+                    projectileAngle,
+                    projectileColor,
+                    critDamage,
+                    firingSound: firingSound,
+                    collisionSound: collisionSound,
+                    bounceSound: firingSound,
+                    explode: explode,
+                    damagesMonsters: true,
+                    location: caster.currentLocation,
+                    firer: caster);
 
-            RemoveRunes(castingWeapon.providesRune);
-            AddExperience(); //TODO maybe this should only count if you hit an enemy
+                generatedProjectile.ignoreTravelGracePeriod.Value = true;
+                generatedProjectile.ignoreMeleeAttacks.Value = true;
+                generatedProjectile.maxTravelDistance.Value = 12 * 64;
+                generatedProjectile.height.Value = 32f;
+                
+                generatedProjectiles.Add(generatedProjectile);
+            }
 
-            projectile = generatedProjectile;
+            if (generatedProjectiles.Count > 0)
+            {
+                RemoveRunes(castingWeapon.providesRune);
+                AddExperience(); //TODO maybe this should only count if you hit an enemy
+            }
+
+            projectile = generatedProjectiles;
         }
 
         return actionResult;
