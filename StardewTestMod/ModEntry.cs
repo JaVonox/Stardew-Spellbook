@@ -12,6 +12,7 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 
 using StardewValley.Menus;
+using StardewValley.Monsters;
 using StardewValley.Tools;
 
 namespace StardewTestMod
@@ -122,6 +123,16 @@ namespace StardewTestMod
                 {
                     ModMonitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Warn);
                     ModMonitor.Log($"Exp: {farmerRoot.modData["TofuMagicExperience"]}",LogLevel.Warn);
+                }
+            }
+            
+            if (e.Button == SButton.F10)
+            {
+                for (int i = 4359; i < 4370; i++)
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                    item.stack.Value = 20;
+                    Game1.player.addItemToInventory(item);
                 }
             }
         }
@@ -302,6 +313,29 @@ namespace StardewTestMod
                     if (!Game1.player.modData.ContainsKey("HasUnlockedMagic"))
                     {
                         Game1.player.modData.Add("HasUnlockedMagic","1"); //TODO update when we make magic unlockable
+                    }
+                }
+            }
+        }
+        
+        //Add monster items
+        [HarmonyPatch(typeof(Monster), "parseMonsterInfo")]
+        [HarmonyPatch(new Type[] { typeof(string) })]
+        public class MonsterDropPatcher
+        {
+            public static void Postfix(Monster __instance, string name)
+            {
+                if (ModAssets.monsterDrops.ContainsKey(name))
+                {
+                    foreach (ItemDrop item in ModAssets.monsterDrops[name])
+                    {
+                        if (Game1.random.NextDouble() <= item.chance)
+                        {
+                            for (int i = 0; i < item.amount; i++)
+                            {
+                                __instance.objectsToDrop.Add(item.itemID);
+                            }
+                        }
                     }
                 }
             }

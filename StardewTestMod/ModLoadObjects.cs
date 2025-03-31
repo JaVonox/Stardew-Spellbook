@@ -10,15 +10,28 @@ using StardewValley.TerrainFeatures;
 
 namespace StardewTestMod;
 
-public struct ModLoadObjects
+public struct ItemDrop
 {
-    private int id;
-    private string name;
-    private string displayName;
-    private string description;
-    private string type;
-    private int spriteIndex;
-    private int category;
+    public string itemID;
+    public int amount;
+    public double chance;
+
+    public ItemDrop(string itemID, int amount, double chance)
+    {
+        this.itemID = itemID;
+        this.amount = amount;
+        this.chance = chance;
+    }
+}
+public class ModLoadObjects
+{
+    protected int id;
+    protected string name;
+    protected string displayName;
+    protected string description;
+    protected string type;
+    protected int spriteIndex;
+    protected int category;
 
     public ModLoadObjects(int id, string name, string displayName, string description, string type = "Basic", int category = -2)
     {
@@ -45,6 +58,23 @@ public struct ModLoadObjects
     }
 }
 
+public class RunesObjects : ModLoadObjects
+{
+    public RunesObjects(int id, string name, string displayName, string description, string type = "Basic", int category = 0) : 
+        base(id,name,displayName,description,type,category)
+    {
+        
+    }
+}
+
+public class TreasureObjects : ModLoadObjects
+{
+    public TreasureObjects(int id, string name, string displayName, string description, int spriteID, string type = "Basic", int category = 0) : 
+        base(id,name,displayName,description,type,category)
+    {
+        base.spriteIndex = spriteID;
+    }
+}
 public class PerkData
 {
     public int perkID;
@@ -79,17 +109,28 @@ public static class ModAssets
     private static object multiplayer;
     
     public static readonly ModLoadObjects[] modItems = {
-        new ModLoadObjects(4290,"Rune_Blank","Pure Essence","An unimbued rune of extra capability."),
-        new ModLoadObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes"),
-        new ModLoadObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes"),
-        new ModLoadObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes"),
-        new ModLoadObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes"),
-        new ModLoadObjects(4295,"Rune_Law","Law Rune","Used for teleport spells"),
-        new ModLoadObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells"),
-        new ModLoadObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells"),
-        new ModLoadObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells"),
-        new ModLoadObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells"),
-        new ModLoadObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells")
+        new RunesObjects(4290,"Rune_Blank","Pure Essence","An unimbued rune of extra capability."),
+        new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes"),
+        new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes"),
+        new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes"),
+        new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes"),
+        new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells"),
+        new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells"),
+        new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells"),
+        new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells"),
+        new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells"),
+        new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells"),
+        new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes",19),
+        new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes",20),
+        new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies",21),
+        new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies",22),
+        new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies",23),
+        new TreasureObjects(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes",24),
+        new TreasureObjects(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes",25),
+        new TreasureObjects(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes",26),
+        new TreasureObjects(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes",27),
+        new TreasureObjects(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes",28),
+        new TreasureObjects(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes",29)
     };
     
     //These are custom melee weapons that use 
@@ -211,6 +252,25 @@ public static class ModAssets
         new PerkData(1,"Emerald","Emerald","All spells no longer require air runes"),
         new PerkData(2,"Ruby","Ruby","20% chance of non-combat spells taking no runes"),
         new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing two extra free projectiles","Additional projectiles fire at 10 degree angles")
+    };
+
+    public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
+    {
+        { "Green Slime", new List<ItemDrop>() {new ItemDrop("4294",2,0.1f),new ItemDrop("4295", 1, 0.1f)} },
+        { "Dust Spirit", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.1f), new ItemDrop("4293",2,0.05f)} },
+        { "Bat", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.2f),new ItemDrop("4299", 1, 0.05f)} },
+        { "Frost Bat", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.1f),new ItemDrop("4292", 3, 0.2f),new ItemDrop("4299", 2, 0.05f)} },
+        { "Lava Bat", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.1f),new ItemDrop("4293", 3, 0.2f),new ItemDrop("4300", 2, 0.05f)} },
+        { "Iridium Bat", new List<ItemDrop>() {new ItemDrop("4299", 2, 0.2f),new ItemDrop("4300", 2, 0.2f)} },
+        { "Stone Golem", new List<ItemDrop>() {new ItemDrop("4294", 3, 0.4f),new ItemDrop("4296", 2, 0.2f)} },
+        { "Wilderness Golem", new List<ItemDrop>() {new ItemDrop("4299", 3, 0.2f),new ItemDrop("4300", 1, 0.2f)} },
+        { "Iridium Golem", new List<ItemDrop>() {new ItemDrop("4299", 5, 0.2f),new ItemDrop("4300", 5, 0.2f)} },
+        { "Grub", new List<ItemDrop>() {new ItemDrop("4296", 1, 0.1f),new ItemDrop("4291", 2, 0.1f)} },
+        { "Fly", new List<ItemDrop>() {new ItemDrop("4291", 3, 0.3f)} },
+        { "Frost Jelly", new List<ItemDrop>() {new ItemDrop("4292",3,0.1f),new ItemDrop("4295", 2, 0.1f)} },
+        { "Shadow Guy", new List<ItemDrop>() {new ItemDrop("4295",2,0.2f),new ItemDrop("4297", 3, 0.2f),new ItemDrop("4300", 3, 0.3f)} },
+        { "Ghost", new List<ItemDrop>() {new ItemDrop("4295",2,0.2f),new ItemDrop("4299", 3, 0.2f),new ItemDrop("4300", 3, 0.1f)} },
+        { "Carbon Ghost", new List<ItemDrop>() {new ItemDrop("4295",2,0.2f),new ItemDrop("4299", 3, 0.2f),new ItemDrop("4300", 3, 0.1f)} },
     };
 
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)
