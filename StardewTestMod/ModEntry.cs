@@ -8,6 +8,7 @@ using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
+using StardewValley.Extensions;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 
@@ -22,7 +23,7 @@ namespace StardewTestMod
         public static ModEntry Instance;
         public static IMonitor ModMonitor { get; private set; }
         
-        private const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
+        public const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
         public override void Entry(IModHelper helper)
         {
             Instance = this;
@@ -135,6 +136,36 @@ namespace StardewTestMod
                     Game1.player.addItemToInventory(item);
                 }
             }
+            
+            /*
+            if (e.Button == SButton.F10)
+            {
+                int amount = 100000;
+
+                Dictionary<string,int> itemToInt = new Dictionary<string, int>();
+                for (int i = 0; i < amount; i++)
+                {
+                    foreach (ObjectGeodeDropData drop in ModAssets.modItems[11].GeodeDrops)
+                    {
+                        if (Game1.random.NextBool(drop.Chance))
+                        {
+                            if (!itemToInt.ContainsKey(drop.ItemId))
+                            {
+                                itemToInt.Add(drop.ItemId, 0);
+                            }
+                            itemToInt[drop.ItemId]++;
+                            break;
+                        }
+                    }
+                }
+
+                foreach (string item in itemToInt.Keys)
+                {
+                    ModMonitor.Log($"{item} occurance: {((float)(itemToInt[item]) / (float)(amount))*100}%", LogLevel.Warn);
+                }
+            }
+            */
+            
         }
         
         //Add menu item to getTabNumberFromName
@@ -340,5 +371,25 @@ namespace StardewTestMod
                 }
             }
         }
+        
+        /*
+        //Add monster items
+        [HarmonyPatch(typeof(Utility), "IsGeode")]
+        [HarmonyPatch(new Type[] { typeof(Item), typeof(bool)})]
+        public class IsGeodePatcher
+        {
+            public static void Prefix(Utility __instance, Item item, bool disallow_special_geodes, ref bool __result)
+            {
+                if (item.HasTypeObject())
+                {
+                    int outID = -1;
+                    if (int.TryParse(item.itemId.Value, out outID) && (outID >= 4359 && outID <= 4369))
+                    {
+                        __result = true;
+                    }
+                }
+            }
+        }
+        */
     }
 }

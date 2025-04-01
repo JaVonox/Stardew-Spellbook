@@ -16,45 +16,46 @@ public struct ItemDrop
     public int amount;
     public double chance;
 
-    public ItemDrop(string itemID, int amount, double chance)
+    public int minAmount;
+    public int maxAmount;
+    public ItemDrop(string itemID, int amount, double chance = 1.0)
     {
         this.itemID = itemID;
         this.amount = amount;
         this.chance = chance;
+        
+        this.minAmount = amount;
+        this.maxAmount = amount;
+    }
+    
+    public ItemDrop(string itemID, int minAmount, int maxAmount, double weight = 1.0) 
+    {
+        this.itemID = itemID;
+        this.amount = minAmount;
+        this.minAmount = minAmount;
+        this.maxAmount = maxAmount;
+        this.chance = weight;
     }
 }
-public class ModLoadObjects
+public class ModLoadObjects : ObjectData
 {
     protected int id;
-    protected string name;
-    protected string displayName;
-    protected string description;
-    protected string type;
-    protected int spriteIndex;
-    protected int category;
 
     public ModLoadObjects(int id, string name, string displayName, string description, string type = "Basic", int category = -2)
     {
         this.id = id;
-        this.name = name;
-        this.displayName = displayName;
-        this.description = description;
-        this.type = type;
-        this.spriteIndex = id - 4290;
-        this.category = category;
+        base.Name = name;
+        base.DisplayName = displayName;
+        base.Description = description;
+        base.Type = type;
+        base.Texture = ModEntry.CustomTextureKey;
+        base.SpriteIndex = id - 4290;
+        base.Category = category;
     }
 
     public void AppendObject(string CustomTextureKey, IDictionary<string,ObjectData> ObjectsSet)
     {
-        ObjectData newItem = new ObjectData();
-        newItem.Name = this.name;
-        newItem.DisplayName = this.displayName;
-        newItem.Description = this.description;
-        newItem.Type = this.type;
-        newItem.Texture = CustomTextureKey;
-        newItem.SpriteIndex = this.spriteIndex;
-        newItem.Category = this.category;
-        ObjectsSet[$"{id}"] = newItem;
+        ObjectsSet[$"{id}"] = this;
     }
 }
 
@@ -69,10 +70,81 @@ public class RunesObjects : ModLoadObjects
 
 public class TreasureObjects : ModLoadObjects
 {
+    public TreasureObjects(int id, string name, string displayName, string description, int spriteID,
+        List<ItemDrop> itemDrops, string type = "Basic", int category = 0) :
+        base(id, name, displayName, description, type, category)
+    {
+        base.SpriteIndex = spriteID;
+        List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
+
+        double totalWeight = itemDrops.Sum(itemDrop => itemDrop.chance);
+
+        int dropID = 0;
+        foreach (ItemDrop item in itemDrops)
+        {
+            ObjectGeodeDropData geodeItem = new ObjectGeodeDropData();
+            geodeItem.Id = dropID.ToString();
+            geodeItem.ItemId = item.itemID;
+
+            geodeItem.MinStack = item.minAmount;
+            geodeItem.MaxStack = item.maxAmount;
+            
+            geodeItem.Chance = BalanceItemPercentage(itemDrops,dropID,totalWeight);
+            geodeItem.Precedence = 0;
+            objects.Add(geodeItem);
+            dropID++;
+        }
+        
+        base.GeodeDropsDefaultItems = false;
+        base.GeodeDrops = objects;
+    }
+
+
     public TreasureObjects(int id, string name, string displayName, string description, int spriteID, string type = "Basic", int category = 0) : 
         base(id,name,displayName,description,type,category)
     {
-        base.spriteIndex = spriteID;
+        base.SpriteIndex = spriteID;
+        List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
+        
+        ObjectGeodeDropData geodeItem = new ObjectGeodeDropData();
+        geodeItem.Id = "0";
+        geodeItem.ItemId = "4291";
+        geodeItem.Chance = 1.0;
+        geodeItem.MinStack = 10;
+        geodeItem.MaxStack = 20;
+        geodeItem.Precedence = 0;
+        objects.Add(geodeItem);
+
+        base.GeodeDropsDefaultItems = false;
+        base.GeodeDrops = objects;
+
+    }
+
+    /// <summary>
+    /// Finds what the new percentage should be for an index in the array to match its expected percentage chance -
+    /// assuming that we work sequentially
+    /// </summary>
+    /// <returns></returns>
+    private static double BalanceItemPercentage(List<ItemDrop> items, int calculatedIndex, double totalWeight)
+    {
+        double desiredChance = (items[calculatedIndex].chance / totalWeight); //The specified chance of this item drop occuring divided by the total chances
+        if (calculatedIndex == 0)
+        {
+            return desiredChance; //If its the first index we always have the desired chance
+        }
+        else if (calculatedIndex == items.Count - 1)
+        {
+            return 1; //final item will always have 100% chance
+        }
+
+        double divisor = 1;
+
+        for(int i = calculatedIndex - 1; i >= 0;i--)
+        {
+            divisor *= (1 - BalanceItemPercentage(items,i,totalWeight)); 
+        }
+        
+        return desiredChance / divisor;
     }
 }
 public class PerkData
@@ -120,17 +192,138 @@ public static class ModAssets
         new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells"),
         new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells"),
         new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells"),
-        new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes",19),
-        new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes",20),
-        new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies",21),
-        new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies",22),
-        new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies",23),
-        new TreasureObjects(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes",24),
-        new TreasureObjects(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes",25),
-        new TreasureObjects(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes",26),
-        new TreasureObjects(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes",27),
-        new TreasureObjects(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes",28),
-        new TreasureObjects(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes",29)
+        
+        new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes",19,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4291",10,15,2.3),
+                new ItemDrop("4291",15,20,0.5),
+                new ItemDrop("4292",5,10,2),
+                new ItemDrop("4292",15,20,0.5),
+                new ItemDrop("4293",5,10,2),
+                new ItemDrop("4293",15,20,0.5),
+                new ItemDrop("4294",5,10,2),
+                new ItemDrop("4294",15,20,0.5),
+            }),
+        
+        new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes",20,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4295",5,10,1.2),
+                new ItemDrop("4296",5,10,1.2),
+                new ItemDrop("4297",5,10,1),
+                new ItemDrop("4298",5,10,1),
+                new ItemDrop("4299",5,15,3),
+                new ItemDrop("4300",5,15,1.5),
+            }),
+        
+        new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies",21,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4364",2,4,0.8),
+                new ItemDrop("4365",1,3,0.5),
+                new ItemDrop("4366",1,3,0.5),
+                new ItemDrop("4367",1,3,0.5),
+                new ItemDrop("4368",1,3,0.5),
+                new ItemDrop("4369",3,3,0.5),
+                
+                new ItemDrop("4295",5,15,0.5),
+                new ItemDrop("4296",5,15,0.5),
+                new ItemDrop("4297",5,15,0.5),
+                new ItemDrop("4298",5,15,0.5),
+                
+                new ItemDrop("4300",10,25,1.1),
+                new ItemDrop("4359",1,3,1),
+                new ItemDrop("4360",2,4,1),
+                
+                new ItemDrop("4351",1,1,0.8),
+                new ItemDrop("4352",1,1,0.3),
+                new ItemDrop("4353",1,1,0.3),
+                new ItemDrop("4354",1,1,0.3),
+                new ItemDrop("4355",1,1,0.3),
+                
+                new ItemDrop("4362",1,1,0.05),
+            }),
+        
+        new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies",22,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4364",2,6,0.8),
+                new ItemDrop("4365",2,5,0.5),
+                new ItemDrop("4366",2,5,0.5),
+                new ItemDrop("4367",2,5,0.5),
+                new ItemDrop("4368",2,5,0.5),
+                new ItemDrop("4369",2,5,0.5),
+                
+                new ItemDrop("4295",10,20,0.5),
+                new ItemDrop("4296",10,20,0.5),
+                new ItemDrop("4297",10,20,0.5),
+                new ItemDrop("4298",10,20,0.5),
+                
+                new ItemDrop("4359",2,4,1),
+                new ItemDrop("4360",3,5,1),
+                
+                new ItemDrop("4352",1,1,0.7),
+                new ItemDrop("4353",1,1,0.7),
+                new ItemDrop("4354",1,1,0.7),
+                new ItemDrop("4355",1,1,0.7),
+                new ItemDrop("4356",1,1,0.2),
+                new ItemDrop("4363",1,1,0.05),
+            }),
+        
+        new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies",23,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4356",1,1,2),
+                new ItemDrop("4357",1,1,0.4),
+                new ItemDrop("4358",1,1,0.4),
+                new ItemDrop("4368",3,6,1),
+                new ItemDrop("4369",3,6,1),
+                new ItemDrop("4360",5,7,1),
+            }),
+        
+        new TreasureObjects(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes",24,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4291",10,15,1.5),
+                new ItemDrop("4291",20,30,0.5),
+                new ItemDrop("4291",40,50,0.25),
+            }),
+        new TreasureObjects(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes",25,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4292",10,15,1.5),
+                new ItemDrop("4292",20,30,0.5),
+                new ItemDrop("4292",40,50,0.25),
+            }),
+        new TreasureObjects(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes",26,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4293",10,15,1.5),
+                new ItemDrop("4293",20,30,0.5),
+                new ItemDrop("4293",40,50,0.25),
+            }),
+        new TreasureObjects(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes",27,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4294",10,15,1.5),
+                new ItemDrop("4294",20,30,0.5),
+                new ItemDrop("4294",40,50,0.25),
+            }),
+        new TreasureObjects(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes",28,
+            new List<ItemDrop>()
+            {
+                new ItemDrop("4299",5,15,1.5),
+                new ItemDrop("4299",15,20,0.5),
+                new ItemDrop("4299",40,50,0.1),
+            }),
+        new TreasureObjects(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes",29,
+        new List<ItemDrop>()
+        {
+            new ItemDrop("4300",5,15,1.5),
+            new ItemDrop("4300",15,20,0.5),
+            new ItemDrop("300",40,50,0.1),
+        }),
     };
     
     //These are custom melee weapons that use 

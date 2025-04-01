@@ -113,10 +113,6 @@ public class InventorySpellMenu : MenuWithInventory
                 }
             }
         }
-        else
-        {
-            
-        }
     }
 
     public override void receiveRightClick(int x, int y, bool playSound = true)
