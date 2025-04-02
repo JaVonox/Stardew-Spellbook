@@ -39,7 +39,7 @@ public struct ItemDrop
 }
 public class ModLoadObjects : ObjectData
 {
-    protected int id;
+    public int id;
 
     public ModLoadObjects(int id, string name, string displayName, string description, string type = "Basic", int category = -2)
     {
@@ -322,7 +322,7 @@ public static class ModAssets
         {
             new ItemDrop("4300",5,15,1.5),
             new ItemDrop("4300",15,20,0.5),
-            new ItemDrop("300",40,50,0.1),
+            new ItemDrop("4300",40,50,0.1),
         }),
     };
     
@@ -449,21 +449,114 @@ public static class ModAssets
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
     {
-        { "Green Slime", new List<ItemDrop>() {new ItemDrop("4294",2,0.1f),new ItemDrop("4295", 1, 0.1f)} },
-        { "Dust Spirit", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.1f), new ItemDrop("4293",2,0.05f)} },
-        { "Bat", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.2f),new ItemDrop("4299", 1, 0.05f)} },
-        { "Frost Bat", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.1f),new ItemDrop("4292", 3, 0.2f),new ItemDrop("4299", 2, 0.05f)} },
-        { "Lava Bat", new List<ItemDrop>() {new ItemDrop("4291", 1, 0.1f),new ItemDrop("4293", 3, 0.2f),new ItemDrop("4300", 2, 0.05f)} },
-        { "Iridium Bat", new List<ItemDrop>() {new ItemDrop("4299", 2, 0.2f),new ItemDrop("4300", 2, 0.2f)} },
-        { "Stone Golem", new List<ItemDrop>() {new ItemDrop("4294", 3, 0.4f),new ItemDrop("4296", 2, 0.2f)} },
-        { "Wilderness Golem", new List<ItemDrop>() {new ItemDrop("4299", 3, 0.2f),new ItemDrop("4300", 1, 0.2f)} },
-        { "Iridium Golem", new List<ItemDrop>() {new ItemDrop("4299", 5, 0.2f),new ItemDrop("4300", 5, 0.2f)} },
-        { "Grub", new List<ItemDrop>() {new ItemDrop("4296", 1, 0.1f),new ItemDrop("4291", 2, 0.1f)} },
-        { "Fly", new List<ItemDrop>() {new ItemDrop("4291", 3, 0.3f)} },
-        { "Frost Jelly", new List<ItemDrop>() {new ItemDrop("4292",3,0.1f),new ItemDrop("4295", 2, 0.1f)} },
-        { "Shadow Guy", new List<ItemDrop>() {new ItemDrop("4295",2,0.2f),new ItemDrop("4297", 3, 0.2f),new ItemDrop("4300", 3, 0.3f)} },
-        { "Ghost", new List<ItemDrop>() {new ItemDrop("4295",2,0.2f),new ItemDrop("4299", 3, 0.2f),new ItemDrop("4300", 3, 0.1f)} },
-        { "Carbon Ghost", new List<ItemDrop>() {new ItemDrop("4295",2,0.2f),new ItemDrop("4299", 3, 0.2f),new ItemDrop("4300", 3, 0.1f)} },
+        { "Green Slime", new List<ItemDrop>(){
+            new ItemDrop("4294",3,0.1f),
+            new ItemDrop("4291",2,0.1f),
+            new ItemDrop("4292",2,0.1f),
+            new ItemDrop("4293",2,0.1f),
+            new ItemDrop("4367",1,0.02f),
+            new ItemDrop("4295", 1, 0.05f),
+            new ItemDrop("4351",1,1f),
+        } },
+        { "Dust Spirit", new List<ItemDrop>(){
+            new ItemDrop("4291", 1, 0.1f), 
+            new ItemDrop("4293",2,0.1f)
+        } },
+        { "Bat", new List<ItemDrop>(){
+            new ItemDrop("4291", 1, 0.05f),
+            new ItemDrop("4364",1,0.02f),
+            new ItemDrop("4299", 1, 0.05f)
+        } },
+        { "Frost Bat", new List<ItemDrop>(){
+            new ItemDrop("4364",1,0.03f),
+            new ItemDrop("4292", 3, 0.1f),
+            new ItemDrop("4365", 1, 0.02f),
+            new ItemDrop("4299", 2, 0.05f),
+            new ItemDrop("4361", 1, 0.02f),
+        } },
+        { "Lava Bat", new List<ItemDrop>(){
+            new ItemDrop("4364",1,0.03f),
+            new ItemDrop("4293", 3, 0.2f),
+            new ItemDrop("4366", 1, 0.02f),
+            new ItemDrop("4300", 2, 0.05f),
+            new ItemDrop("4362", 1, 0.02f),
+        } },
+        { "Stone Golem", new List<ItemDrop>(){
+            new ItemDrop("4367", 1, 0.1f),
+            new ItemDrop("4296", 5, 0.1f),
+            new ItemDrop("4359", 1, 0.1f)
+        } },
+        { "Wilderness Golem", new List<ItemDrop>(){
+            new ItemDrop("4299", 3, 0.05f),
+            new ItemDrop("4300", 1, 0.05f)
+        } },
+        { "Grub", new List<ItemDrop>(){
+            new ItemDrop("4296", 1, 0.1f),
+            new ItemDrop("4291", 2, 0.1f)
+        } },
+        { "Fly", new List<ItemDrop>(){
+            new ItemDrop("4291", 3, 0.3f),
+            new ItemDrop("4364", 1, 0.05f),
+        } },
+        { "Frost Jelly", new List<ItemDrop>(){
+            new ItemDrop("4292",4,0.1f),
+            new ItemDrop("4295", 2, 0.1f),
+            new ItemDrop("4359", 1, 0.05f)
+        } },
+        { "Shadow Guy", new List<ItemDrop>(){
+            new ItemDrop("4295",2,0.2f),
+            new ItemDrop("4297", 3, 0.2f),
+            new ItemDrop("4300", 3, 0.3f),
+            new ItemDrop("4360", 1, 0.05f),
+            new ItemDrop("4361", 1, 0.05f)
+        } },
+        { "Ghost", new List<ItemDrop>(){
+            new ItemDrop("4295",2,0.2f),
+            new ItemDrop("4299", 3, 0.2f),
+            new ItemDrop("4296",3,0.2f),
+            new ItemDrop("4297",3,0.2f),
+            new ItemDrop("4300", 3, 0.1f),
+            new ItemDrop("4368", 1, 0.05f),
+            new ItemDrop("4360", 1, 0.05f)
+        } },
+        { "Duggy", new List<ItemDrop>(){
+            new ItemDrop("4359",2,0.2f),
+            new ItemDrop("4294",5,0.01f),
+        } },
+        { "Rock Crab", new List<ItemDrop>(){
+            new ItemDrop("4359",2,0.2f),
+            new ItemDrop("4365",1,0.1f),
+        } },
+        { "Truffle Crab", new List<ItemDrop>(){
+            new ItemDrop("4296",3,0.02f)
+        } },
+        { "Squid Kid", new List<ItemDrop>(){
+            new ItemDrop("4360",2,0.1f),
+            new ItemDrop("4359",4,0.1f),
+            new ItemDrop("4361",2,0.1f),
+        } },
+        { "Skeleton", new List<ItemDrop>(){
+            new ItemDrop("4368",1,0.05f),
+            new ItemDrop("4369",1,0.02f),
+            new ItemDrop("4361",1,0.06f),
+        } },
+        { "Metal Head", new List<ItemDrop>(){
+            new ItemDrop("4362",1,0.05f),
+        } },
+        { "Shadow Brute", new List<ItemDrop>(){
+            new ItemDrop("4361",1,0.05f),
+            new ItemDrop("4362",1,0.05f),
+            new ItemDrop("4295",5,0.1f),
+            new ItemDrop("4296",5,0.1f),
+            new ItemDrop("4368",2,0.1f),
+        } },
+        { "Shadow Shaman", new List<ItemDrop>(){
+            new ItemDrop("4361",1,0.05f),
+            new ItemDrop("4362",1,0.05f),
+            new ItemDrop("4297",5,0.1f),
+            new ItemDrop("4298",5,0.1f),
+            new ItemDrop("4369",2,0.1f),
+        } },
     };
 
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)

@@ -231,8 +231,10 @@ namespace StardewTestMod
                 __instance.drawMouse(b, ignore_transparency: true);
             }
         }
-        
-        //Add to weapon swipe
+
+        public static class MeleeWeaponPatches
+        {
+                    //Add to weapon swipe
         [HarmonyPatch(typeof(MeleeWeapon), "doSwipe")]
         [HarmonyPatch(new Type[] { typeof(int), typeof(Vector2),typeof(int),typeof(float),typeof(Farmer) })]
         public class SwipePatcher
@@ -310,6 +312,100 @@ namespace StardewTestMod
             }
         }
         
+        [HarmonyPatch(typeof(MeleeWeapon), "getExtraSpaceNeededForTooltipSpecialIcons")]
+        [HarmonyPatch(new Type[] { typeof(SpriteFont), typeof(int), typeof(int), typeof(int), typeof(StringBuilder), typeof(string), typeof(int)  })]
+        public class SpacePatcher
+        {
+            public static void Postfix(ref Point __result,MeleeWeapon __instance, SpriteFont font, int minWidth, int horizontalBuffer, int startingHeight, StringBuilder descriptionText, string boldTitleText, int moneyAmountToDisplayAtBottom)
+            {
+                if (__instance.type.Value == 429) //Staff type
+                {
+                    StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
+                    bool staffProvidesRune = staffWeaponData.providesRune != -1;
+                    __result.Y += (staffWeaponData.projectileDamageModifier > 1.0f ? 48 : 0) + (staffProvidesRune ? 48 : 0); //Add to the size of the extra space to allow for extra staff damage symbol
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(MeleeWeapon), "getCategoryName")]
+        public class CategoryNamePatcher
+        {
+            public static void Postfix(ref string __result,MeleeWeapon __instance)
+            {
+                if (__instance.type.Value == 429) //Staff type
+                {
+                    StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
+                    int level = staffWeaponData.providesRune != -1 ? 10 : int.Parse(staffWeaponData.id) - 4343;
+                    
+                    __result = $"Level {level} Battlestaff";
+                }
+            }
+        }
+
+        [HarmonyPatch]
+        public class MeleeTooltipPatcher
+        {
+            private static MethodBase TargetMethod()
+            {
+                // Get all methods in MeleeWeapon
+                var methods = typeof(MeleeWeapon).GetMethods(BindingFlags.Public | BindingFlags.Instance);
+
+                var method = methods.FirstOrDefault(x => x.Name == "drawTooltip");
+
+                if (method == null)
+                {
+                    return null;
+                }
+                
+                var parameters = method.GetParameters();
+        
+                //This is essential to allow us to use a ref type for the method
+                if (parameters[0].ParameterType == typeof(SpriteBatch) &&
+                    parameters[1].ParameterType == typeof(int).MakeByRefType() && 
+                    parameters[2].ParameterType == typeof(int).MakeByRefType() &&
+                    parameters[3].ParameterType == typeof(SpriteFont) &&
+                    parameters[4].ParameterType == typeof(float) &&
+                    parameters[5].ParameterType == typeof(StringBuilder))
+                {
+                    return method;
+                }
+                    
+                return null;
+            }
+            public static void Postfix(MeleeWeapon __instance, SpriteBatch spriteBatch, ref int x, ref int y, SpriteFont font, float alpha, StringBuilder overrideText)
+            {
+                if (__instance.type.Value == 429) //Staff type
+                {
+                    StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
+                    Color c3 = Game1.textColor;
+                    int extraSize = (int)Math.Max(font.MeasureString("TT").Y, 48f);
+                    ;
+                    if (staffWeaponData.projectileDamageModifier > 1.0f)
+                    {
+                        Utility.drawWithShadow(spriteBatch, ModAssets.extraTextures,
+                            new Vector2(x + 16 + 4, y + 16 + 4), new Rectangle(16, 0, 10, 10), Color.White, 0f,
+                            Vector2.Zero, 4f, flipped: false, 1f);
+                        Utility.drawTextWithShadow(spriteBatch, $"{staffWeaponData.projectileDamageModifier}x Spell Damage", font,
+                            new Vector2(x + 16 + 52, y + 16 + 12), c3 * 0.9f * alpha);
+                        y += extraSize;
+                    }
+                    
+                    if (staffWeaponData.providesRune != -1)
+                    {
+                        Utility.drawWithShadow(spriteBatch, ModAssets.extraTextures,
+                            new Vector2(x + 16 + 4, y + 16 + 4), new Rectangle(26, 0, 10, 10), Color.White, 0f,
+                            Vector2.Zero, 4f, flipped: false, 1f);
+                        Utility.drawTextWithShadow(spriteBatch, $"{ModAssets.modItems.First(x=>x.id == staffWeaponData.providesRune).DisplayName}", font,
+                            new Vector2(x + 16 + 52, y + 16 + 12), c3 * 0.9f * alpha);
+                        y += extraSize;
+                    }
+                }
+            }
+        }
+            
+        }
+        
+        
         //this patch adds to the first post load - so it maintains between days but if you save and reload it will reset
         [HarmonyPatch(typeof(Game1), "_update")]
         [HarmonyPatch(new Type[] {typeof(GameTime)})]
@@ -371,25 +467,5 @@ namespace StardewTestMod
                 }
             }
         }
-        
-        /*
-        //Add monster items
-        [HarmonyPatch(typeof(Utility), "IsGeode")]
-        [HarmonyPatch(new Type[] { typeof(Item), typeof(bool)})]
-        public class IsGeodePatcher
-        {
-            public static void Prefix(Utility __instance, Item item, bool disallow_special_geodes, ref bool __result)
-            {
-                if (item.HasTypeObject())
-                {
-                    int outID = -1;
-                    if (int.TryParse(item.itemId.Value, out outID) && (outID >= 4359 && outID <= 4369))
-                    {
-                        __result = true;
-                    }
-                }
-            }
-        }
-        */
     }
 }

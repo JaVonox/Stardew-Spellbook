@@ -175,7 +175,7 @@ public class SpellbookPage : IClickableMenu
         
         if (damageText != "")
         {
-            Utility.drawWithShadow(b, Game1.mouseCursors, new Vector2(x + 16, y + nextYOffset + 4), new Rectangle(120, 428, 10, 10), Color.White, 0f, Vector2.Zero, 4f, flipped: false, 1f);
+            Utility.drawWithShadow(b, ModAssets.extraTextures, new Vector2(x + 16, y + nextYOffset + 4), new Rectangle(16, 0, 10, 10), Color.White, 0f, Vector2.Zero, 4f, flipped: false, 1f);
             Utility.drawTextWithShadow(b, damageText, Game1.smallFont, new Vector2(x + 16 + 52, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
             nextYOffset += damageHeight;
         }
