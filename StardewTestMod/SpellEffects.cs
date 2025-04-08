@@ -47,6 +47,11 @@ public class BaseSpellEffects
     
 }
 
+public class PlankMakeConversions
+{
+    public string inItemID;
+    public string outItemID;
+}
 /// <summary>
 /// The class full of functions for individual spells to run when cast
 /// </summary>
@@ -118,6 +123,50 @@ public class SpellEffects : BaseSpellEffects
 
         return new KeyValuePair<bool, string>(true, "");
     }
+    
+    /// <summary>
+    /// Conversion on the plankmake spell from wooden items to hardwood. Doesn't include wood itself since that has its own conversion
+    /// </summary>
+    public static readonly Dictionary<string,int> plankMakeConversions =
+    new Dictionary<string, int>(){
+        {"(O)709",15},{"(O)169",10},{"(O)298",15},{"(O)322",2},{"(O)328",1},{"(O)405",1},{"(O)734",15},{"(O)325",10},{"(BC)37",25}
+    };
+    public static KeyValuePair<bool, string> PlankMake(ref Item? itemArgs)
+    {
+        int postCastStackSize;
+        
+        
+        //TODO convert this to use recipes rather than hardcoded dictionary
+        
+        if (itemArgs.ItemId == "388") //Wood to hardwood
+        {
+            if (itemArgs.Stack < 15)
+            {
+                return new KeyValuePair<bool, string>(false, "I need atleast 15 wood to make hardwood");
+            }
+            postCastStackSize = itemArgs.Stack - 15;
+            
+            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"709");
+            Utility.CollectOrDrop(returnItem);
+            itemArgs.ConsumeStack(15);
+        }
+        else //Any other recipes
+        {
+            postCastStackSize = itemArgs.Stack - 1;
+            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"388");
+            returnItem.Stack = plankMakeConversions[itemArgs.QualifiedItemId];
+            Utility.CollectOrDrop(returnItem);
+            itemArgs.ConsumeStack(1);
+        }
+
+        if (postCastStackSize == 0)
+        {
+            itemArgs = null;
+        }
+        
+        return new KeyValuePair<bool, string>(true, "");
+    }
+
 
     public static KeyValuePair<bool, string> SuperheatItem(ref Item? itemArgs)
     {

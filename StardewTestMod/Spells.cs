@@ -304,8 +304,9 @@ public class InventorySpell : Spell
     public KeyValuePair<bool, string> CastSpell(ref Item? itemArgs)
     {
         KeyValuePair<bool, string> operationReturn = IsItemValidForOperation(ref itemArgs);
-
-        if (operationReturn.Key)
+        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        
+        if (operationReturn.Key && actionResult.Key)
         {
             operationReturn = doAction(ref itemArgs);
 
