@@ -12,6 +12,7 @@ namespace StardewTestMod;
 public class MagicProjectile : BasicProjectile
 {
     private NetInt projectileSpriteID = new NetInt();
+    private NetInt projectileSpellID = new NetInt();
     private NetFloat projectileRotation = new NetFloat();
     private NetColor projectileColor = new NetColor();
     private NetFloat projectileCritDamage = new NetFloat();
@@ -20,13 +21,14 @@ public class MagicProjectile : BasicProjectile
     {
         
     }
-    public MagicProjectile(int damageToFarmer, int spriteIndex, int bouncesTillDestruct, int tailLength, float rotationVelocity, float xVelocity, float yVelocity, Vector2 startingPosition, float projectileRotation, Color projectileColor, float projectileCritDamage, string collisionSound = null, string bounceSound = null, string firingSound = null, bool explode = false, bool damagesMonsters = false, GameLocation location = null, Character firer = null, onCollisionBehavior collisionBehavior = null, string shotItemId = null)
+    public MagicProjectile(int damageToFarmer, int spriteIndex, int bouncesTillDestruct, int tailLength, float rotationVelocity, float xVelocity, float yVelocity, Vector2 startingPosition, float projectileRotation, Color projectileColor, float projectileCritDamage, int projectileSpellID, string collisionSound = null, string bounceSound = null, string firingSound = null, bool explode = false, bool damagesMonsters = false, GameLocation location = null, Character firer = null, onCollisionBehavior collisionBehavior = null, string shotItemId = null)
         : base(damageToFarmer, spriteIndex, bouncesTillDestruct, tailLength, rotationVelocity, xVelocity, yVelocity, startingPosition, collisionSound, bounceSound , firingSound, explode , damagesMonsters , location , firer , collisionBehavior, shotItemId )
     {
         this.projectileSpriteID.Value = spriteIndex;
         this.projectileRotation.Value = projectileRotation;
         this.projectileColor.Value = projectileColor;
         this.projectileCritDamage.Value = projectileCritDamage;
+        this.projectileSpellID.Value = projectileSpellID;
     }
 
     protected override void InitNetFields()
@@ -35,7 +37,8 @@ public class MagicProjectile : BasicProjectile
         base.NetFields.AddField(projectileSpriteID,"spriteID")
             .AddField(projectileRotation,"projectileRotation")
             .AddField(projectileColor,"projectileColor")
-            .AddField(projectileCritDamage,"projectileCritDamage");
+            .AddField(projectileCritDamage,"projectileCritDamage")
+            .AddField(projectileSpellID,"projectileSpellID");
     }
 
     public override void behaviorOnCollisionWithMonster(NPC n, GameLocation location)
@@ -48,11 +51,22 @@ public class MagicProjectile : BasicProjectile
         explosionAnimation(location);
         if (n is Monster)
         {
+            int combatDamage = damageToFarmer.Value; //Crit is already calculated in this stage, but we have to apply extra effects on top to account for undead/blood
+            CombatSpell castSpell = (CombatSpell)ModAssets.modSpells.First(x => x.id == this.projectileSpellID.Value);
+            
+            bool shouldBeBomb = false; //Mummies can only be killed by bombs and crusader weapons, so this allows us to make the projectile a bomb under certain circumstances
+            
+            //provide extra effects if applicable
+            if (castSpell.combatEffect != null)
+            {
+                castSpell.combatEffect.Invoke(player, n, ref combatDamage, ref shouldBeBomb);
+            }
+            
             //damage is already precalculated 
             location.damageMonster(n.GetBoundingBox(),
-                damageToFarmer.Value, 
-                damageToFarmer.Value + 1,
-                false,
+                combatDamage, 
+                combatDamage,
+                shouldBeBomb,
                 1,
                 0,
                 projectileCritDamage.Value > 0 ? 1 : -1,
@@ -65,7 +79,7 @@ public class MagicProjectile : BasicProjectile
                 piercesLeft.Value--;
             }
         }
-        else
+        else 
         {
             //TODO This is bugged
             /*

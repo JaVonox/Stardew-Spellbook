@@ -3,6 +3,7 @@ using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.GameData.Machines;
 using StardewValley.Inventories;
+using StardewValley.Monsters;
 using StardewValley.TerrainFeatures;
 
 namespace StardewTestMod;
@@ -56,8 +57,8 @@ public class SpellEffects : BaseSpellEffects
         Farmer player = Game1.player;
         GameLocation currentLoc = player.currentLocation;
         List<HoeDirt> tilesToCastOn = tiles.OfType<HoeDirt>().ToList();
-        
-        PlayAnimation(() => 
+
+        PlayAnimation(() =>
         {
             int j = 0;
             foreach (HoeDirt appTile in tilesToCastOn)
@@ -76,11 +77,12 @@ public class SpellEffects : BaseSpellEffects
                 });
                 j++;
             }
-        },"wand",1000);
+        }, "wand", 1000);
 
         return new KeyValuePair<bool, string>(true, "");
 
     }
+
     public static KeyValuePair<bool, string> CurePlant(List<TerrainFeature> tiles)
     {
         Farmer player = Game1.player;
@@ -99,9 +101,10 @@ public class SpellEffects : BaseSpellEffects
                 appTile.plant(randomSeed, player, false);
             }
         }, "wand", 1000);
-        
+
         return new KeyValuePair<bool, string>(true, "");
     }
+
     public static KeyValuePair<bool, string> HighAlchemy(ref Item? itemArgs)
     {
         int postCastStackSize = itemArgs.Stack - 1;
@@ -112,9 +115,10 @@ public class SpellEffects : BaseSpellEffects
         {
             itemArgs = null;
         }
-        
-        return new KeyValuePair<bool, string>(true,"");
+
+        return new KeyValuePair<bool, string>(true, "");
     }
+
     public static KeyValuePair<bool, string> SuperheatItem(ref Item? itemArgs)
     {
         string itemId = itemArgs.QualifiedItemId;
@@ -123,22 +127,22 @@ public class SpellEffects : BaseSpellEffects
 
         if (furnaceRule == null)
         {
-            return new KeyValuePair<bool, string>(false,"This item can't be smelted");
+            return new KeyValuePair<bool, string>(false, "This item can't be smelted");
         }
-        
+
         int stackSizeRequired = furnaceRule.Triggers.First(x => x.RequiredItemId == itemId).RequiredCount;
         string itemReturn = furnaceRule.OutputItem[0].ItemId;
 
         if (itemArgs.Stack >= stackSizeRequired) //If we have enough of the item
         {
             int postCastStackSize = itemArgs.Stack - stackSizeRequired;
-            
+
             StardewValley.Object furnaceItem = ItemRegistry.Create<StardewValley.Object>($"{itemReturn}");
 
             Utility.CollectOrDrop(furnaceItem);
             Game1.player.playNearbySoundAll("furnace", null);
             itemArgs.ConsumeStack(stackSizeRequired);
-            
+
             if (postCastStackSize == 0)
             {
                 itemArgs = null;
@@ -146,44 +150,95 @@ public class SpellEffects : BaseSpellEffects
         }
         else
         {
-            return new KeyValuePair<bool, string>(false,$"I need atleast {stackSizeRequired} {itemArgs.DisplayName}");
+            return new KeyValuePair<bool, string>(false, $"I need atleast {stackSizeRequired} {itemArgs.DisplayName}");
         }
-        
-        return new KeyValuePair<bool, string>(true,"");
+
+        return new KeyValuePair<bool, string>(true, "");
     }
 
     public static KeyValuePair<bool, string> VileVigour()
     {
         Farmer caster = Game1.player;
-        
+
         PlayAnimation(() =>
         {
             caster.health -= caster.maxHealth / 3;
             caster.stamina = caster.MaxStamina;
-        },"yoba",500);
+        }, "yoba", 500);
 
-        return new KeyValuePair<bool, string>(true,"");
+        return new KeyValuePair<bool, string>(true, "");
     }
-    
+
     public static KeyValuePair<bool, string> BakePie()
     {
         CraftingRecipe? selectedRecipe = Game1.player.cookingRecipes.Keys
             .Select(x => new CraftingRecipe(x, true))
-            .Where(x=>x.doesFarmerHaveIngredientsInInventory()).OrderBy(x=> Game1.random.Next()).FirstOrDefault();
+            .Where(x => x.doesFarmerHaveIngredientsInInventory()).OrderBy(x => Game1.random.Next()).FirstOrDefault();
 
         if (selectedRecipe == null)
         {
-            return new KeyValuePair<bool, string>(false,"I can't cook anything with these ingredients");
+            return new KeyValuePair<bool, string>(false, "I can't cook anything with these ingredients");
         }
-        
+
         PlayAnimation(() =>
         {
             Item crafted = selectedRecipe.createItem();
-            selectedRecipe.consumeIngredients(new List<IInventory>(){Game1.player.Items});
+            selectedRecipe.consumeIngredients(new List<IInventory>() { Game1.player.Items });
             Utility.CollectOrDrop(crafted);
-            
-        },"wand",500);
 
-        return new KeyValuePair<bool, string>(true,"");
+        }, "wand", 500);
+
+        return new KeyValuePair<bool, string>(true, "");
+    }
+
+    private static readonly string[] undeadMonsters = {
+        "Ghost",
+        "Carbon Ghost",
+        "Skeleton",
+        "Skeleton Mage",
+        "Skeleton Warrior",
+        "Mummy",
+        "Putrid Ghost"
+    };
+
+    public static void DealUndeadDamage(Farmer caster, NPC target, ref int damage, ref bool isBomb)
+    {
+        string targetMonster = ((Monster)target).Name;
+
+        if (undeadMonsters.Contains(targetMonster))
+        {
+            damage = (int)Math.Floor(damage * 1.5f);
+
+            if (targetMonster == "Mummy")
+            {
+                isBomb = true;
+            }
+        }
+    }
+
+    public static void DealDemonbaneDamage(Farmer caster, NPC target, ref int damage, ref bool isBomb)
+    {
+        string targetMonster = ((Monster)target).Name;
+
+        if (undeadMonsters.Contains(targetMonster))
+        {
+            damage *= 2;
+            
+            if (targetMonster == "Mummy")
+            {
+                isBomb = true;
+            }
+        }
+    }
+    public static void DealVampiricDamage(Farmer caster, NPC target, ref int damage, ref bool isBomb)
+    {
+        if (caster.health != caster.maxHealth)
+        {
+            int healAmount = (int)Math.Ceiling(Math.Min((float)damage * 0.1f, 20));
+            healAmount = Math.Min(caster.maxHealth - caster.health, healAmount);
+            caster.currentLocation.debris.Add(new Debris(healAmount, caster.getStandingPosition(), Color.Lime, 1f, caster));
+            Game1.playSound("healSound", null);
+            caster.health += healAmount;
+        }
     }
 }

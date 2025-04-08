@@ -10,6 +10,7 @@ namespace StardewTestMod;
 public delegate KeyValuePair<bool, string> TilesMethod(List<TerrainFeature> tiles);
 public delegate KeyValuePair<bool, string> InventoryMethod(ref Item? itemArgs);
 public delegate KeyValuePair<bool, string> BuffMethod();
+public delegate void CombatExtraMethod(Farmer caster, NPC target, ref int damage, ref bool isBomb);
 
 ///<summary> Base class for all spells - effectively abstract. Attempting to cast this will always report an error </summary>
 public class Spell
@@ -384,11 +385,16 @@ public class CombatSpell : Spell
     private string firingSound;
     private string collisionSound;
     private Color projectileColor;
+    
+    /// <summary>
+    /// This is an extra effect that is applied using the monster 
+    /// </summary>
+    public CombatExtraMethod? combatEffect;
 
     //Sprite rotation offset is the amount of rotation we need to have to make it point upwards in the projectile (in degrees)
     public CombatSpell(int id, string name, string displayName, string description,
         int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
-        int damage,float velocity,int projectileSpriteID, Color projectileColor, bool explode = false, string firingSound = "wand", string collisionSound = "wand")
+        int damage,float velocity,int projectileSpriteID, Color projectileColor, CombatExtraMethod? combatEffect = null, bool explode = false, string firingSound = "wand", string collisionSound = "wand")
         : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
     {
         this.damage = damage;
@@ -398,6 +404,7 @@ public class CombatSpell : Spell
         this.firingSound = firingSound;
         this.collisionSound = collisionSound;
         this.projectileColor = projectileColor;
+        this.combatEffect = combatEffect;
     }
     
     public override bool HasRuneCost(int runeID)
@@ -519,6 +526,7 @@ public class CombatSpell : Spell
                     projectileAngle,
                     projectileColor,
                     critDamage,
+                    this.id,
                     firingSound: firingSound,
                     collisionSound: collisionSound,
                     bounceSound: firingSound,
