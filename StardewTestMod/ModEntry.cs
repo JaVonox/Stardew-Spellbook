@@ -483,7 +483,7 @@ namespace StardewTestMod
                 else if (id == "430") //Dark lure buff
                 {
                     __instance.displayName = "Dark Lure";
-                    __instance.description = "Lures more monsters towards you";
+                    __instance.description = "Spawns more monsters, and makes them prioritise you over other farmers";
                     __instance.millisecondsDuration = 180000;
                     __instance.glow = Color.White;
                     __instance.iconTexture = ModAssets.extraTextures;
