@@ -486,7 +486,7 @@ public class CombatSpell : Spell
                                (caster.hasBuff("statue_of_blessings_5") ? 0.1f : 0f) *
                                (caster.professions.Contains(25) ? 1.5f : 1f);
             
-            int projectileCount = ModAssets.CheckHasPerkByName(Game1.player, "Dragonstone") && Game1.random.NextDouble() <= 0.2 ? 3 : 1;
+            int projectileCount = caster.hasBuff("429") || (ModAssets.CheckHasPerkByName(Game1.player, "Dragonstone") && Game1.random.NextDouble() <= 0.2) ? 3 : 1;
             
             List<MagicProjectile> generatedProjectiles = new List<MagicProjectile>();
             for(int i = 0; i < projectileCount; i++)

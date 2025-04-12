@@ -406,8 +406,8 @@ public static class ModAssets
         new Spell(12,"Menu_EarthOrb","Charge Earth Orb","NA Turns emeralds into stronger slingshot ammo",7,
             new Dictionary<int, int>() { {4297, 3},{4294,5}},15),
         
-        new Spell(13,"Buff_DarkLure","Dark Lure","NA Lures more enemies to you",6,
-            new Dictionary<int, int>() { {4296, 2},{4297,2}},10),
+        new BuffSpell(13,"Buff_DarkLure","Dark Lure","Summons more enemies, and makes them prioritise you over other farmers",6,
+            new Dictionary<int, int>() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, "I'm already luring monsters!"),
         
         new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",0,
             new Dictionary<int, int>() { {4299, 1},{4291,1}}, 1,25,15,0,Color.White),
@@ -424,8 +424,8 @@ public static class ModAssets
         new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
             new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}},5, 95,15,2,Color.OrangeRed),
         
-        new Spell(19,"Buff_Charge","Charge","NA Increases the power of combat spells while active",7,
-            new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10),
+        new BuffSpell(19,"Buff_Charge","Charge","Spells cast two extra projectiles for 30 seconds",7,
+            new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, "I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
             new Dictionary<int, int>() { {4300, 2},{4297,2},{4293,8}},6, 65,13,3,Color.Purple,SpellEffects.DealDemonbaneDamage),
@@ -441,9 +441,6 @@ public static class ModAssets
                                       && ((recipes.IndexOf("388") != -1 && recipes.IndexOf("388") + 1 % 2 != 0) || (recipes.IndexOf("709") != -1 && recipes.IndexOf("709") + 1 % 2 != 0) ) )))
             ,SpellEffects.PlankMake,
             "Breaks down wooden items into wood, and converts 15 wood into 1 hardwood. For recipes that require more than wood, it will only return the wood."),
-        
-        new Spell(23,"Buff_Heal","Heal","NA Restores your health in exchange for energy",8,
-            new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},5),
     };
     
     public static readonly List<PerkData> perks = new List<PerkData>()

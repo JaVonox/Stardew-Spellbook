@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
@@ -7,11 +6,9 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
-using Netcode;
-using StardewValley.Extensions;
+using StardewValley.Buffs;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
-
 using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.Tools;
@@ -464,6 +461,60 @@ namespace StardewTestMod
                             }
                         }
                     }
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Buff), MethodType.Constructor)]
+        [HarmonyPatch(new Type[] { typeof(string),typeof(string),typeof(string),typeof(int),typeof(Texture2D),typeof(int),typeof(BuffEffects),typeof(bool),typeof(string),typeof(string) })]
+        public class BuffPatcher
+        {
+            public static void Postfix(Buff __instance,string id, string source = null, string displaySource = null, int duration = -1, Texture2D iconTexture = null, int iconSheetIndex = -1, BuffEffects effects = null, bool? isDebuff = null, string displayName = null, string description = null)
+            {
+                if (id == "429") //Charge buff
+                {
+                    __instance.displayName = "Charge";
+                    __instance.description = "Summons more shots for every combat spell";
+                    __instance.millisecondsDuration = 30000;
+                    __instance.glow = Color.White;
+                    __instance.iconTexture = ModAssets.extraTextures;
+                    __instance.iconSheetIndex = 3;
+                }
+                else if (id == "430") //Dark lure buff
+                {
+                    __instance.displayName = "Dark Lure";
+                    __instance.description = "Lures more monsters towards you";
+                    __instance.millisecondsDuration = 180000;
+                    __instance.glow = Color.White;
+                    __instance.iconTexture = ModAssets.extraTextures;
+                    __instance.iconSheetIndex = 4;
+                }
+            }
+        }
+
+
+        [HarmonyPatch(typeof(Farmer), "hasBuff")]
+        [HarmonyPatch(new Type[] { typeof(string) })]
+        public class FarmerhasBuffPatcher
+        {
+            public static void Postfix(ref bool __result, Farmer __instance, string id)
+            {
+                if (id == "24" && !__result) //If we are searching for 24 - the monster musk bonus - and we dont find it, also check for 420 - the dark lure buff
+                {
+                    __result = __instance.buffs.IsApplied("430");
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Monster), "findPlayerPriority")]
+        [HarmonyPatch(new Type[] { typeof(Farmer) })]
+        public class MonsterAIPatcher
+        {
+            public static void Postfix(ref double __result, Monster __instance, Farmer f)
+            {
+                if (f.hasBuff($"430")) //If we have dark lure, max out aggro for this player
+                {
+                    __result = double.MinValue;
                 }
             }
         }

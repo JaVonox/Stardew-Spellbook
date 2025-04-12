@@ -123,16 +123,6 @@ public class SpellEffects : BaseSpellEffects
 
         return new KeyValuePair<bool, string>(true, "");
     }
-    
-    /// <summary>
-    /// Conversion on the plankmake spell from wooden items to hardwood. Doesn't include wood itself since that has its own conversion
-    /// </summary>
-    /*
-    public static readonly Dictionary<string,int> plankMakeConversions =
-    new Dictionary<string, int>(){
-        {"(O)709",15},{"(O)169",10},{"(O)298",15},{"(O)322",2},{"(O)328",1},{"(O)405",1},{"(O)734",15},{"(O)325",10},{"(BC)37",25}
-    };
-    */
     public static KeyValuePair<bool, string> PlankMake(ref Item? itemArgs)
     {
         int postCastStackSize;
@@ -270,6 +260,28 @@ public class SpellEffects : BaseSpellEffects
 
         }, "wand", 500);
 
+        return new KeyValuePair<bool, string>(true, "");
+    }
+
+    public static KeyValuePair<bool, string> Charge()
+    {
+        PlayAnimation(() =>
+        {
+            Game1.player.applyBuff("429");
+
+        }, "wand", 200);
+        
+        return new KeyValuePair<bool, string>(true, "");
+    }
+    
+    public static KeyValuePair<bool, string> DarkLure()
+    {
+        PlayAnimation(() =>
+        {
+            Game1.player.applyBuff("430");
+
+        }, "wand", 200);
+        
         return new KeyValuePair<bool, string>(true, "");
     }
 
