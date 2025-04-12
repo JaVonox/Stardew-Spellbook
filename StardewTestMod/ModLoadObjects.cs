@@ -433,9 +433,13 @@ public static class ModAssets
         new CombatSpell(21,"Combat_Blood","Blood Barrage","Fires a strong vampiric blood missile",10,
             new Dictionary<int, int>() { {4300, 8},{4297,5}}, 10,80,15,1,Color.Crimson, SpellEffects.DealVampiricDamage),
         
-        new InventorySpell(22,"Menu_Plank","Plank Make","NA Transmutes wooden items into wood",3,
-            new Dictionary<int, int>() { {4298, 2},{4297,1}},10,
-            (i => i is Item item && (item.itemId.Value == "388" || SpellEffects.plankMakeConversions.Keys.Contains(item.QualifiedItemId))),SpellEffects.PlankMake,
+        new InventorySpell(22,"Menu_Plank","Plank Make","Transmutes wooden items into wood",3,
+            new Dictionary<int, int>() { {4298, 1},{4297,1}},5,
+            (i => i is Item item && (item.itemId.Value == "388" || 
+                                     (CraftingRecipe.craftingRecipes.ContainsKey(item.Name) 
+                                      && CraftingRecipe.craftingRecipes[item.Name].Split(' ').ToList() is List<string> recipes 
+                                      && ((recipes.IndexOf("388") != -1 && recipes.IndexOf("388") + 1 % 2 != 0) || (recipes.IndexOf("709") != -1 && recipes.IndexOf("709") + 1 % 2 != 0) ) )))
+            ,SpellEffects.PlankMake,
             "Breaks down wooden items into wood, and converts 15 wood into 1 hardwood. For recipes that require more than wood, it will only return the wood."),
         
         new Spell(23,"Buff_Heal","Heal","NA Restores your health in exchange for energy",8,

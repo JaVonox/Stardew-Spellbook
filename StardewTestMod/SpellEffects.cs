@@ -127,10 +127,12 @@ public class SpellEffects : BaseSpellEffects
     /// <summary>
     /// Conversion on the plankmake spell from wooden items to hardwood. Doesn't include wood itself since that has its own conversion
     /// </summary>
+    /*
     public static readonly Dictionary<string,int> plankMakeConversions =
     new Dictionary<string, int>(){
         {"(O)709",15},{"(O)169",10},{"(O)298",15},{"(O)322",2},{"(O)328",1},{"(O)405",1},{"(O)734",15},{"(O)325",10},{"(BC)37",25}
     };
+    */
     public static KeyValuePair<bool, string> PlankMake(ref Item? itemArgs)
     {
         int postCastStackSize;
@@ -152,11 +154,42 @@ public class SpellEffects : BaseSpellEffects
         }
         else //Any other recipes
         {
-            postCastStackSize = itemArgs.Stack - 1;
-            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"388");
-            returnItem.Stack = plankMakeConversions[itemArgs.QualifiedItemId];
-            Utility.CollectOrDrop(returnItem);
-            itemArgs.ConsumeStack(1);
+            try
+            {
+                postCastStackSize = itemArgs.Stack - 1;
+                List<string> delimCraftRecipe = CraftingRecipe.craftingRecipes[itemArgs.Name].Split(' ').ToList(); //Splits recipe into fields. Item ID is always followed by amount
+                delimCraftRecipe[delimCraftRecipe.Count-1] = delimCraftRecipe[delimCraftRecipe.Count-1].Split('/')[0]; //We need to split the final item again because it will have a / in it to delimit other information
+                string[] woodIDs = {"709","388"};
+                bool generatedItem = false;
+                foreach (string woodID in woodIDs) //Find the instances of wood + hardwood in the crafting recipe. the next number will be 
+                {
+                    int itemIndex = delimCraftRecipe.IndexOf(woodID);
+                    if (itemIndex == -1 || (itemIndex+1) % 2 == 0) //If the item was not found in the recipe or it was an amount value
+                    {
+                        continue;
+                    }
+
+                    int amount = -1;
+                    if (!int.TryParse(delimCraftRecipe[itemIndex + 1], out amount))
+                    {
+                        continue;
+                    }
+    
+                    StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"{woodID}");
+                    returnItem.Stack = amount;
+                    Utility.CollectOrDrop(returnItem);
+                    generatedItem = true;
+                }
+
+                if (generatedItem)
+                {
+                    itemArgs.ConsumeStack(1);
+                }
+            }
+            catch (Exception e)
+            {
+                return new KeyValuePair<bool, string>(false, $"An unexpected error occured {e.Message}");
+            }
         }
 
         if (postCastStackSize == 0)
