@@ -82,7 +82,7 @@ namespace StardewTestMod
 
             if (e.Button == SButton.F5)
             {
-                for (int i = 4290; i < 4301; i++)
+                for (int i = 4290; i < 4303; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
                     item.stack.Value = 20;
@@ -515,6 +515,41 @@ namespace StardewTestMod
                 if (f.hasBuff($"430")) //If we have dark lure, max out aggro for this player
                 {
                     __result = double.MinValue;
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Slingshot), "canThisBeAttached")]
+        [HarmonyPatch(new Type[] { typeof(StardewValley.Object),typeof(int) })]
+        public class SlingshotAttachmentPatcher
+        {
+            public static void Postfix(ref bool __result, StardewValley.Object o, int slot)
+            {
+                //update result to check if the item is either of the extra ammos
+                __result = __result || o.QualifiedItemId == "(O)4301" || o.QualifiedItemId == "(O)4302";
+            }
+        }
+        
+        [HarmonyPatch(typeof(Slingshot), "GetAmmoDamage")]
+        [HarmonyPatch(new Type[] { typeof(StardewValley.Object)})]
+        public class SlingshotDamagePatcher
+        {
+            public static void Postfix(ref int __result, StardewValley.Object ammunition)
+            {
+                if (__result == 1) //Append extra slingshot damages to the orb items
+                {
+                    switch (ammunition.QualifiedItemId)
+                    {
+                        case "(O)4301":
+                            __result = 15;
+                            break;
+                        case "(O)4302":
+                            __result = 25;
+                            break;
+                        default:
+                            __result = 1;
+                            break;
+                    }
                 }
             }
         }

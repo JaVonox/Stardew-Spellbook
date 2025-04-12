@@ -109,7 +109,6 @@ public class SpellEffects : BaseSpellEffects
 
         return new KeyValuePair<bool, string>(true, "");
     }
-
     public static KeyValuePair<bool, string> HighAlchemy(ref Item? itemArgs)
     {
         int postCastStackSize = itemArgs.Stack - 1;

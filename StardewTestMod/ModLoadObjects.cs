@@ -69,6 +69,15 @@ public class RunesObjects : ModLoadObjects
     }
 }
 
+public class SlingshotItem : ModLoadObjects
+{
+    public SlingshotItem(int id, string name, string displayName, string description, int spriteID, string type = "Basic", int category = 0) : 
+        base(id,name,displayName,description,type,category)
+    {
+        base.SpriteIndex = spriteID;
+    }
+}
+
 public class TreasureObjects : ModLoadObjects
 {
     public TreasureObjects(int id, string name, string displayName, string description, int spriteID,
@@ -193,6 +202,11 @@ public static class ModAssets
         new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells"),
         new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells"),
         new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells"),
+        
+        
+        //TODO fix the icons for these + add spell to spawn them
+        new SlingshotItem(4301,"Ammo_Water","Water Orb","Slingshot ammo enchanted with the power of water",30),
+        new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Slingshot ammo enchanted with the power of earth",31),
         
         new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes",19,
             new List<ItemDrop>()
