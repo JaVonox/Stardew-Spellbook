@@ -122,6 +122,77 @@ public class SpellEffects : BaseSpellEffects
 
         return new KeyValuePair<bool, string>(true, "");
     }
+    
+    public static Dictionary<string,int> blueGemsEnchants = new Dictionary<string,int>()
+    {
+        {"62",10}, //Aquamarine
+        {"72",30}, //Diamond
+        {"74",50}, //Prismatic Shard
+        {"550",15}, //Kyanite
+        {"541",15}, //Aerinite
+        {"564",15}, //Opal
+        {"561",15}, //Ghost Crystal
+        {"536",5}, //Frozen Geode
+        {"749",10}, //Omni Geode
+    };
+    public static KeyValuePair<bool, string> EnchantSapphireBolt(ref Item? itemArgs)
+    {
+        if (blueGemsEnchants.ContainsKey(itemArgs.ItemId))
+        {
+            int postCastStackSize = itemArgs.Stack - 1;
+            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"4301");
+            returnItem.Stack = blueGemsEnchants[itemArgs.ItemId];
+            Utility.CollectOrDrop(returnItem);
+
+            itemArgs.ConsumeStack(1);
+            if (postCastStackSize == 0)
+            {
+                itemArgs = null;
+            }
+        }
+        else
+        {
+            return new KeyValuePair<bool, string>(false, "I can't convert this into ammo!");
+        }
+
+        return new KeyValuePair<bool, string>(true, "");
+    }
+    
+    public static Dictionary<string,int> greenGemsEnchants = new Dictionary<string,int>()
+    {
+        {"60",10}, //Emerald
+        {"70",20}, //Jade
+        {"74",30}, //Prismatic Shard
+        {"548",10}, //Jamborite
+        {"552",10}, //Malachite
+        {"557",10}, //Petrified Slime
+        {"560",10}, //Ocean Stone
+        {"909",5}, //Radioactive Ore
+        {"910",25}, //Radioactive Bar
+        {"749",5}, //Omni Geode
+    };
+    public static KeyValuePair<bool, string> EnchantEmeraldBolt(ref Item? itemArgs)
+    {
+        if (greenGemsEnchants.ContainsKey(itemArgs.ItemId))
+        {
+            int postCastStackSize = itemArgs.Stack - 1;
+            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"4302");
+            returnItem.Stack = greenGemsEnchants[itemArgs.ItemId];
+            Utility.CollectOrDrop(returnItem);
+
+            itemArgs.ConsumeStack(1);
+            if (postCastStackSize == 0)
+            {
+                itemArgs = null;
+            }
+        }
+        else
+        {
+            return new KeyValuePair<bool, string>(false, "I can't convert this into ammo!");
+        }
+
+        return new KeyValuePair<bool, string>(true, "");
+    }
     public static KeyValuePair<bool, string> PlankMake(ref Item? itemArgs)
     {
         int postCastStackSize;

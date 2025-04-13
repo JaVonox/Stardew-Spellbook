@@ -414,11 +414,13 @@ public static class ModAssets
             new Dictionary<int, int>() { {4295, 1},{4291,5}},10, "Mountain",54,7,0, 
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("landslideDone")))),
         
-        new Spell(11,"Menu_WaterOrb","Charge Water Orb","NA Turns aquamarine into strong slingshot ammo",4,
-            new Dictionary<int, int>() { {4297, 3},{4292,5}},15),
+        new InventorySpell(11,"Menu_EnchantSapphire","Enchant Sapphire Bolt","Turns blue rocks and gemstones into strong slingshot ammo",4,
+            new Dictionary<int, int>() { {4297, 2},{4292,3}},10,(i => i is Item item && SpellEffects.blueGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantSapphireBolt,
+            "Convert any blue gems or rocks into enchanted ammo for the slingshot"),
         
-        new Spell(12,"Menu_EarthOrb","Charge Earth Orb","NA Turns emeralds into stronger slingshot ammo",7,
-            new Dictionary<int, int>() { {4297, 3},{4294,5}},15),
+        new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Turns green gemstones into stronger slingshot ammo",7,
+            new Dictionary<int, int>() { {4297, 2},{4294,3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
+            "Convert any green gems into enchanted ammo for the slingshot"),
         
         new BuffSpell(13,"Buff_DarkLure","Dark Lure","Summons more enemies, and makes them prioritise you over other farmers for 3 minutes",6,
             new Dictionary<int, int>() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, "I'm already luring monsters!"),
@@ -462,7 +464,7 @@ public static class ModAssets
         new PerkData(0,"Sapphire","Sapphire","All teleportation spells are free","Teleportation spells no longer grant experience"),
         new PerkData(1,"Emerald","Emerald","All spells no longer require air runes"),
         new PerkData(2,"Ruby","Ruby","20% chance of non-combat spells taking no runes"),
-        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing two extra free projectiles","Additional projectiles fire at 10 degree angles")
+        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing two extra free projectiles","Additional projectiles fire at 10 degree angles. Does not stack with charge")
     };
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()

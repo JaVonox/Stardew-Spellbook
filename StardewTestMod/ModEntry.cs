@@ -85,9 +85,17 @@ namespace StardewTestMod
                 for (int i = 4290; i < 4303; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.stack.Value = 20;
+                    item.Stack = 20;
                     Game1.player.addItemToInventory(item);
                 }
+                
+                StardewValley.Object item2 = ItemRegistry.Create<StardewValley.Object>($"62");
+                item2.Stack = 20;
+                Game1.player.addItemToInventory(item2);
+                
+                StardewValley.Object item3 = ItemRegistry.Create<StardewValley.Object>($"560");
+                item3.Stack = 20;
+                Game1.player.addItemToInventory(item3);
             }
 
             if (e.Button == SButton.F6)
@@ -231,7 +239,7 @@ namespace StardewTestMod
 
         public static class MeleeWeaponPatches
         {
-                    //Add to weapon swipe
+        //Add to weapon swipe
         [HarmonyPatch(typeof(MeleeWeapon), "doSwipe")]
         [HarmonyPatch(new Type[] { typeof(int), typeof(Vector2),typeof(int),typeof(float),typeof(Farmer) })]
         public class SwipePatcher
