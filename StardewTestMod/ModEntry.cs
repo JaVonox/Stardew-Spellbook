@@ -125,6 +125,16 @@ namespace StardewTestMod
             
             if (e.Button == SButton.F9)
             {
+                /*
+                Game1.player.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[1]
+                {
+                    new FarmerSprite.AnimationFrame(tempID, 1000, secondaryArm: false, flip: false)
+                });
+
+                Instance.Monitor.Log($"ID ${tempID}",LogLevel.Warn);
+                tempID++;
+                */
+                
                 foreach (Farmer farmerRoot in ModAssets.GetFarmers())
                 {
                     ModMonitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Warn);
@@ -141,35 +151,6 @@ namespace StardewTestMod
                     Game1.player.addItemToInventory(item);
                 }
             }
-            
-            /*
-            if (e.Button == SButton.F10)
-            {
-                int amount = 100000;
-
-                Dictionary<string,int> itemToInt = new Dictionary<string, int>();
-                for (int i = 0; i < amount; i++)
-                {
-                    foreach (ObjectGeodeDropData drop in ModAssets.modItems[11].GeodeDrops)
-                    {
-                        if (Game1.random.NextBool(drop.Chance))
-                        {
-                            if (!itemToInt.ContainsKey(drop.ItemId))
-                            {
-                                itemToInt.Add(drop.ItemId, 0);
-                            }
-                            itemToInt[drop.ItemId]++;
-                            break;
-                        }
-                    }
-                }
-
-                foreach (string item in itemToInt.Keys)
-                {
-                    ModMonitor.Log($"{item} occurance: {((float)(itemToInt[item]) / (float)(amount))*100}%", LogLevel.Warn);
-                }
-            }
-            */
             
         }
         

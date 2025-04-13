@@ -17,9 +17,12 @@ public class InventorySpellMenu : MenuWithInventory
     
     private int centreY;
     private int casterX;
+    
     private int currentFrame;
+    private bool isAnimatingCast;
     
     private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
+    private TemporaryAnimatedSpriteList castAnim = new TemporaryAnimatedSpriteList();
     public InventorySpellMenu(InventorySpell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
         //TODO maybe replace texture here?
@@ -46,6 +49,29 @@ public class InventorySpellMenu : MenuWithInventory
         spellIcon = new ClickableTextureComponent(new Rectangle(casterX + 80,
                 (centreY - 15) - (ModAssets.spellsSize / 2),
                 ModAssets.spellsSize, ModAssets.spellsSize),ModAssets.extraTextures, new Rectangle(0,ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), 1f);
+        
+        caster.faceDirection(2); //Point caster down
+
+        isAnimatingCast = false;
+        
+        //Add the casting frames to the set
+        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(0, 16, 16, 34),
+            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
+                
+        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(16, 16, 16, 34),
+            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
+                
+        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(32, 16, 16, 34),
+            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
+                
+        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(48, 16, 16, 34),
+            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
+        
+        foreach (TemporaryAnimatedSprite sprite in castAnim) //Set the texture to the correct value
+        {
+            sprite.texture = ModAssets.animTextures; 
+        }
+
     }
 
     public bool highlightTargets(Item i)
@@ -91,22 +117,40 @@ public class InventorySpellMenu : MenuWithInventory
         }
  
     }
-    
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
+        if(isAnimatingCast) {return;}
+        
         base.receiveLeftClick(x, y, playSound: true);
         if (inputSpot.containsPoint(x, y))
         {
             (base.heldItem, inputSpot.item) = (inputSpot.item, base.heldItem); //Swap items
-            return;
+            if (inputSpot.item != null)
+            {
+                caster.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[1]
+                {
+                    new FarmerSprite.AnimationFrame(68, 1800000, secondaryArm: false, flip: false)
+                });
+            }
+            else
+            {
+                caster.FarmerSprite.PauseForSingleAnimation = false;
+                caster.FarmerSprite.StopAnimation();
+            }
         }
         else if (spellIcon.containsPoint(x, y))
         {
             if (inputSpot.item != null)
             {
-                //TODO set cast spell
                 KeyValuePair<bool, string> castReturn = targetSpell.CastSpell(ref inputSpot.item); //Cast the specified spell
 
+                isAnimatingCast = true;
+                
+                caster.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[1]
+                {
+                    new FarmerSprite.AnimationFrame(57, 2000, secondaryArm: false, flip: false,(x=>isAnimatingCast = false),true)
+                });
+                
                 if (!castReturn.Key)
                 {
                     Game1.showRedMessage(castReturn.Value, true);
@@ -133,7 +177,6 @@ public class InventorySpellMenu : MenuWithInventory
     
     private void _OnCloseMenu()
     {
-        
         //TODO theres a bug where leaving this menu, even without doing anything gives you Iframes. could be abused for infinite invincibility
         if (base.heldItem != null)
         {
@@ -147,6 +190,8 @@ public class InventorySpellMenu : MenuWithInventory
 
         base.heldItem = null;
         inputSpot.item = null;
+        caster.FarmerSprite.PauseForSingleAnimation = false;
+        caster.FarmerSprite.StopAnimation();
     }
     public override void draw(SpriteBatch b)
     {
@@ -160,18 +205,25 @@ public class InventorySpellMenu : MenuWithInventory
             new Rectangle(325, 318, 25, 18), Color.White); //Back icon for spell cast
         spellIcon.draw(b,Color.White,0.96f);
         
-        FarmerRenderer.isDrawingForUI = true;
+        //FarmerRenderer.isDrawingForUI = true;
         
-        caster.FarmerRenderer.draw(b, new FarmerSprite.AnimationFrame(0, 0, secondaryArm: false, flip: false), 0,
-            new Rectangle(0, 0, 16, 32),
+        caster.FarmerRenderer.draw(b, Game1.player.FarmerSprite.CurrentAnimationFrame, Game1.player.FarmerSprite.CurrentFrame,
+            Game1.player.FarmerSprite.SourceRect,
             new Vector2(casterX - 8, centreY - 48), Vector2.Zero, 0.8f, 2, Color.White, 0f, 1f, caster);
-
-        FarmerRenderer.isDrawingForUI = false;
+        
+        //FarmerRenderer.isDrawingForUI = false;
         
         foreach (TemporaryAnimatedSprite fluffSprite in fluffSprites)
         {
             fluffSprite.draw(b, localPosition: true);
         }
+        
+        /*
+        foreach (TemporaryAnimatedSprite castSprite in castAnim)
+        {
+            castSprite.draw(b, localPosition: true);
+        }
+        */
         
         int totalItems = targetSpell.requiredItems.Count;
         float itemWidth = 16 * 4; // Each item is 16 pixels wide and scaled by 4
