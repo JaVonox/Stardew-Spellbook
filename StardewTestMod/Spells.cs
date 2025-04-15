@@ -262,12 +262,18 @@ public class InventorySpell : Spell
     
     ///<summary>Description placed on the side menu to detail specific mechanics</summary>
     public string longDescription;
-    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription):
+
+    /// <summary>
+    /// the offset from 16 y in the spellanimations.xnb to use for the inventory spell
+    /// </summary>
+    public int spellAnimOffset;
+    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset = 0):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
     {
         this.highlightPredicate = highlightPredicate;
         this.doAction = doAction;
         this.longDescription = longDescription;
+        this.spellAnimOffset = spellAnimOffset;
     }
     
     public KeyValuePair<bool, string> IsItemValidForOperation(ref Item? itemArgs)

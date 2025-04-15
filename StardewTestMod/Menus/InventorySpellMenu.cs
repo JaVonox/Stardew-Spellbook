@@ -22,7 +22,7 @@ public class InventorySpellMenu : MenuWithInventory
     private bool isAnimatingCast;
     
     private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
-    private TemporaryAnimatedSpriteList castAnim = new TemporaryAnimatedSpriteList();
+    private TemporaryAnimatedSprite castAnim;
     public InventorySpellMenu(InventorySpell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
         //TODO maybe replace texture here?
@@ -53,24 +53,7 @@ public class InventorySpellMenu : MenuWithInventory
         caster.faceDirection(2); //Point caster down
 
         isAnimatingCast = false;
-        
-        //Add the casting frames to the set
-        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(0, 16, 16, 34),
-            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
-                
-        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(16, 16, 16, 34),
-            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
-                
-        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(32, 16, 16, 34),
-            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
-                
-        castAnim.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(48, 16, 16, 34),
-            new Vector2(casterX - 8, centreY - 48),false,0.5f,Color.White){scale = 4f});
-        
-        foreach (TemporaryAnimatedSprite sprite in castAnim) //Set the texture to the correct value
-        {
-            sprite.texture = ModAssets.animTextures; 
-        }
+        descriptionText = targetSpell.longDescription;
 
     }
 
@@ -78,24 +61,26 @@ public class InventorySpellMenu : MenuWithInventory
     {
         return this.selectablePredicate(i);
     }
-    
+
+    private bool cannotCast;
+
+    private void reevaluateCannotCast()
+    {
+        cannotCast = inputSpot.item == null || !targetSpell.CanCastSpell().Key;
+    }
     public override void update(GameTime time)
     {
         currentFrame = currentFrame % 1000 == 0 ? 1 : currentFrame + 1;
         
-        descriptionText = targetSpell.longDescription;
+        reevaluateCannotCast();
         
-        fluffSprites.RemoveWhere((TemporaryAnimatedSprite sprite) => sprite.update(time));
-        
-        bool cannotCast = inputSpot.item == null || !targetSpell.CanCastSpell().Key;
-        
-        spellIcon.bounds.X = casterX + 80 + (!cannotCast ? Game1.random.Next(-1, 1) : 0);
-        spellIcon.bounds.Y = (centreY - 15) - (ModAssets.spellsSize / 2) + (!cannotCast ? Game1.random.Next(-1, 1) : 0);
+        spellIcon.bounds.X = casterX + 80 + (!cannotCast && !isAnimatingCast ? Game1.random.Next(-1, 1) : 0);
+        spellIcon.bounds.Y = (centreY - 15) - (ModAssets.spellsSize / 2) + (!cannotCast && !isAnimatingCast ? Game1.random.Next(-1, 1) : 0);
 
-        spellIcon.sourceRect = new Rectangle((cannotCast ? ModAssets.spellsSize : 0), 
+        spellIcon.sourceRect = new Rectangle((cannotCast || isAnimatingCast ? ModAssets.spellsSize : 0), 
             ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize);
         
-        if (!cannotCast)
+        if (!cannotCast && !isAnimatingCast)
         {
             if (currentFrame % 30 == 1)
             {
@@ -115,6 +100,28 @@ public class InventorySpellMenu : MenuWithInventory
                 });
             }
         }
+        
+        fluffSprites.RemoveWhere((TemporaryAnimatedSprite sprite) => sprite.update(time));
+        
+        //Update cast time, and when we finish set the animations to new setup
+        if (isAnimatingCast && castAnim.update(time))
+        {
+            castAnim = null;
+            isAnimatingCast = false;
+            
+            if (!cannotCast)
+            {
+                caster.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[1]
+                {
+                    new FarmerSprite.AnimationFrame(68, 1800000, secondaryArm: false, flip: false)
+                });
+            }
+            else
+            {
+                caster.FarmerSprite.PauseForSingleAnimation = false;
+                caster.FarmerSprite.StopAnimation();
+            }
+        }
  
     }
     public override void receiveLeftClick(int x, int y, bool playSound = true)
@@ -125,7 +132,8 @@ public class InventorySpellMenu : MenuWithInventory
         if (inputSpot.containsPoint(x, y))
         {
             (base.heldItem, inputSpot.item) = (inputSpot.item, base.heldItem); //Swap items
-            if (inputSpot.item != null)
+            reevaluateCannotCast();
+            if (!cannotCast)
             {
                 caster.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[1]
                 {
@@ -140,18 +148,23 @@ public class InventorySpellMenu : MenuWithInventory
         }
         else if (spellIcon.containsPoint(x, y))
         {
-            if (inputSpot.item != null)
+            reevaluateCannotCast();
+            if (!cannotCast)
             {
                 KeyValuePair<bool, string> castReturn = targetSpell.CastSpell(ref inputSpot.item); //Cast the specified spell
 
-                isAnimatingCast = true;
-                
-                caster.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[1]
+                if (castReturn.Key)
                 {
-                    new FarmerSprite.AnimationFrame(57, 2000, secondaryArm: false, flip: false,(x=>isAnimatingCast = false),true)
-                });
-                
-                if (!castReturn.Key)
+                    isAnimatingCast = true;
+
+                    //play cast animation. we use the wrong texture name temporarily.
+                    castAnim = new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(0, (targetSpell.spellAnimOffset * 34) + 16, 16, 34), 100f,
+                        4, 2,
+                        new Vector2(casterX - 8, centreY - 48), false, false) { scale = 4f };
+
+                    castAnim.texture = ModAssets.animTextures; //Set the texture to the correct value
+                }
+                else
                 {
                     Game1.showRedMessage(castReturn.Value, true);
                 }
@@ -177,7 +190,8 @@ public class InventorySpellMenu : MenuWithInventory
     
     private void _OnCloseMenu()
     {
-        //TODO theres a bug where leaving this menu, even without doing anything gives you Iframes. could be abused for infinite invincibility
+        //TODO theres maybe a bug where leaving this menu, even without doing anything gives you Iframes. could be abused for infinite invincibility
+        //TODO seems like players can't ok to exit the menu if they have a held item?
         if (base.heldItem != null)
         {
             Utility.CollectOrDrop(base.heldItem);
@@ -199,31 +213,25 @@ public class InventorySpellMenu : MenuWithInventory
         Game1.dayTimeMoneyBox.drawMoneyBox(b);
         
         inputSpot.draw(b, Color.White, 0.96f);
-        inputSpot.drawItem(b, 16, 16);
+        inputSpot.drawItem(b, 16, 16,isAnimatingCast ? 0.25f : 1f);
         
         b.Draw(Game1.mouseCursors, new Rectangle(casterX + 80, centreY - (ModAssets.spellsSize / 2),ModAssets.spellsSize,ModAssets.spellsSize),
             new Rectangle(325, 318, 25, 18), Color.White); //Back icon for spell cast
         spellIcon.draw(b,Color.White,0.96f);
         
-        //FarmerRenderer.isDrawingForUI = true;
-        
         caster.FarmerRenderer.draw(b, Game1.player.FarmerSprite.CurrentAnimationFrame, Game1.player.FarmerSprite.CurrentFrame,
             Game1.player.FarmerSprite.SourceRect,
             new Vector2(casterX - 8, centreY - 48), Vector2.Zero, 0.8f, 2, Color.White, 0f, 1f, caster);
-        
-        //FarmerRenderer.isDrawingForUI = false;
         
         foreach (TemporaryAnimatedSprite fluffSprite in fluffSprites)
         {
             fluffSprite.draw(b, localPosition: true);
         }
-        
-        /*
-        foreach (TemporaryAnimatedSprite castSprite in castAnim)
+
+        if (castAnim != null)
         {
-            castSprite.draw(b, localPosition: true);
+            castAnim.draw(b, localPosition: true);
         }
-        */
         
         int totalItems = targetSpell.requiredItems.Count;
         float itemWidth = 16 * 4; // Each item is 16 pixels wide and scaled by 4

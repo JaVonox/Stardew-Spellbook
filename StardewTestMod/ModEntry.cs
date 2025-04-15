@@ -177,8 +177,21 @@ namespace StardewTestMod
         {
             public static void Postfix(GameMenu __instance, bool playOpeningSound = true)
             {
+                //Replace the exit table position so it is at the end of the list
+                __instance.tabs[__instance.tabs.Count - 1] = new ClickableComponent(
+                    new Rectangle(__instance.xPositionOnScreen + 704,
+                        __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "exit",
+                    Game1.content.LoadString("Strings\\UI:GameMenu_Exit"))
+                {
+                    myID = 12349,
+                    downNeighborID = 9,
+                    leftNeighborID = 12348,
+                    tryDefaultIfNoDownNeighborExists = true,
+                    fullyImmutable = true
+                };
+                
                 __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
-                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 704, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "modtest", "Spellbook")
+                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 640, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "modtest", "Spellbook")
                 {
                     myID = 12350,
                     downNeighborID = 10,
