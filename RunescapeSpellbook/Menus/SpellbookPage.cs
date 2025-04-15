@@ -2,9 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Menus;
-using static StardewTestMod.ModLoadObjects;
+using static RunescapeSpellbook.ModLoadObjects;
 
-namespace StardewTestMod;
+namespace RunescapeSpellbook;
 
 public class SpellbookPage : IClickableMenu
 {

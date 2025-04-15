@@ -1,6 +1,6 @@
 ﻿using StardewValley.GameData.Weapons;
 
-namespace StardewTestMod;
+namespace RunescapeSpellbook;
 
 public class StaffWeaponData : WeaponData
 {
@@ -24,7 +24,7 @@ public class StaffWeaponData : WeaponData
         base.SpriteIndex = spriteIndex;
         
         base.Type = 429;
-        base.Texture = "Mods.StardewTestMod.Assets.modsprites";
+        base.Texture = "Mods.RunescapeSpellbook.Assets.modsprites";
         base.Knockback = 1.5f;
         base.CanBeLostOnDeath = false;
         

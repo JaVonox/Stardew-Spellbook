@@ -6,7 +6,7 @@ using StardewValley.Inventories;
 using StardewValley.Monsters;
 using StardewValley.TerrainFeatures;
 
-namespace StardewTestMod;
+namespace RunescapeSpellbook;
 
 public class BaseSpellEffects
 {

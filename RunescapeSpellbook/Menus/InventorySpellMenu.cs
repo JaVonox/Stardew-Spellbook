@@ -4,7 +4,7 @@ using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.Menus;
 
-namespace StardewTestMod;
+namespace RunescapeSpellbook;
 public class InventorySpellMenu : MenuWithInventory
 {
     private ClickableTextureComponent inputSpot;

@@ -13,14 +13,14 @@ using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.Tools;
 
-namespace StardewTestMod
+namespace RunescapeSpellbook
 {
     internal sealed class ModEntry : Mod
     {
         public static ModEntry Instance;
         public static IMonitor ModMonitor { get; private set; }
         
-        public const string CustomTextureKey = "Mods.StardewTestMod.Assets.modsprites";
+        public const string CustomTextureKey = "Mods.RunescapeSpellbook.Assets.modsprites";
         public override void Entry(IModHelper helper)
         {
             Instance = this;
@@ -514,9 +514,9 @@ namespace StardewTestMod
         {
             public static void Postfix(ref double __result, Monster __instance, Farmer f)
             {
-                if (f.hasBuff($"430")) //If we have dark lure, max out aggro for this player
+                if (f.hasBuff($"430")) //If we have dark lure, make the result extremely low for this player, so we can increase their priority
                 {
-                    __result = double.MinValue;
+                    __result *= 0.1;
                 }
             }
         }

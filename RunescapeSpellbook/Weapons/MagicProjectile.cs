@@ -7,7 +7,7 @@ using StardewValley.Monsters;
 using StardewValley.Projectiles;
 using StardewValley.TokenizableStrings;
 
-namespace StardewTestMod;
+namespace RunescapeSpellbook;
 
 public class MagicProjectile : BasicProjectile
 {

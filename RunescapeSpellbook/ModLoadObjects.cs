@@ -9,7 +9,7 @@ using StardewValley.ItemTypeDefinitions;
 using StardewValley.Network;
 using StardewValley.TerrainFeatures;
 
-namespace StardewTestMod;
+namespace RunescapeSpellbook;
 
 public struct ItemDrop
 {
@@ -440,7 +440,7 @@ public static class ModAssets
         new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
             new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}},5, 95,15,2,Color.OrangeRed),
         
-        new BuffSpell(19,"Buff_Charge","Charge","Spells cast two extra projectiles for 30 seconds",7,
+        new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 30 seconds",7,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, "I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
@@ -464,7 +464,7 @@ public static class ModAssets
         new PerkData(0,"Sapphire","Sapphire","All teleportation spells are free","Teleportation spells no longer grant experience"),
         new PerkData(1,"Emerald","Emerald","All spells no longer require air runes"),
         new PerkData(2,"Ruby","Ruby","20% chance of non-combat spells taking no runes"),
-        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing two extra free projectiles","Additional projectiles fire at 10 degree angles. Does not stack with charge")
+        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing three projectiles for free","Does not stack with charge, charge takes prescedent")
     };
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()

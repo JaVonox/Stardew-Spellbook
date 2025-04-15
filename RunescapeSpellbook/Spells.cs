@@ -6,7 +6,7 @@ using StardewValley.Extensions;
 using StardewValley.GameData.Weapons;
 using StardewValley.TerrainFeatures;
 
-namespace StardewTestMod;
+namespace RunescapeSpellbook;
 public delegate KeyValuePair<bool, string> TilesMethod(List<TerrainFeature> tiles);
 public delegate KeyValuePair<bool, string> InventoryMethod(ref Item? itemArgs);
 public delegate KeyValuePair<bool, string> BuffMethod();
