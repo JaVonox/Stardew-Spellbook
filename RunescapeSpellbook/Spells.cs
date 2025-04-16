@@ -7,9 +7,9 @@ using StardewValley.GameData.Weapons;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
-public delegate KeyValuePair<bool, string> TilesMethod(List<TerrainFeature> tiles);
+public delegate KeyValuePair<bool, string> TilesMethod(List<TerrainFeature> tiles, int animOffset);
 public delegate KeyValuePair<bool, string> InventoryMethod(ref Item? itemArgs);
-public delegate KeyValuePair<bool, string> BuffMethod();
+public delegate KeyValuePair<bool, string> BuffMethod(int animOffset);
 public delegate void CombatExtraMethod(Farmer caster, NPC target, ref int damage, ref bool isBomb);
 
 ///<summary> Base class for all spells - effectively abstract. Attempting to cast this will always report an error </summary>
@@ -23,7 +23,12 @@ public class Spell
     public Dictionary<int,int> requiredItems; //Set of IDs for the required runes
     public int expReward;
     public string audioID;
-    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int,int> requiredItems, int expReward, string audioID = "HighAlch")
+    
+    /// <summary>
+    /// the offset from 16 y in the spellanimations.xnb to use for the inventory spell
+    /// </summary>
+    public int spellAnimOffset;
+    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int,int> requiredItems, int expReward, int spellAnimOffset, string audioID = "HighAlch")
     {
         this.id = id;
         this.name = name;
@@ -33,6 +38,7 @@ public class Spell
         this.requiredItems = requiredItems;
         this.expReward = expReward;
         this.audioID = audioID;
+        this.spellAnimOffset = spellAnimOffset;
     }
     
     protected bool HasMagicLevel()
@@ -117,7 +123,7 @@ public class TeleportSpell : Spell
     private Predicate<Farmer>? extraTeleportReqs;
     public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
         string location, int xPos, int yPos, int dir, Predicate<Farmer>? extraTeleportReqs = null):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,"Teleport")
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,4,"Teleport")
     {
         this.location = location;
         this.xPos = xPos;
@@ -144,7 +150,7 @@ public class TeleportSpell : Spell
             Game1.player.temporarilyInvincible = false;
             Game1.player.temporaryInvincibilityTimer = 0;
             Game1.player.freezePause = 0;
-        },"RunescapeSpellbook.Teleport",2000);
+        },"RunescapeSpellbook.Teleport",800,spellAnimOffset);
         
         return new KeyValuePair<bool, string>(true,"");
     }
@@ -191,9 +197,9 @@ public class TilesSpell : Spell
     
     ///<summary>Specifies a function to be ran with the set of tiles collected via the terrainReqs predicate</summary>
     private TilesMethod doAction; 
-    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize, string AudioID = "HighAlch",
+    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize, int spellAnimOffset, string AudioID = "HighAlch",
         Predicate<TerrainFeature>? terrainReqs = null, string noTilesMessage = "Couldn't find any tiles to cast on"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0,AudioID)
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0,spellAnimOffset,AudioID)
     {
         this.terrainReqs = terrainReqs;
         this.doAction = doAction;
@@ -234,7 +240,7 @@ public class TilesSpell : Spell
                 return new KeyValuePair<bool, string>(false,this.noTilesMessage);
             }
 
-            doAction(tilesToCastOn);
+            doAction(tilesToCastOn,spellAnimOffset);
             
             RemoveRunes();
             AddExperiencePerTile(tilesToCastOn.Count);
@@ -264,18 +270,13 @@ public class InventorySpell : Spell
     
     ///<summary>Description placed on the side menu to detail specific mechanics</summary>
     public string longDescription;
-
-    /// <summary>
-    /// the offset from 16 y in the spellanimations.xnb to use for the inventory spell
-    /// </summary>
-    public int spellAnimOffset;
-    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, string AudioID = "HighAlch", int spellAnimOffset = 0):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,AudioID)
+    
+    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset, string AudioID = "HighAlch"):
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.highlightPredicate = highlightPredicate;
         this.doAction = doAction;
         this.longDescription = longDescription;
-        this.spellAnimOffset = spellAnimOffset;
     }
     
     public KeyValuePair<bool, string> IsItemValidForOperation(ref Item? itemArgs)
@@ -341,8 +342,8 @@ public class BuffSpell : Spell
     
     ///<summary>The message to display when a player does not meet the requirements for the spell specified in the farmerConditions predicate</summary>
     private string buffInvalidMessage;
-    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,AudioID)
+    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, int spellAnimOffset,string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.farmerConditions = farmerConditions;
         this.buffInvalidMessage = buffInvalidMessage;
@@ -374,7 +375,7 @@ public class BuffSpell : Spell
             }
             else
             {
-                actionResult = doAction();
+                actionResult = doAction(spellAnimOffset);
                 RemoveRunes();
                 AddExperience();
             }
@@ -404,7 +405,7 @@ public class CombatSpell : Spell
     public CombatSpell(int id, string name, string displayName, string description,
         int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
         int damage,float velocity,int projectileSpriteID, Color projectileColor,string firingSound = "HighAlch", CombatExtraMethod? combatEffect = null)
-        : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,firingSound)
+        : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,projectileSpriteID,firingSound)
     {
         this.damage = damage;
         this.projectileSpriteID = projectileSpriteID;

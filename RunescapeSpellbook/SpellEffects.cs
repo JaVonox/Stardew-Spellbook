@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.GameData.Machines;
@@ -10,13 +11,30 @@ namespace RunescapeSpellbook;
 
 public class BaseSpellEffects
 {
-    public static void PlayCastAnim(FarmerSprite.endOfAnimationBehavior endBehavior, int duration)
+    public static void PlayCastAnim(FarmerSprite.endOfAnimationBehavior endBehavior, int duration, int spellAnimOffset)
     {
         Game1.player.faceDirection(2);
         Game1.player.temporarilyInvincible = true;
         Game1.player.temporaryInvincibilityTimer = -duration;
         Game1.player.freezePause = duration;
         Game1.displayFarmer = true;
+        
+        TemporaryAnimatedSprite castAnim = new TemporaryAnimatedSprite("LooseSprites\\Cursors",
+            new Rectangle(0, (spellAnimOffset * 34) + 16, 16, 34), ((float)duration / 4),
+            ModAssets.animFrames, 0,
+            new Vector2(Game1.player.position.X, Game1.player.position.Y-80), false, false)
+        {
+            scale=4f,
+            layerDepth = 1.1f
+        };
+
+        castAnim.texture = ModAssets.animTextures; //Set the texture to the correct value
+        
+        ModEntry.ModMonitor.Log($"Anim {spellAnimOffset}",LogLevel.Warn);
+        
+        ModEntry.ModMonitor.Log($"Tile X {Game1.player.Tile.X} Tile Y {Game1.player.Tile.Y}",LogLevel.Warn);
+        ModAssets.BroadcastSprite(Game1.player.currentLocation,castAnim);
+        
         
         Game1.player.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[2]
         {
@@ -32,7 +50,7 @@ public class BaseSpellEffects
             )
         });
     }
-    public static void PlayAnimation(Action onAnimationComplete, string sound, int duration)
+    public static void PlayAnimation(Action onAnimationComplete, string sound, int duration, int spellAnimOffset)
     {
         Game1.player.playNearbySoundAll(sound, null);
     
@@ -42,7 +60,7 @@ public class BaseSpellEffects
             onAnimationComplete?.Invoke();
         };
         
-        PlayCastAnim(endBehavior,duration);
+        PlayCastAnim(endBehavior,duration, spellAnimOffset);
     }
     
 }
@@ -52,7 +70,7 @@ public class BaseSpellEffects
 /// </summary>
 public class SpellEffects : BaseSpellEffects
 {
-    public static KeyValuePair<bool, string> Humidify(List<TerrainFeature> tiles)
+    public static KeyValuePair<bool, string> Humidify(List<TerrainFeature> tiles, int animOffset)
     {
         Farmer player = Game1.player;
         GameLocation currentLoc = player.currentLocation;
@@ -77,13 +95,13 @@ public class SpellEffects : BaseSpellEffects
                 });
                 j++;
             }
-        }, "RunescapeSpellbook.Humidify", 1000);
+        }, "RunescapeSpellbook.Humidify", 800,animOffset);
 
         return new KeyValuePair<bool, string>(true, "");
 
     }
 
-    public static KeyValuePair<bool, string> CurePlant(List<TerrainFeature> tiles)
+    public static KeyValuePair<bool, string> CurePlant(List<TerrainFeature> tiles, int animOffset)
     {
         Farmer player = Game1.player;
         GameLocation currentLoc = player.currentLocation;
@@ -100,7 +118,7 @@ public class SpellEffects : BaseSpellEffects
                 appTile.destroyCrop(true);
                 appTile.plant(randomSeed, player, false);
             }
-        }, "RunescapeSpellbook.Cure", 1000);
+        }, "RunescapeSpellbook.Cure", 800,animOffset);
 
         return new KeyValuePair<bool, string>(true, "");
     }
@@ -293,7 +311,7 @@ public class SpellEffects : BaseSpellEffects
         return new KeyValuePair<bool, string>(true, "");
     }
 
-    public static KeyValuePair<bool, string> VileVigour()
+    public static KeyValuePair<bool, string> VileVigour(int animOffset)
     {
         Farmer caster = Game1.player;
 
@@ -301,12 +319,12 @@ public class SpellEffects : BaseSpellEffects
         {
             caster.health -= caster.maxHealth / 3;
             caster.stamina = caster.MaxStamina;
-        }, "RunescapeSpellbook.Vile", 500);
+        }, "RunescapeSpellbook.Vile", 500,animOffset);
 
         return new KeyValuePair<bool, string>(true, "");
     }
 
-    public static KeyValuePair<bool, string> BakePie()
+    public static KeyValuePair<bool, string> BakePie(int animOffset)
     {
         CraftingRecipe? selectedRecipe = Game1.player.cookingRecipes.Keys
             .Select(x => new CraftingRecipe(x, true))
@@ -323,29 +341,29 @@ public class SpellEffects : BaseSpellEffects
             selectedRecipe.consumeIngredients(new List<IInventory>() { Game1.player.Items });
             Utility.CollectOrDrop(crafted);
 
-        }, "RunescapeSpellbook.BakePie", 500);
+        }, "RunescapeSpellbook.BakePie", 800,animOffset);
 
         return new KeyValuePair<bool, string>(true, "");
     }
 
-    public static KeyValuePair<bool, string> Charge()
+    public static KeyValuePair<bool, string> Charge(int animOffset)
     {
         PlayAnimation(() =>
         {
             Game1.player.applyBuff("429");
 
-        }, "RunescapeSpellbook.Charge", 200);
+        }, "RunescapeSpellbook.Charge", 800,animOffset);
         
         return new KeyValuePair<bool, string>(true, "");
     }
     
-    public static KeyValuePair<bool, string> DarkLure()
+    public static KeyValuePair<bool, string> DarkLure(int animOffset)
     {
         PlayAnimation(() =>
         {
             Game1.player.applyBuff("430");
 
-        }, "RunescapeSpellbook.DarkLure", 200);
+        }, "RunescapeSpellbook.DarkLure", 800,animOffset);
         
         return new KeyValuePair<bool, string>(true, "");
     }

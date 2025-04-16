@@ -190,6 +190,8 @@ public static class ModAssets
     public const int spellsSize = 80;
     private static object multiplayer;
     
+    public const int animFrames = 4; 
+    
     public static readonly ModLoadObjects[] modItems = {
         new RunesObjects(4290,"Rune_Blank","Pure Essence","An unimbued rune of extra capability."),
         new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes"),
@@ -380,27 +382,27 @@ public static class ModAssets
         new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",1,
             new Dictionary<int, int>() { {4296, 1},{4293,4}},15,
             (i=>i is Item item && DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId))),
-            SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost. Put an appropriate item in the slot and press the spell icon to cast.","Superheat",1),
+            SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
         
         new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",5,
             new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
-            SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 100% of the items shipping bin value. Put an appropriate item in the slot and press the spell icon to cast.","HighAlch",0),
+            SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 100% of the items shipping bin value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
         new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",2,
-            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.3f,SpellEffects.Humidify, 10,"Humidify",
+            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.3f,SpellEffects.Humidify, 10,5,"Humidify",
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
         
         new TilesSpell(5,"Area_Cure","Cure Plant","Replants dead crops",6,
-            new Dictionary<int, int>() { {4298, 1},{4294,8}},0.5f, SpellEffects.CurePlant, 10,"Cure",
+            new Dictionary<int, int>() { {4298, 1},{4294,8}},0.5f, SpellEffects.CurePlant, 10,6,"Cure",
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
         
         new BuffSpell(6,"Buff_VileVigour","Vile Vigour","Sacrifices a third of your max health to fill your energy",3,
             new Dictionary<int, int>() { {4297, 1},{4291,3}},3, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
-            "Vile","My energy is already full"),
+            7,"Vile","My energy is already full"),
         
         new BuffSpell(7,"Buff_PieMake","Bake Pie","Cooks a random recipe that you know using your held ingredients",3,
             new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,1}}, 15,
-            (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0), SpellEffects.BakePie, "BakePie","I don't know enough recipes"),
+            (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0), SpellEffects.BakePie, 8,"BakePie","I don't know enough recipes"),
         
         new TeleportSpell(8,"Teleport_Desert","Desert Teleport","Teleports you to the desert, if you have access to it",5,
             new Dictionary<int, int>() { {4295, 2},{4294,1},{4293,1}}, 15,"Desert", 19, 34,2,
@@ -416,14 +418,14 @@ public static class ModAssets
         
         new InventorySpell(11,"Menu_EnchantSapphire","Enchant Sapphire Bolt","Turns blue rocks and gemstones into strong slingshot ammo",4,
             new Dictionary<int, int>() { {4297, 2},{4292,3}},10,(i => i is Item item && SpellEffects.blueGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantSapphireBolt,
-            "Convert any blue gems or rocks into enchanted ammo for the slingshot","EnchantBolt",2),
+            "Convert any blue gems or rocks into enchanted ammo for the slingshot",2,"EnchantBolt"),
         
         new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Turns green gemstones into stronger slingshot ammo",7,
             new Dictionary<int, int>() { {4297, 2},{4294,3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
-            "Convert any green gems into enchanted ammo for the slingshot","EnchantBolt",2),
+            "Convert any green gems into enchanted ammo for the slingshot",2,"EnchantBolt"),
         
         new BuffSpell(13,"Buff_DarkLure","Dark Lure","Summons more enemies, and makes them prioritise you over other farmers for 3 minutes",6,
-            new Dictionary<int, int>() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, "DarkLure","I'm already luring monsters!"),
+            new Dictionary<int, int>() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
         
         new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",0,
             new Dictionary<int, int>() { {4299, 1},{4291,1}}, 1,25,15,0,Color.White,"WindStrike"),
@@ -441,7 +443,7 @@ public static class ModAssets
             new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}},5, 95,15,2,Color.OrangeRed,"FireWave"),
         
         new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 30 seconds",7,
-            new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, "Charge","I'm already charged!"),
+            new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
             new Dictionary<int, int>() { {4300, 2},{4297,2},{4293,8}},6, 65,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
@@ -456,7 +458,7 @@ public static class ModAssets
                                       && CraftingRecipe.craftingRecipes[item.Name].Split(' ').ToList() is List<string> recipes 
                                       && ((recipes.IndexOf("388") != -1 && recipes.IndexOf("388") + 1 % 2 != 0) || (recipes.IndexOf("709") != -1 && recipes.IndexOf("709") + 1 % 2 != 0) ) )))
             ,SpellEffects.PlankMake,
-            "Breaks down wooden items into wood, and converts 15 wood into 1 hardwood. For recipes that require more than wood, it will only return the wood.","Degrime",3),
+            "Breaks down wooden items into wood, and converts 15 wood into 1 hardwood. For recipes that require more than wood, it will only return the wood.",3,"Degrime"),
     };
     
     public static readonly List<PerkData> perks = new List<PerkData>()
