@@ -47,11 +47,6 @@ public class BaseSpellEffects
     
 }
 
-public class PlankMakeConversions
-{
-    public string inItemID;
-    public string outItemID;
-}
 /// <summary>
 /// The class full of functions for individual spells to run when cast
 /// </summary>
@@ -82,7 +77,7 @@ public class SpellEffects : BaseSpellEffects
                 });
                 j++;
             }
-        }, "wand", 1000);
+        }, "RunescapeSpellbook.Humidify", 1000);
 
         return new KeyValuePair<bool, string>(true, "");
 
@@ -105,7 +100,7 @@ public class SpellEffects : BaseSpellEffects
                 appTile.destroyCrop(true);
                 appTile.plant(randomSeed, player, false);
             }
-        }, "wand", 1000);
+        }, "RunescapeSpellbook.Cure", 1000);
 
         return new KeyValuePair<bool, string>(true, "");
     }
@@ -306,7 +301,7 @@ public class SpellEffects : BaseSpellEffects
         {
             caster.health -= caster.maxHealth / 3;
             caster.stamina = caster.MaxStamina;
-        }, "yoba", 500);
+        }, "RunescapeSpellbook.Vile", 500);
 
         return new KeyValuePair<bool, string>(true, "");
     }
@@ -328,7 +323,7 @@ public class SpellEffects : BaseSpellEffects
             selectedRecipe.consumeIngredients(new List<IInventory>() { Game1.player.Items });
             Utility.CollectOrDrop(crafted);
 
-        }, "wand", 500);
+        }, "RunescapeSpellbook.BakePie", 500);
 
         return new KeyValuePair<bool, string>(true, "");
     }
@@ -339,7 +334,7 @@ public class SpellEffects : BaseSpellEffects
         {
             Game1.player.applyBuff("429");
 
-        }, "wand", 200);
+        }, "RunescapeSpellbook.Charge", 200);
         
         return new KeyValuePair<bool, string>(true, "");
     }
@@ -350,7 +345,7 @@ public class SpellEffects : BaseSpellEffects
         {
             Game1.player.applyBuff("430");
 
-        }, "wand", 200);
+        }, "RunescapeSpellbook.DarkLure", 200);
         
         return new KeyValuePair<bool, string>(true, "");
     }

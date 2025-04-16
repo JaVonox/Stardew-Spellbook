@@ -158,11 +158,13 @@ public class InventorySpellMenu : MenuWithInventory
                     isAnimatingCast = true;
 
                     //play cast animation. we use the wrong texture name temporarily.
-                    castAnim = new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(0, (targetSpell.spellAnimOffset * 34) + 16, 16, 34), 100f,
+                    castAnim = new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(0, (targetSpell.spellAnimOffset * 34) + 16, 16, 34), 200f,
                         4, 2,
                         new Vector2(casterX - 8, centreY - 48), false, false) { scale = 4f };
 
                     castAnim.texture = ModAssets.animTextures; //Set the texture to the correct value
+                    
+                    Game1.player.playNearbySoundLocal($"RunescapeSpellbook.{targetSpell.audioID}");
                 }
                 else
                 {

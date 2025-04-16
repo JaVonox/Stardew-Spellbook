@@ -22,7 +22,8 @@ public class Spell
     public int magicLevelRequirement;
     public Dictionary<int,int> requiredItems; //Set of IDs for the required runes
     public int expReward;
-    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int,int> requiredItems, int expReward)
+    public string audioID;
+    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int,int> requiredItems, int expReward, string audioID = "HighAlch")
     {
         this.id = id;
         this.name = name;
@@ -31,6 +32,7 @@ public class Spell
         this.magicLevelRequirement = magicLevelRequirement;
         this.requiredItems = requiredItems;
         this.expReward = expReward;
+        this.audioID = audioID;
     }
     
     protected bool HasMagicLevel()
@@ -114,8 +116,8 @@ public class TeleportSpell : Spell
     /// <returns>True if the requirements for the teleport are met</returns>
     private Predicate<Farmer>? extraTeleportReqs;
     public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
-        string location, int xPos, int yPos, int dir,Predicate<Farmer>? extraTeleportReqs = null):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
+        string location, int xPos, int yPos, int dir, Predicate<Farmer>? extraTeleportReqs = null):
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,"Teleport")
     {
         this.location = location;
         this.xPos = xPos;
@@ -142,7 +144,7 @@ public class TeleportSpell : Spell
             Game1.player.temporarilyInvincible = false;
             Game1.player.temporaryInvincibilityTimer = 0;
             Game1.player.freezePause = 0;
-        },"wand",2000);
+        },"RunescapeSpellbook.Teleport",2000);
         
         return new KeyValuePair<bool, string>(true,"");
     }
@@ -189,9 +191,9 @@ public class TilesSpell : Spell
     
     ///<summary>Specifies a function to be ran with the set of tiles collected via the terrainReqs predicate</summary>
     private TilesMethod doAction; 
-    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize,
+    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize, string AudioID = "HighAlch",
         Predicate<TerrainFeature>? terrainReqs = null, string noTilesMessage = "Couldn't find any tiles to cast on"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0)
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0,AudioID)
     {
         this.terrainReqs = terrainReqs;
         this.doAction = doAction;
@@ -267,8 +269,8 @@ public class InventorySpell : Spell
     /// the offset from 16 y in the spellanimations.xnb to use for the inventory spell
     /// </summary>
     public int spellAnimOffset;
-    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset = 0):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
+    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, string AudioID = "HighAlch", int spellAnimOffset = 0):
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,AudioID)
     {
         this.highlightPredicate = highlightPredicate;
         this.doAction = doAction;
@@ -339,8 +341,8 @@ public class BuffSpell : Spell
     
     ///<summary>The message to display when a player does not meet the requirements for the spell specified in the farmerConditions predicate</summary>
     private string buffInvalidMessage;
-    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, string buffInvalidMessage = "Couldn't cast spell"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
+    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
+        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,AudioID)
     {
         this.farmerConditions = farmerConditions;
         this.buffInvalidMessage = buffInvalidMessage;
@@ -401,15 +403,15 @@ public class CombatSpell : Spell
     //Sprite rotation offset is the amount of rotation we need to have to make it point upwards in the projectile (in degrees)
     public CombatSpell(int id, string name, string displayName, string description,
         int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
-        int damage,float velocity,int projectileSpriteID, Color projectileColor, CombatExtraMethod? combatEffect = null, bool explode = false, string firingSound = "wand", string collisionSound = "wand")
-        : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward)
+        int damage,float velocity,int projectileSpriteID, Color projectileColor,string firingSound = "HighAlch", CombatExtraMethod? combatEffect = null)
+        : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,firingSound)
     {
         this.damage = damage;
         this.projectileSpriteID = projectileSpriteID;
         this.velocity = velocity;
         this.explode = explode;
-        this.firingSound = firingSound;
-        this.collisionSound = collisionSound;
+        this.firingSound = "RunescapeSpellbook." + firingSound;
+        this.collisionSound = "RunescapeSpellbook.Preserve";
         this.projectileColor = projectileColor;
         this.combatEffect = combatEffect;
     }

@@ -12,4 +12,16 @@
       <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.3.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Content\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Content\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Content\**" />
+    </ItemGroup>
+
 </Project>

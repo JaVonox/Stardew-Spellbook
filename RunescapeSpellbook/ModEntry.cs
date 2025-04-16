@@ -7,6 +7,7 @@ using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Buffs;
+using StardewValley.GameData;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
@@ -20,6 +21,7 @@ namespace RunescapeSpellbook
         public static ModEntry Instance;
         public static IMonitor ModMonitor { get; private set; }
         
+        //TODO modify other systems to use their own custom texture keys rather than their own texture files
         public const string CustomTextureKey = "Mods.RunescapeSpellbook.Assets.modsprites";
         public override void Entry(IModHelper helper)
         {
@@ -37,13 +39,31 @@ namespace RunescapeSpellbook
             
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            
             if (e.NameWithoutLocale.IsEquivalentTo(CustomTextureKey))
             {
-                Monitor.Log("LoadedCustom", LogLevel.Warn);
                 e.LoadFromModFile<Texture2D>("Assets/itemsprites", AssetLoadPriority.Medium);
             }
-
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/AudioChanges"))
+            {
+                e.Edit(asset =>
+                    {
+                        List<string> audioTracks = ModAssets.modSpells.Select(x=>x.audioID).Distinct().ToList();
+                        audioTracks.Add("Preserve"); //Add the sound for hitting
+                        
+                        var data = asset.AsDictionary<string, AudioCueData>().Data;
+                        foreach (string audioTrack in audioTracks)
+                        {
+                            data.Add($"{audioTrack}", new AudioCueData() {
+                                Id = $"RunescapeSpellbook.{audioTrack}",
+                                Category = "Sound",
+                                FilePaths = new() { Path.Combine(Helper.DirectoryPath, "Assets/Audio", $"{audioTrack}.ogg") },
+                            });
+                        }
+                    }
+                );
+            }
+            
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
             {
                 e.Edit(asset =>
@@ -130,9 +150,6 @@ namespace RunescapeSpellbook
                 {
                     new FarmerSprite.AnimationFrame(tempID, 1000, secondaryArm: false, flip: false)
                 });
-
-                Instance.Monitor.Log($"ID ${tempID}",LogLevel.Warn);
-                tempID++;
                 */
                 
                 foreach (Farmer farmerRoot in ModAssets.GetFarmers())
@@ -477,7 +494,7 @@ namespace RunescapeSpellbook
                 {
                     __instance.displayName = "Charge";
                     __instance.description = "Summons more shots for every combat spell";
-                    __instance.millisecondsDuration = 30000;
+                    __instance.millisecondsDuration = 60000;
                     __instance.glow = Color.White;
                     __instance.iconTexture = ModAssets.extraTextures;
                     __instance.iconSheetIndex = 3;
