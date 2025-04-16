@@ -49,7 +49,7 @@ public class ModLoadObjects : ObjectData
         base.DisplayName = displayName;
         base.Description = description;
         base.Type = type;
-        base.Texture = ModEntry.CustomTextureKey;
+        base.Texture = "Mods.RunescapeSpellbook.Assets.modsprites";
         base.SpriteIndex = id - 4290;
         base.Category = category;
     }

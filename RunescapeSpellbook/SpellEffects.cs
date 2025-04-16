@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.GameData.Machines;
@@ -19,7 +18,7 @@ public class BaseSpellEffects
         Game1.player.freezePause = duration;
         Game1.displayFarmer = true;
         
-        TemporaryAnimatedSprite castAnim = new TemporaryAnimatedSprite("LooseSprites\\Cursors",
+        TemporaryAnimatedSprite castAnim = new TemporaryAnimatedSprite("Mods.RunescapeSpellbook.Assets.spellanimations",
             new Rectangle(0, (spellAnimOffset * 34) + 16, 16, 34), ((float)duration / 4),
             ModAssets.animFrames, 0,
             new Vector2(Game1.player.position.X, Game1.player.position.Y-80), false, false)
@@ -27,12 +26,7 @@ public class BaseSpellEffects
             scale=4f,
             layerDepth = 1.1f
         };
-
-        castAnim.texture = ModAssets.animTextures; //Set the texture to the correct value
         
-        ModEntry.ModMonitor.Log($"Anim {spellAnimOffset}",LogLevel.Warn);
-        
-        ModEntry.ModMonitor.Log($"Tile X {Game1.player.Tile.X} Tile Y {Game1.player.Tile.Y}",LogLevel.Warn);
         ModAssets.BroadcastSprite(Game1.player.currentLocation,castAnim);
         
         

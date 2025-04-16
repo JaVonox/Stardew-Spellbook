@@ -39,9 +39,15 @@ namespace RunescapeSpellbook
             
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.NameWithoutLocale.IsEquivalentTo(CustomTextureKey))
+            if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modsprites"))
             {
                 e.LoadFromModFile<Texture2D>("Assets/itemsprites", AssetLoadPriority.Medium);
+            }
+            
+            //TODO we may be double loading this anim file? this must be used to make animations work in multiplayer, but draw calls require textures rather than names so loading it again works similar to Game1.mouseCursors
+            if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.spellanimations"))
+            {
+                e.LoadFromModFile<Texture2D>("Assets/spellanimations", AssetLoadPriority.Medium);
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Data/AudioChanges"))

@@ -16,10 +16,8 @@ public class MagicProjectile : BasicProjectile
     private NetFloat projectileRotation = new NetFloat();
     private NetColor projectileColor = new NetColor();
     private NetFloat projectileCritDamage = new NetFloat();
-
     public MagicProjectile()
     {
-        
     }
     public MagicProjectile(int damageToFarmer, int spriteIndex, int bouncesTillDestruct, int tailLength, float rotationVelocity, float xVelocity, float yVelocity, Vector2 startingPosition, float projectileRotation, Color projectileColor, float projectileCritDamage, int projectileSpellID, string collisionSound = null, string bounceSound = null, string firingSound = null, bool explode = false, bool damagesMonsters = false, GameLocation location = null, Character firer = null, onCollisionBehavior collisionBehavior = null, string shotItemId = null)
         : base(damageToFarmer, spriteIndex, bouncesTillDestruct, tailLength, rotationVelocity, xVelocity, yVelocity, startingPosition, collisionSound, bounceSound , firingSound, explode , damagesMonsters , location , firer , collisionBehavior, shotItemId )
