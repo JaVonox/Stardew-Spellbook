@@ -193,7 +193,7 @@ public static class ModAssets
     public const int animFrames = 4; 
     
     public static readonly ModLoadObjects[] modItems = {
-        new RunesObjects(4290,"Rune_Blank","Pure Essence","An unimbued rune of extra capability."),
+        new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object."),
         new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes"),
         new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes"),
         new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes"),
@@ -638,6 +638,21 @@ public static class ModAssets
         return farmers;
     }
 
+    public static bool HasMagic(Farmer farmer)
+    {
+        int hasMagic = 0;
+        int.TryParse(farmer.modData["HasUnlockedMagic"],out hasMagic);
+        if (hasMagic == 1)
+        {
+            return true;
+        }
+        else if (farmer.eventsSeen.Contains("RS.0"))
+        {
+            farmer.modData["HasUnlockedMagic"] = "1";
+            return true;
+        }
+        return false;
+    }
     public static int GetFarmerMagicLevel(Farmer farmer)
     {
         int level = -1;

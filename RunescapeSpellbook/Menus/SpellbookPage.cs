@@ -22,32 +22,42 @@ public class SpellbookPage : IClickableMenu
     private ClickableTextureComponent magicIcon;
     List<ClickableTextureComponent> perkIcons = new List<ClickableTextureComponent>();
     private List<int> perksAssigned = new List<int>();
+    
+    private bool hasMagic = false;
     public SpellbookPage(int x, int y, int width, int height)
         : base(x, y, width, height)
     {
         runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
-        List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
         
-        int spellsPlaced = 0;
-        foreach(Spell sp in orderedSpells)
+        hasMagic = ModAssets.HasMagic(Game1.player);
+        if (hasMagic)
         {
-            spellIcons.Add(
-                new ClickableComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPlaced % spellsPerRow) * 90),yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 4 - 12 + ((ModAssets.spellsSize + 20) * (spellsPlaced / spellsPerRow) ),
-                    ModAssets.spellsSize,ModAssets.spellsSize), name:sp.name)
-                {
-                    myID = sp.id,
-                    fullyImmutable = false
-                }
-                );
-            spellsPlaced++;
-        }
+            List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
 
-        magicIcon = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPerRow) * 90) + 30, 
-            yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder - 14,80,80),
-            ModAssets.extraTextures,new Rectangle(160,105,80,80),1f,true);
-        
-        magicLevel = ModAssets.GetFarmerMagicLevel(Game1.player);
-        RefreshPerkData();
+            int spellsPlaced = 0;
+            foreach (Spell sp in orderedSpells)
+            {
+                spellIcons.Add(
+                    new ClickableComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPlaced % spellsPerRow) * 90),
+                        yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 4 - 12 +
+                        ((ModAssets.spellsSize + 20) * (spellsPlaced / spellsPerRow)),
+                        ModAssets.spellsSize, ModAssets.spellsSize), name: sp.name)
+                    {
+                        myID = sp.id,
+                        fullyImmutable = false
+                    }
+                );
+                spellsPlaced++;
+            }
+
+            magicIcon = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPerRow) * 90) + 30,
+                    yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder - 14, 80, 80),
+                ModAssets.extraTextures, new Rectangle(160, 105, 80, 80), 1f, true);
+
+            magicLevel = ModAssets.GetFarmerMagicLevel(Game1.player);
+
+            RefreshPerkData();
+        }
     }
 
     public void RefreshPerkData()
@@ -84,6 +94,7 @@ public class SpellbookPage : IClickableMenu
     public override void performHoverAction(int x, int y)
     {
         base.performHoverAction(x,y);
+        if(!hasMagic){return;}
         foreach (ClickableComponent c in spellIcons)
         {
             if (c.containsPoint(x, y))
@@ -129,6 +140,7 @@ public class SpellbookPage : IClickableMenu
     public const int runesOffset = 15;
     private void GenerateHoverBoxSpell(SpriteBatch b, KeyValuePair<bool,string> canCast)
     {
+        if(!hasMagic){return;}
         int x = Game1.getOldMouseX() + 32;
         int y = Game1.getOldMouseY() + 32;
         Spell hoveredSpell = ModAssets.modSpells[hoverSpellID];
@@ -202,6 +214,7 @@ public class SpellbookPage : IClickableMenu
 
     private void GenerateHoverBoxPerk(SpriteBatch b)
     {
+        if(!hasMagic){return;}
         int x = Game1.getOldMouseX() + 32;
         int y = Game1.getOldMouseY() + 32;
         PerkData hoveredPerk = ModAssets.perks[hoverPerkID];
@@ -269,7 +282,6 @@ public class SpellbookPage : IClickableMenu
                 return;
             }
             
-            //TODO check you can't get the same perk twice
             bool couldAssignPerk = ModAssets.GrantPerk(Game1.player,ModAssets.perks[hoverPerkID].perkID);
 
             if (couldAssignPerk)
@@ -287,26 +299,46 @@ public class SpellbookPage : IClickableMenu
     {
         b.End();
         b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
-        
+
+        if (!hasMagic)
+        {
+            const string messageLine1 = "I don't know any runic spells yet";
+            const string messageLine2 = "I might be able to learn some if I reach level 5 friendship with someone with experience in magic";
+            
+            //TODO format this correctly
+            b.DrawString(Game1.dialogueFont,messageLine1, new Vector2((width / 2),height / 2),Game1.textColor);
+            b.DrawString(Game1.smallFont,messageLine2, new Vector2((width / 2),64 + (height / 2)),Game1.textColor);
+            b.End();
+            b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
+            return;
+        }
         foreach (ClickableComponent c in spellIcons)
         {
             bool canCast = ModAssets.modSpells[c.myID].CanCastSpell().Key;
-            
-            b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(canCast ? 0 : ModAssets.spellsSize,ModAssets.spellsY + (c.myID * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
-            b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(canCast ? 0 : ModAssets.spellsSize,ModAssets.spellsY + (c.myID * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
+
+            b.Draw(ModAssets.extraTextures, c.bounds,
+                new Rectangle(canCast ? 0 : ModAssets.spellsSize,
+                    ModAssets.spellsY + (c.myID * ModAssets.spellsSize), ModAssets.spellsSize,
+                    ModAssets.spellsSize), Color.White);
+            b.Draw(ModAssets.extraTextures, c.bounds,
+                new Rectangle(canCast ? 0 : ModAssets.spellsSize,
+                    ModAssets.spellsY + (c.myID * ModAssets.spellsSize), ModAssets.spellsSize,
+                    ModAssets.spellsSize), Color.White);
 
             if (c.myID == ModAssets.localFarmerData.selectedSpellID) //If this is the selected spell
             {
                 //Draw a box behind the selected spell
-                b.Draw(ModAssets.extraTextures, c.bounds, new Rectangle(160,25,ModAssets.spellsSize,ModAssets.spellsSize), Color.White);
+                b.Draw(ModAssets.extraTextures, c.bounds,
+                    new Rectangle(160, 25, ModAssets.spellsSize, ModAssets.spellsSize), Color.White);
             }
         }
-        
+
         //Magic Level
         magicIcon.draw(b);
         string levelText = $"Level {magicLevel}";
         int spacing = (int)(magicIcon.bounds.Width - Game1.dialogueFont.MeasureString(levelText).X) / 2;
-        b.DrawString(Game1.dialogueFont,$"Level {magicLevel}",new Vector2(magicIcon.bounds.X + spacing,magicIcon.bounds.Y + 90),Game1.textColor);
+        b.DrawString(Game1.dialogueFont, $"Level {magicLevel}",
+            new Vector2(magicIcon.bounds.X + spacing, magicIcon.bounds.Y + 90), Game1.textColor);
 
         foreach (ClickableTextureComponent perk in perkIcons)
         {
@@ -316,13 +348,13 @@ public class SpellbookPage : IClickableMenu
         //Needs to be at end to prevent overlap
         if (hoverSpellID != -1)
         {
-            GenerateHoverBoxSpell(b,ModAssets.modSpells[hoverSpellID].CanCastSpell());
+            GenerateHoverBoxSpell(b, ModAssets.modSpells[hoverSpellID].CanCastSpell());
         }
         else if (hoverPerkID != -1)
         {
             GenerateHoverBoxPerk(b);
         }
-        
+
         b.End();
         b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
     }

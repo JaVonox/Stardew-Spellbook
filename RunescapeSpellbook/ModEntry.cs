@@ -13,6 +13,7 @@ using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.Tools;
+using Object = StardewValley.Object;
 
 namespace RunescapeSpellbook
 {
@@ -56,6 +57,7 @@ namespace RunescapeSpellbook
                     {
                         List<string> audioTracks = ModAssets.modSpells.Select(x=>x.audioID).Distinct().ToList();
                         audioTracks.Add("Preserve"); //Add the sound for hitting
+                        audioTracks.Add("MagicLevel"); //Add the sound for hitting
                         
                         var data = asset.AsDictionary<string, AudioCueData>().Data;
                         foreach (string audioTrack in audioTracks)
@@ -80,6 +82,79 @@ namespace RunescapeSpellbook
                         {
                             newObject.AppendObject(CustomTextureKey, objectDict);
                         }
+                    }
+                );
+            }
+            
+            //Add wizard event for unlocking magic
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Events/Farm"))
+            {
+                e.Edit(asset =>
+                    {
+                        var eventDict = asset.AsDictionary<string, string>().Data;
+                        
+                        //TODO music doesn't resume playing after the sound effect
+                        eventDict.Add("RS.0/f Wizard 0/t 600 1800",
+                            "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
+                            "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
+                            "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
+                            "/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"" +
+                            "/stopMusic /itemAboveHead 4290 /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail RSSpellMailGet" +
+                            "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, which can be found in the depths of the mines.\"/pause 600" +
+                            "/speak Wizard \"Well, that was all. I'll be on my way now.\"" +
+                            "/pause 300/end");
+                    }
+                );
+            }
+            
+            //Possible mails
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Mail"))
+            {
+                e.Edit(asset =>
+                    {
+                        var mailDict = asset.AsDictionary<string, string>().Data;
+                        
+                        mailDict.Add("RSSpellMailGet",
+                            "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a form of focus, a magical battlestaff." +
+                            "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not recieve it in one piece. " +
+                            "^^   -M. Rasmodius, Wizard[letterbg 2]" +
+                            "%item object 4351 1 %%" +
+                            "[#]Wizard's Battlestaff Gift");
+                        
+                        mailDict.Add("summer_15_1",
+                            "@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
+                            "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
+                            "^^   -Clint^^P.S I've included some samples with this letter" +
+                            "%item object 4364 3 %%" +
+                            "[#]Clint's Pack Opening Service");
+                        
+                        mailDict.Add("summer_10_2",
+                            "Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
+                            "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
+                            "^^   -Willy" +
+                            "%item object 4362 1 %%" +
+                            "[#]Willy's Casket");
+                        
+                        mailDict.Add("summer_1_3",
+                            "@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
+                            "^^Maybe you'll get something out of them." +
+                            "^^   -Clint" +
+                            "%item object 4300 60 %%" +
+                            "[#]Clint's Terrible Gift");
+                        
+                        mailDict.Add("spring_9_2",
+                            "@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
+                            "^^I hope you'll think of the great outdoors when you use them." +
+                            "^^   -Linus" +
+                            "%item object 4296 40 %%" +
+                            "[#]Linus' Nature Stones");
+                        
+                        mailDict.Add("fall_26_3",
+                            "Coco,^^Beef Soup" +
+                            "^^   -Tofu" +
+                            "%item object 4293 150 %%" +
+                            "[#]Letter For Someone Else");
+                        
                     }
                 );
             }
@@ -108,7 +183,7 @@ namespace RunescapeSpellbook
 
             if (e.Button == SButton.F5)
             {
-                for (int i = 4290; i < 4303; i++)
+                for (int i = 4291; i < 4303; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
                     item.Stack = 20;
@@ -139,8 +214,7 @@ namespace RunescapeSpellbook
                 Game1.player.modData["TofuMagicExperience"] = "0";
                 Game1.player.modData["TofuMagicProfession1"] = "-1";
                 Game1.player.modData["TofuMagicProfession2"] = "-1";
-                Game1.player.modData["HasUnlockedMagic"] = "1";
-                Monitor.Log("ResetLevel", LogLevel.Info);
+                Game1.player.modData["HasUnlockedMagic"] = "0";
             }
             
             if (e.Button == SButton.F8)
@@ -183,7 +257,7 @@ namespace RunescapeSpellbook
         {
             public static bool Prefix(GameMenu __instance, string name, ref int __result)
             {
-                if (name == "modtest")
+                if (name == "RSspellbook")
                 {
                     __result = 10;
                     return false; //effectively a break
@@ -214,7 +288,7 @@ namespace RunescapeSpellbook
                 };
                 
                 __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
-                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 640, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "modtest", "Spellbook")
+                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 640, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "RSspellbook", "Spellbook")
                 {
                     myID = 12350,
                     downNeighborID = 10,
@@ -234,7 +308,7 @@ namespace RunescapeSpellbook
             {
                 if(!__instance.invisible)
                 {
-                    ClickableComponent c = __instance.tabs.Where(x => x.name == "modtest").First();
+                    ClickableComponent c = __instance.tabs.Where(x => x.name == "RSspellbook").First();
                     b.Draw(ModAssets.extraTextures, new Vector2(c.bounds.X, c.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)), new Rectangle(newMenuIndex * 16, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
                     DuplicateDraws(__instance, b);
                 }
@@ -461,7 +535,7 @@ namespace RunescapeSpellbook
                     
                     if (!Game1.player.modData.ContainsKey("HasUnlockedMagic"))
                     {
-                        Game1.player.modData.Add("HasUnlockedMagic","1"); //TODO update when we make magic unlockable
+                        Game1.player.modData.Add("HasUnlockedMagic","0");
                     }
                 }
             }
