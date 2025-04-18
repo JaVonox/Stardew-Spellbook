@@ -303,11 +303,18 @@ public class SpellbookPage : IClickableMenu
         if (!hasMagic)
         {
             const string messageLine1 = "I don't know any runic spells yet";
-            const string messageLine2 = "I might be able to learn some if I reach level 5 friendship with someone with experience in magic";
+            const string messageLine2 = "I might be able to learn some if I reach level 5";
+            const string messageLine3 = "friendship with someone with experience in magic";
+            
+            Vector2 message1Size = Game1.dialogueFont.MeasureString(messageLine1);
+            Vector2 message2Size = Game1.smallFont.MeasureString(messageLine2);
+            Vector2 message3Size = Game1.smallFont.MeasureString(messageLine3);
             
             //TODO format this correctly
-            b.DrawString(Game1.dialogueFont,messageLine1, new Vector2((width / 2),height / 2),Game1.textColor);
-            b.DrawString(Game1.smallFont,messageLine2, new Vector2((width / 2),64 + (height / 2)),Game1.textColor);
+            b.DrawString(Game1.dialogueFont,messageLine1, new Vector2(xPositionOnScreen + (width / 2) - (message1Size.X / 2),yPositionOnScreen + (height / 2) - 64),Game1.textColor);
+            b.DrawString(Game1.smallFont,messageLine2, new Vector2(xPositionOnScreen + (width / 2) - (message2Size.X / 2),message1Size.Y + 4 + yPositionOnScreen + (height / 2) - 64),Game1.textColor);
+            b.DrawString(Game1.smallFont,messageLine3, new Vector2(xPositionOnScreen + (width / 2) - (message3Size.X / 2),message1Size.Y + 8 + message2Size.Y + yPositionOnScreen + (height / 2) - 64),Game1.textColor);
+
             b.End();
             b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
             return;

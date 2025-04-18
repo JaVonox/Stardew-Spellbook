@@ -58,7 +58,8 @@ namespace RunescapeSpellbook
                     {
                         List<string> audioTracks = ModAssets.modSpells.Select(x=>x.audioID).Distinct().ToList();
                         audioTracks.Add("Preserve"); //Add the sound for hitting
-                        audioTracks.Add("MagicLevel"); //Add the sound for hitting
+                        audioTracks.Add("MagicLevel"); //Add the sound for levelling up
+                        audioTracks.Add("MultiHit"); //Add the sound for when you fire multiple projectiles
                         
                         var data = asset.AsDictionary<string, AudioCueData>().Data;
                         foreach (string audioTrack in audioTracks)
@@ -95,13 +96,13 @@ namespace RunescapeSpellbook
                         var eventDict = asset.AsDictionary<string, string>().Data;
                         
                         //TODO music doesn't resume playing after the sound effect
-                        eventDict.Add("RS.0/f Wizard 0/t 600 1800",
+                        eventDict.Add("RS.0/f Wizard 0/t 600 700",
                             "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
                             "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
                             "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
                             "/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"" +
                             "/stopMusic /itemAboveHead 4290 /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail RSSpellMailGet" +
-                            "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, which can be found in the depths of the mines.\"/pause 600" +
+                            "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600" +
                             "/speak Wizard \"Well, that was all. I'll be on my way now.\"" +
                             "/pause 300/end");
                     }
@@ -131,13 +132,14 @@ namespace RunescapeSpellbook
 
                     foreach (string characterName in preferencesDict.Keys)
                     {
+                        //TODO maybe this should be changed to allow for other universals?
                         if (characterName == "Universal_Dislike")
                         {
                             //Add all items from the mod to universal dislikes
                             preferencesDict["Universal_Dislike"] = preferencesDict["Universal_Dislike"] +
                                                                    " " + ModAssets.modItems.Select(x => x.id).Join(null," ");
                         }
-                        else if (!characterName.Contains("Universal_"))
+                        else if (!characterName.Contains("Universal_")) //We only accept non universals for this so far
                         {
                             Dictionary<int,PrefType> itemPreferences = 
                                 ModAssets.modItems.Where(x=>x.characterPreferences.Keys.Contains(characterName))
@@ -214,14 +216,6 @@ namespace RunescapeSpellbook
                     item.Stack = 20;
                     Game1.player.addItemToInventory(item);
                 }
-                
-                StardewValley.Object item2 = ItemRegistry.Create<StardewValley.Object>($"62");
-                item2.Stack = 20;
-                Game1.player.addItemToInventory(item2);
-                
-                StardewValley.Object item3 = ItemRegistry.Create<StardewValley.Object>($"560");
-                item3.Stack = 20;
-                Game1.player.addItemToInventory(item3);
             }
 
             if (e.Button == SButton.F6)
@@ -328,28 +322,19 @@ namespace RunescapeSpellbook
         [HarmonyPatch(new Type[] { typeof(SpriteBatch) })]
         public class GameMenuDrawPatch
         {
-            private const int newMenuIndex = 0;
             public static void Postfix(GameMenu __instance, SpriteBatch b)
             {
                 if(!__instance.invisible)
                 {
                     ClickableComponent c = __instance.tabs.Where(x => x.name == "RSspellbook").First();
-                    b.Draw(ModAssets.extraTextures, new Vector2(c.bounds.X, c.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)), new Rectangle(newMenuIndex * 16, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
-                    DuplicateDraws(__instance, b);
+                    b.Draw(ModAssets.extraTextures, new Vector2(c.bounds.X, c.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)), new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
+                    
+                    if (!__instance.hoverText.Equals(""))
+                    {
+                        IClickableMenu.drawHoverText(b, __instance.hoverText, Game1.smallFont, 0, 0, -1, null, -1, null, null, 0, null, -1, -1, -1, 1f, null, null, null, null, null, null);
+                    }
+                    __instance.drawMouse(b, ignore_transparency: true);
                 }
-            }
-
-            /*
-             * Some duplicate methods to prevent the mouse and hover text from appearing under it
-             * This'd probably be better to use a transpiler for but it seems very complicated
-             */
-            private static void DuplicateDraws(GameMenu __instance, SpriteBatch b)
-            {
-                if (!__instance.hoverText.Equals(""))
-                {
-                    IClickableMenu.drawHoverText(b, __instance.hoverText, Game1.smallFont, 0, 0, -1, null, -1, null, null, 0, null, -1, -1, -1, 1f, null, null, null, null, null, null);
-                }
-                __instance.drawMouse(b, ignore_transparency: true);
             }
         }
 

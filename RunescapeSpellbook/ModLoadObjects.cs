@@ -461,7 +461,7 @@ public static class ModAssets
         new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
             new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}},5, 95,15,2,Color.OrangeRed,"FireWave"),
         
-        new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 30 seconds",7,
+        new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 60 seconds",7,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
@@ -769,8 +769,9 @@ public static class ModAssets
                 }
                 
                 farmer.modData["TofuMagicLevel"] = (currentLevel).ToString();
+                Game1.player.playNearbySoundLocal("RunescapeSpellbook.MagicLevel");
             }
-
+            
             switch (messageTier)
             {
                 case 1:

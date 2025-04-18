@@ -23,13 +23,14 @@ public class InventorySpellMenu : MenuWithInventory
     
     private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
     private TemporaryAnimatedSprite castAnim;
+
+    private string spellDescriptionText;
     public InventorySpellMenu(InventorySpell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
         //TODO maybe replace texture here?
         runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
         this.targetSpell = targetSpell;
         this.selectablePredicate = selectablePredicate;
-        descriptionText = targetSpell.description;
         currentFrame = Game1.random.Next(16);
         if (yPositionOnScreen == IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder)
         {
@@ -53,7 +54,8 @@ public class InventorySpellMenu : MenuWithInventory
         caster.faceDirection(2); //Point caster down
 
         isAnimatingCast = false;
-        descriptionText = targetSpell.longDescription;
+        
+        spellDescriptionText = targetSpell.longDescription;
 
     }
 
@@ -258,5 +260,19 @@ public class InventorySpellMenu : MenuWithInventory
         {
             drawMouse(b);
         }
+        
+        //Add in description text
+        int xPosition = xPositionOnScreen + 576 + 42 + ((wiggleWordsTimer > 0) ? Game1.random.Next(-2, 3) : 0);
+        int yPosition = yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder - 32 + ((wiggleWordsTimer > 0) ? Game1.random.Next(-2, 3) : 0);
+        int max_height = 320;
+        float scale = 0f;
+        string parsed_text;
+        do
+        {
+            scale = ((scale != 0f) ? (scale - 0.1f) : 1f);
+            parsed_text = Game1.parseText(spellDescriptionText, Game1.smallFont, (int)(224f / scale));
+        }
+        while (Game1.smallFont.MeasureString(parsed_text).Y > (float)max_height / scale && scale > 0.5f);
+        Utility.drawTextWithColoredShadow(b, parsed_text, Game1.smallFont, new Vector2(xPosition, yPosition), Game1.textColor * 0.75f, Color.Black * 0.2f, scale);
     }
 }
