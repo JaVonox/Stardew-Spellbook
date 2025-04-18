@@ -10,7 +10,6 @@ using StardewValley.Network;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
-
 public struct ItemDrop
 {
     public string itemID;
@@ -38,11 +37,21 @@ public struct ItemDrop
         this.chance = weight;
     }
 }
+
+public enum PrefType
+{
+    Hate,
+    Dislike,
+    Neutral,
+    Like,
+    Love
+}
 public class ModLoadObjects : ObjectData
 {
     public int id;
+    public readonly Dictionary<string, PrefType>? characterPreferences;
 
-    public ModLoadObjects(int id, string name, string displayName, string description, string type = "Basic", int category = -2)
+    public ModLoadObjects(int id, string name, string displayName, string description, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
     {
         this.id = id;
         base.Name = name;
@@ -52,6 +61,7 @@ public class ModLoadObjects : ObjectData
         base.Texture = "Mods.RunescapeSpellbook.Assets.modsprites";
         base.SpriteIndex = id - 4290;
         base.Category = category;
+        this.characterPreferences = characterPreferences ?? new Dictionary<string, PrefType>();
     }
 
     public void AppendObject(string CustomTextureKey, IDictionary<string,ObjectData> ObjectsSet)
@@ -62,8 +72,8 @@ public class ModLoadObjects : ObjectData
 
 public class RunesObjects : ModLoadObjects
 {
-    public RunesObjects(int id, string name, string displayName, string description, string type = "Basic", int category = 0) : 
-        base(id,name,displayName,description,type,category)
+    public RunesObjects(int id, string name, string displayName, string description,Dictionary<string, PrefType>? characterPreferences = null) : 
+        base(id,name,displayName,description,characterPreferences,"Basic",0)
     {
         
     }
@@ -71,8 +81,8 @@ public class RunesObjects : ModLoadObjects
 
 public class SlingshotItem : ModLoadObjects
 {
-    public SlingshotItem(int id, string name, string displayName, string description, int spriteID, string type = "Basic", int category = 0) : 
-        base(id,name,displayName,description,type,category)
+    public SlingshotItem(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences = null) : 
+        base(id,name,displayName,description,characterPreferences,"Basic",0)
     {
         base.SpriteIndex = spriteID;
     }
@@ -81,8 +91,8 @@ public class SlingshotItem : ModLoadObjects
 public class TreasureObjects : ModLoadObjects
 {
     public TreasureObjects(int id, string name, string displayName, string description, int spriteID,
-        List<ItemDrop> itemDrops, string type = "Basic", int category = 0) :
-        base(id, name, displayName, description, type, category)
+        List<ItemDrop> itemDrops, Dictionary<string, PrefType>? characterPreferences = null) :
+        base(id, name, displayName, description,characterPreferences, "Basic", 0)
     {
         base.SpriteIndex = spriteID;
         List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
@@ -110,8 +120,8 @@ public class TreasureObjects : ModLoadObjects
     }
 
 
-    public TreasureObjects(int id, string name, string displayName, string description, int spriteID, string type = "Basic", int category = 0) : 
-        base(id,name,displayName,description,type,category)
+    public TreasureObjects(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences) : 
+        base(id,name,displayName,description,characterPreferences,"Basic",0)
     {
         base.SpriteIndex = spriteID;
         List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
@@ -192,18 +202,27 @@ public static class ModAssets
     
     public const int animFrames = 4; 
     
-    public static readonly ModLoadObjects[] modItems = {
+    public static ModLoadObjects[] modItems = {
         new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object."),
         new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes"),
-        new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes"),
-        new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes"),
-        new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes"),
-        new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells"),
-        new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells"),
-        new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells"),
-        new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells"),
-        new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells"),
-        new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells"),
+        new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",
+            new Dictionary<string, PrefType>(){{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}}),
+        new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",
+            new Dictionary<string, PrefType>(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}}),
+        new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",
+            new Dictionary<string, PrefType>(){{"Dwarf",PrefType.Neutral}}),
+        new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",
+            new Dictionary<string, PrefType>(){{"Wizard",PrefType.Like}}),
+        new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",
+            new Dictionary<string, PrefType>(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral}}),
+        new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral}}),
+        new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Like}}),
+        new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate}}),
+        new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",
+            new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate}}),
         
         
         //TODO fix the icons for these + add spell to spawn them
@@ -260,7 +279,7 @@ public static class ModAssets
                 new ItemDrop("4355",1,1,0.3),
                 
                 new ItemDrop("4362",1,1,0.05),
-            }),
+            }, new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}}),
         
         new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies",22,
             new List<ItemDrop>()
@@ -286,7 +305,7 @@ public static class ModAssets
                 new ItemDrop("4355",1,1,0.7),
                 new ItemDrop("4356",1,1,0.2),
                 new ItemDrop("4363",1,1,0.05),
-            }),
+            },new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
         
         new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies",23,
             new List<ItemDrop>()
@@ -297,7 +316,7 @@ public static class ModAssets
                 new ItemDrop("4368",3,6,1),
                 new ItemDrop("4369",3,6,1),
                 new ItemDrop("4360",5,7,1),
-            }),
+            },new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
         
         new TreasureObjects(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes",24,
             new List<ItemDrop>()
@@ -579,6 +598,59 @@ public static class ModAssets
             new ItemDrop("4298",5,0.1f),
             new ItemDrop("4369",2,0.1f),
         } },
+    };
+
+    //Mail to be loaded into the game
+    public static Dictionary<string, string> loadableMail = new Dictionary<string, string>()
+    {
+        {
+            "RSSpellMailGet",
+            "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a form of focus, a magical battlestaff." +
+            "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not recieve it in one piece. " +
+            "^^   -M. Rasmodius, Wizard[letterbg 2]" +
+            "%item object 4351 1 %%" +
+            "[#]Wizard's Battlestaff Gift"
+        },
+        {
+            "summer_15_1",
+            "@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
+            "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
+            "^^   -Clint^^P.S I've included some samples with this letter" +
+            "%item object 4364 3 %%" +
+            "[#]Clint's Pack Opening Service"
+        },
+        {
+            "summer_10_2",
+            "Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
+            "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
+            "^^   -Willy" +
+            "%item object 4362 1 %%" +
+            "[#]Willy's Casket"
+        },
+        {
+            "summer_1_3",
+            "@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
+            "^^Maybe you'll get something out of them." +
+            "^^   -Clint" +
+            "%item object 4300 60 %%" +
+            "[#]Clint's Terrible Gift"
+        },
+        {
+            "spring_9_2",
+            "@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
+            "^^I hope you'll think of the great outdoors when you use them." +
+            "^^   -Linus" +
+            "%item object 4296 40 %%" +
+            "[#]Linus' Nature Stones"
+        },
+        {
+            "fall_26_3",
+            "Coco,^^Beef Soup" +
+
+            "^^   -Tofu" +
+            "%item object 4293 150 %%" +
+            "[#]Letter For Someone Else"
+        }
     };
 
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)

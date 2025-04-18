@@ -7,6 +7,7 @@ using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Buffs;
+using StardewValley.Extensions;
 using StardewValley.GameData;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
@@ -113,52 +114,76 @@ namespace RunescapeSpellbook
                 e.Edit(asset =>
                     {
                         var mailDict = asset.AsDictionary<string, string>().Data;
-                        
-                        mailDict.Add("RSSpellMailGet",
-                            "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a form of focus, a magical battlestaff." +
-                            "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not recieve it in one piece. " +
-                            "^^   -M. Rasmodius, Wizard[letterbg 2]" +
-                            "%item object 4351 1 %%" +
-                            "[#]Wizard's Battlestaff Gift");
-                        
-                        mailDict.Add("summer_15_1",
-                            "@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
-                            "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
-                            "^^   -Clint^^P.S I've included some samples with this letter" +
-                            "%item object 4364 3 %%" +
-                            "[#]Clint's Pack Opening Service");
-                        
-                        mailDict.Add("summer_10_2",
-                            "Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
-                            "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
-                            "^^   -Willy" +
-                            "%item object 4362 1 %%" +
-                            "[#]Willy's Casket");
-                        
-                        mailDict.Add("summer_1_3",
-                            "@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
-                            "^^Maybe you'll get something out of them." +
-                            "^^   -Clint" +
-                            "%item object 4300 60 %%" +
-                            "[#]Clint's Terrible Gift");
-                        
-                        mailDict.Add("spring_9_2",
-                            "@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
-                            "^^I hope you'll think of the great outdoors when you use them." +
-                            "^^   -Linus" +
-                            "%item object 4296 40 %%" +
-                            "[#]Linus' Nature Stones");
-                        
-                        mailDict.Add("fall_26_3",
-                            "Coco,^^Beef Soup" +
-                            "^^   -Tofu" +
-                            "%item object 4293 150 %%" +
-                            "[#]Letter For Someone Else");
-                        
+
+                        foreach (KeyValuePair<string,string> mail in ModAssets.loadableMail)
+                        {
+                            mailDict.Add(mail.Key, mail.Value);
+                        }
                     }
                 );
             }
 
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/NPCGiftTastes"))
+            {
+                e.Edit(asset =>
+                {
+                    var preferencesDict = asset.AsDictionary<string, string>().Data;
+
+                    foreach (string characterName in preferencesDict.Keys)
+                    {
+                        if (characterName == "Universal_Dislike")
+                        {
+                            //Add all items from the mod to universal dislikes
+                            preferencesDict["Universal_Dislike"] = preferencesDict["Universal_Dislike"] +
+                                                                   " " + ModAssets.modItems.Select(x => x.id).Join(null," ");
+                        }
+                        else if (!characterName.Contains("Universal_"))
+                        {
+                            Dictionary<int,PrefType> itemPreferences = 
+                                ModAssets.modItems.Where(x=>x.characterPreferences.Keys.Contains(characterName))
+                                    .ToDictionary(i=>i.id,j=> j.characterPreferences[characterName]); //get a dictionary of gifts for this character with their preference
+                            
+                            if(!itemPreferences.Any()) {continue;} //If we have no data to assign, skip this entirely
+
+                            //If all treasures are the same for a treasureitem, then we consider it the same as gifting the item itself
+                            //I.e Fire rune packs will have the same gift value as a fire rune
+                            Dictionary<int, PrefType> treasureItems =
+                                ModAssets.modItems.Where(x =>
+                                    x is TreasureObjects treasure && 
+                                    (treasure.GeodeDrops.All(y => y.ItemId == treasure.GeodeDrops[0].ItemId) && ModAssets.modItems.First(z=>z.id.ToString() == treasure.GeodeDrops[0].ItemId).characterPreferences.ContainsKey(characterName)))
+                                    .ToDictionary(i=>i.id,j=>ModAssets.modItems.First(k=>k.id.ToString() == j.GeodeDrops[0].ItemId).characterPreferences[characterName]);
+                            
+                            if (treasureItems.Any()) //Add treasures in to item preferences
+                            {
+                                itemPreferences.TryAddMany(treasureItems);
+                            }
+
+                            string[] characterPrefsStrings = preferencesDict[characterName].Split('/'); //character preferences are delimited with / 
+                            //The indexes always follow this format: 0 text 1 loveIDs 2 text 3 likeIDs 4 text 5 dislikeIDs 6 text 7 hateIDs 8 text 9 neutralIDs
+                            
+                            foreach (KeyValuePair<int, PrefType> itemPref in itemPreferences)
+                            {
+                                int idToModify = itemPref.Value switch
+                                {
+                                    PrefType.Love => 1,
+                                    PrefType.Like => 3,
+                                    PrefType.Dislike => 5,
+                                    PrefType.Hate => 7,
+                                    PrefType.Neutral => 9
+                                };
+                                
+                                characterPrefsStrings[idToModify] = characterPrefsStrings[idToModify] + $" {itemPref.Key}";
+                            }
+
+                            preferencesDict[characterName] = characterPrefsStrings.Join(null, "/");
+                        }
+                        
+                        
+                    }
+                });
+
+            }
+            
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Weapons"))
             {
                 e.Edit(asset =>
