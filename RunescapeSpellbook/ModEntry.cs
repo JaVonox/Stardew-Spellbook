@@ -22,9 +22,6 @@ namespace RunescapeSpellbook
     {
         public static ModEntry Instance;
         public static IMonitor ModMonitor { get; private set; }
-        
-        //TODO modify other systems to use their own custom texture keys rather than their own texture files
-        public const string CustomTextureKey = "Mods.RunescapeSpellbook.Assets.modsprites";
         public override void Entry(IModHelper helper)
         {
             Instance = this;
@@ -82,7 +79,7 @@ namespace RunescapeSpellbook
 
                         foreach (ModLoadObjects newObject in ModAssets.modItems)
                         {
-                            newObject.AppendObject(CustomTextureKey, objectDict);
+                            newObject.AppendObject("Mods.RunescapeSpellbook.Assets.modsprites", objectDict);
                         }
                     }
                 );
@@ -132,7 +129,6 @@ namespace RunescapeSpellbook
 
                     foreach (string characterName in preferencesDict.Keys)
                     {
-                        //TODO maybe this should be changed to allow for other universals?
                         if (characterName == "Universal_Dislike")
                         {
                             //Add all items from the mod to universal dislikes
@@ -376,7 +372,7 @@ namespace RunescapeSpellbook
             }
         }
         
-        //TODO remove forge + enchant ability from staves
+        //TODO check for and remove forge + enchant ability from staves
         [HarmonyPatch(typeof(MeleeWeapon), "FireProjectile")]
         [HarmonyPatch(new Type[] { typeof(Farmer) })]
         public class FireProjectilePatcher

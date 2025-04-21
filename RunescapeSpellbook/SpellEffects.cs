@@ -204,9 +204,6 @@ public class SpellEffects : BaseSpellEffects
     {
         int postCastStackSize;
         
-        
-        //TODO convert this to use recipes rather than hardcoded dictionary
-        
         if (itemArgs.ItemId == "388") //Wood to hardwood
         {
             if (itemArgs.Stack < 15)

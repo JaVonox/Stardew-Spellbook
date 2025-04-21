@@ -27,7 +27,6 @@ public class InventorySpellMenu : MenuWithInventory
     private string spellDescriptionText;
     public InventorySpellMenu(InventorySpell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
-        //TODO maybe replace texture here?
         runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
         this.targetSpell = targetSpell;
         this.selectablePredicate = selectablePredicate;

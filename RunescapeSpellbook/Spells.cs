@@ -556,7 +556,7 @@ public class CombatSpell : Spell
             if (generatedProjectiles.Count > 0)
             {
                 RemoveRunes(castingWeapon.providesRune);
-                AddExperience(); //TODO maybe this should only count if you hit an enemy
+                AddExperience();
             }
 
             projectile = generatedProjectiles;

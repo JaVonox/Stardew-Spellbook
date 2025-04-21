@@ -210,26 +210,24 @@ public static class ModAssets
         new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",
             new Dictionary<string, PrefType>(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}}),
         new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",
-            new Dictionary<string, PrefType>(){{"Dwarf",PrefType.Neutral}}),
+            new Dictionary<string, PrefType>(){{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}}),
         new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",
             new Dictionary<string, PrefType>(){{"Wizard",PrefType.Like}}),
         new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",
-            new Dictionary<string, PrefType>(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral}}),
+            new Dictionary<string, PrefType>(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}}),
         new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral}}),
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}}),
         new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Like}}),
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}}),
         new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate}}),
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}}),
         new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",
-            new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate}}),
+            new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}}),
         
-        
-        //TODO fix the icons for these + add spell to spawn them
         new SlingshotItem(4301,"Ammo_Water","Water Orb","Slingshot ammo enchanted with the power of water",30),
         new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Slingshot ammo enchanted with the power of earth",31),
         
-        new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes",19,
+        new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. Clint might be able to open it.",19,
             new List<ItemDrop>()
             {
                 new ItemDrop("4291",10,15,2.3),
@@ -242,7 +240,7 @@ public static class ModAssets
                 new ItemDrop("4294",15,20,0.5),
             }),
         
-        new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes",20,
+        new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. Clint might be able to open it.",20,
             new List<ItemDrop>()
             {
                 new ItemDrop("4295",5,10,1.2),
@@ -253,7 +251,7 @@ public static class ModAssets
                 new ItemDrop("4300",5,15,1.5),
             }),
         
-        new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies",21,
+        new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. Clint might be able to open it.",21,
             new List<ItemDrop>()
             {
                 new ItemDrop("4364",2,4,0.8),
@@ -281,7 +279,7 @@ public static class ModAssets
                 new ItemDrop("4362",1,1,0.05),
             }, new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}}),
         
-        new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies",22,
+        new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. Clint might be able to open it.",22,
             new List<ItemDrop>()
             {
                 new ItemDrop("4364",2,6,0.8),
@@ -307,7 +305,7 @@ public static class ModAssets
                 new ItemDrop("4363",1,1,0.05),
             },new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
         
-        new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies",23,
+        new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. Clint might be able to open it.",23,
             new List<ItemDrop>()
             {
                 new ItemDrop("4356",1,1,2),
@@ -318,47 +316,47 @@ public static class ModAssets
                 new ItemDrop("4360",5,7,1),
             },new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
         
-        new TreasureObjects(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes",24,
+        new TreasureObjects(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. Clint might be able to open it.",24,
             new List<ItemDrop>()
             {
-                new ItemDrop("4291",10,15,1.5),
-                new ItemDrop("4291",20,30,0.5),
-                new ItemDrop("4291",40,50,0.25),
+                new ItemDrop("4291",15,20,1.5),
+                new ItemDrop("4291",25,35,0.5),
+                new ItemDrop("4291",45,55,0.25),
             }),
-        new TreasureObjects(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes",25,
+        new TreasureObjects(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. Clint might be able to open it.",25,
             new List<ItemDrop>()
             {
-                new ItemDrop("4292",10,15,1.5),
-                new ItemDrop("4292",20,30,0.5),
-                new ItemDrop("4292",40,50,0.25),
+                new ItemDrop("4292",15,20,1.5),
+                new ItemDrop("4292",25,35,0.5),
+                new ItemDrop("4292",45,55,0.25),
             }),
-        new TreasureObjects(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes",26,
+        new TreasureObjects(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes. Clint might be able to open it.",26,
             new List<ItemDrop>()
             {
-                new ItemDrop("4293",10,15,1.5),
-                new ItemDrop("4293",20,30,0.5),
-                new ItemDrop("4293",40,50,0.25),
+                new ItemDrop("4293",15,20,1.5),
+                new ItemDrop("4293",25,35,0.5),
+                new ItemDrop("4293",45,55,0.25),
             }),
-        new TreasureObjects(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes",27,
+        new TreasureObjects(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. Clint might be able to open it.",27,
             new List<ItemDrop>()
             {
-                new ItemDrop("4294",10,15,1.5),
-                new ItemDrop("4294",20,30,0.5),
-                new ItemDrop("4294",40,50,0.25),
+                new ItemDrop("4294",15,20,1.5),
+                new ItemDrop("4294",25,35,0.5),
+                new ItemDrop("4294",45,55,0.25),
             }),
-        new TreasureObjects(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes",28,
+        new TreasureObjects(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. Clint might be able to open it.",28,
             new List<ItemDrop>()
             {
-                new ItemDrop("4299",5,15,1.5),
-                new ItemDrop("4299",15,20,0.5),
-                new ItemDrop("4299",40,50,0.1),
+                new ItemDrop("4299",15,20,1.5),
+                new ItemDrop("4299",25,35,0.5),
+                new ItemDrop("4299",45,55,0.25),
             }),
-        new TreasureObjects(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes",29,
+        new TreasureObjects(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. Clint might be able to open it.",29,
         new List<ItemDrop>()
         {
-            new ItemDrop("4300",5,15,1.5),
-            new ItemDrop("4300",15,20,0.5),
-            new ItemDrop("4300",40,50,0.1),
+            new ItemDrop("4300",15,20,1.5),
+            new ItemDrop("4300",25,35,0.5),
+            new ItemDrop("4300",45,55,0.25),
         }),
     };
     
@@ -393,10 +391,10 @@ public static class ModAssets
     
     public static readonly Spell[] modSpells = {
         new TeleportSpell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",0,
-            new Dictionary<int, int>() { {4295, 1},{4291,3},{4293,1} },8,"Town", 43, 60,0),
+            new Dictionary<int, int>() { {4295, 1},{4291,3},{4292,2} },8,"Town", 43, 60,0),
         
         new TeleportSpell(1,"Teleport_Home","Farm Teleport","Teleports you outside your Farm",4,
-            new Dictionary<int, int>() { {4295, 1},{4291,1},{4294,1} },10, "BusStop", 19, 23,2),
+            new Dictionary<int, int>() { {4295, 1},{4291,3},{4294,3} },10, "BusStop", 19, 23,2),
         
         new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",1,
             new Dictionary<int, int>() { {4296, 1},{4293,4}},15,
@@ -424,11 +422,11 @@ public static class ModAssets
             (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0), SpellEffects.BakePie, 8,"BakePie","I don't know enough recipes"),
         
         new TeleportSpell(8,"Teleport_Desert","Desert Teleport","Teleports you to the desert, if you have access to it",5,
-            new Dictionary<int, int>() { {4295, 2},{4294,1},{4293,1}}, 15,"Desert", 19, 34,2,
+            new Dictionary<int, int>() { {4295, 2},{4294,5},{4293,5}}, 15,"Desert", 19, 34,2,
             ((farmer => Game1.MasterPlayer.mailReceived.Contains("ccVault")))),
         
         new TeleportSpell(9,"Teleport_Ginger","Ginger Island Teleport","Teleports you to ginger island, if you have access to it",7,
-            new Dictionary<int, int>() { {4295, 2},{4292,2},{4293,2}},15, "IslandSouth",21,37,0,
+            new Dictionary<int, int>() { {4295, 2},{4292,5},{4293,5}},15, "IslandSouth",21,37,0,
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("willyBoatFixed")))),
         
         new TeleportSpell(10,"Teleport_Caves","Caves Teleport","Teleports you to the pelican town mines",1,
@@ -456,19 +454,19 @@ public static class ModAssets
             new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}},4, 30,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
         
         new CombatSpell(17,"Combat_Earth","Earth Blast","A medium level earth missile",6,
-            new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,4}},4, 60,16,1,Color.DarkGreen,"EarthBlast"),
+            new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,3}},4, 60,16,1,Color.DarkGreen,"EarthBlast"),
         
         new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
-            new Dictionary<int, int>() { {4300, 2},{4291,5},{4293,5}},5, 95,15,2,Color.OrangeRed,"FireWave"),
+            new Dictionary<int, int>() { {4300, 2},{4291,3},{4293,4}},5, 95,15,2,Color.OrangeRed,"FireWave"),
         
         new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 60 seconds",7,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
-            new Dictionary<int, int>() { {4300, 2},{4297,2},{4293,8}},6, 65,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
+            new Dictionary<int, int>() { {4300, 2},{4298,2},{4293,4}},6, 65,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
         
         new CombatSpell(21,"Combat_Blood","Blood Barrage","Fires a strong vampiric blood missile",10,
-            new Dictionary<int, int>() { {4300, 8},{4297,5}}, 10,80,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
+            new Dictionary<int, int>() { {4300, 4},{4297,3}}, 10,80,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
         
         new InventorySpell(22,"Menu_Plank","Plank Make","Transmutes wooden items into wood",3,
             new Dictionary<int, int>() { {4298, 1},{4297,1}},5,
@@ -490,113 +488,51 @@ public static class ModAssets
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
     {
+        { "Big Slime", new List<ItemDrop>(){
+            new ItemDrop("4296",2,0.2f),
+            new ItemDrop("4368",1,0.2f),
+            new ItemDrop("4359",2,0.1f),
+            new ItemDrop("4360",1,0.05f)
+        } },
+        { "Prismatic Slime", new List<ItemDrop>(){
+            new ItemDrop("4295",4,0.9f),
+            new ItemDrop("4298",5,0.9f),
+        } },
         { "Green Slime", new List<ItemDrop>(){
-            new ItemDrop("4294",3,0.1f),
-            new ItemDrop("4291",2,0.1f),
-            new ItemDrop("4292",2,0.1f),
-            new ItemDrop("4293",2,0.1f),
-            new ItemDrop("4367",1,0.02f),
-            new ItemDrop("4295", 1, 0.05f),
-            new ItemDrop("4351",1,1f),
-        } },
-        { "Dust Spirit", new List<ItemDrop>(){
-            new ItemDrop("4291", 1, 0.1f), 
-            new ItemDrop("4293",2,0.1f)
-        } },
-        { "Bat", new List<ItemDrop>(){
-            new ItemDrop("4291", 1, 0.05f),
-            new ItemDrop("4364",1,0.02f),
-            new ItemDrop("4299", 1, 0.05f)
-        } },
-        { "Frost Bat", new List<ItemDrop>(){
-            new ItemDrop("4364",1,0.03f),
-            new ItemDrop("4292", 3, 0.1f),
-            new ItemDrop("4365", 1, 0.02f),
-            new ItemDrop("4299", 2, 0.05f),
-            new ItemDrop("4361", 1, 0.02f),
-        } },
-        { "Lava Bat", new List<ItemDrop>(){
-            new ItemDrop("4364",1,0.03f),
-            new ItemDrop("4293", 3, 0.2f),
-            new ItemDrop("4366", 1, 0.02f),
-            new ItemDrop("4300", 2, 0.05f),
-            new ItemDrop("4362", 1, 0.02f),
-        } },
-        { "Stone Golem", new List<ItemDrop>(){
-            new ItemDrop("4367", 1, 0.1f),
-            new ItemDrop("4296", 5, 0.1f),
-            new ItemDrop("4359", 1, 0.1f)
-        } },
-        { "Wilderness Golem", new List<ItemDrop>(){
-            new ItemDrop("4299", 3, 0.05f),
-            new ItemDrop("4300", 1, 0.05f)
-        } },
-        { "Grub", new List<ItemDrop>(){
-            new ItemDrop("4296", 1, 0.1f),
-            new ItemDrop("4291", 2, 0.1f)
-        } },
-        { "Fly", new List<ItemDrop>(){
-            new ItemDrop("4291", 3, 0.3f),
-            new ItemDrop("4364", 1, 0.05f),
-        } },
-        { "Frost Jelly", new List<ItemDrop>(){
-            new ItemDrop("4292",4,0.1f),
-            new ItemDrop("4295", 2, 0.1f),
-            new ItemDrop("4359", 1, 0.05f)
-        } },
-        { "Shadow Guy", new List<ItemDrop>(){
-            new ItemDrop("4295",2,0.2f),
-            new ItemDrop("4297", 3, 0.2f),
-            new ItemDrop("4300", 3, 0.3f),
-            new ItemDrop("4360", 1, 0.05f),
-            new ItemDrop("4361", 1, 0.05f)
-        } },
-        { "Ghost", new List<ItemDrop>(){
-            new ItemDrop("4295",2,0.2f),
-            new ItemDrop("4299", 3, 0.2f),
-            new ItemDrop("4296",3,0.2f),
-            new ItemDrop("4297",3,0.2f),
-            new ItemDrop("4300", 3, 0.1f),
-            new ItemDrop("4368", 1, 0.05f),
-            new ItemDrop("4360", 1, 0.05f)
+            new ItemDrop("4295",2,0.08f),
+            new ItemDrop("4359",1,0.1f),
+            new ItemDrop("4360",1,0.08f),
         } },
         { "Duggy", new List<ItemDrop>(){
-            new ItemDrop("4359",2,0.2f),
-            new ItemDrop("4294",5,0.01f),
+            new ItemDrop("4366",1,0.3f),
+            new ItemDrop("4367",1,0.15f),
+        } },
+        { "Fly", new List<ItemDrop>(){
+            new ItemDrop("4364",1,0.3f),
+            new ItemDrop("4368",1,0.1f),
         } },
         { "Rock Crab", new List<ItemDrop>(){
-            new ItemDrop("4359",2,0.2f),
-            new ItemDrop("4365",1,0.1f),
+            new ItemDrop("4365",1,0.3f),
+            new ItemDrop("4360",1,0.1f),
         } },
-        { "Truffle Crab", new List<ItemDrop>(){
-            new ItemDrop("4296",3,0.02f)
+        { "Grub", new List<ItemDrop>(){
+            new ItemDrop("4367",1,0.1f),
+            new ItemDrop("4296",2,0.1f),
         } },
-        { "Squid Kid", new List<ItemDrop>(){
-            new ItemDrop("4360",2,0.1f),
-            new ItemDrop("4359",4,0.1f),
-            new ItemDrop("4361",2,0.1f),
+        { "Bug", new List<ItemDrop>(){
+            new ItemDrop("4364",1,0.2f),
+            new ItemDrop("4368",1,0.1f),
         } },
-        { "Skeleton", new List<ItemDrop>(){
-            new ItemDrop("4368",1,0.05f),
-            new ItemDrop("4369",1,0.02f),
-            new ItemDrop("4361",1,0.06f),
+        { "Bat", new List<ItemDrop>(){
+            new ItemDrop("4364",2,0.15f),
+            new ItemDrop("4368",1,0.1f),
         } },
-        { "Metal Head", new List<ItemDrop>(){
-            new ItemDrop("4362",1,0.05f),
-        } },
-        { "Shadow Brute", new List<ItemDrop>(){
+        { "Stone Golem", new List<ItemDrop>(){
+            new ItemDrop("4366",1,0.1f),
+            new ItemDrop("4367",2,0.2f),
+            new ItemDrop("4295",3,0.1f),
+            new ItemDrop("4297",3,0.2f),
             new ItemDrop("4361",1,0.05f),
-            new ItemDrop("4362",1,0.05f),
-            new ItemDrop("4295",5,0.1f),
-            new ItemDrop("4296",5,0.1f),
-            new ItemDrop("4368",2,0.1f),
-        } },
-        { "Shadow Shaman", new List<ItemDrop>(){
-            new ItemDrop("4361",1,0.05f),
-            new ItemDrop("4362",1,0.05f),
-            new ItemDrop("4297",5,0.1f),
-            new ItemDrop("4298",5,0.1f),
-            new ItemDrop("4369",2,0.1f),
         } },
     };
 

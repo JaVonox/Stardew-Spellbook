@@ -310,7 +310,6 @@ public class SpellbookPage : IClickableMenu
             Vector2 message2Size = Game1.smallFont.MeasureString(messageLine2);
             Vector2 message3Size = Game1.smallFont.MeasureString(messageLine3);
             
-            //TODO format this correctly
             b.DrawString(Game1.dialogueFont,messageLine1, new Vector2(xPositionOnScreen + (width / 2) - (message1Size.X / 2),yPositionOnScreen + (height / 2) - 64),Game1.textColor);
             b.DrawString(Game1.smallFont,messageLine2, new Vector2(xPositionOnScreen + (width / 2) - (message2Size.X / 2),message1Size.Y + 4 + yPositionOnScreen + (height / 2) - 64),Game1.textColor);
             b.DrawString(Game1.smallFont,messageLine3, new Vector2(xPositionOnScreen + (width / 2) - (message3Size.X / 2),message1Size.Y + 8 + message2Size.Y + yPositionOnScreen + (height / 2) - 64),Game1.textColor);
