@@ -21,12 +21,10 @@ namespace RunescapeSpellbook
     internal sealed class ModEntry : Mod
     {
         public static ModEntry Instance;
-        public static IMonitor ModMonitor { get; private set; }
         public override void Entry(IModHelper helper)
         {
             Instance = this;
             
-            ModMonitor = this.Monitor;
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll();
 
@@ -43,7 +41,6 @@ namespace RunescapeSpellbook
                 e.LoadFromModFile<Texture2D>("Assets/itemsprites", AssetLoadPriority.Medium);
             }
             
-            //TODO we may be double loading this anim file? this must be used to make animations work in multiplayer, but draw calls require textures rather than names so loading it again works similar to Game1.mouseCursors
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.spellanimations"))
             {
                 e.LoadFromModFile<Texture2D>("Assets/spellanimations", AssetLoadPriority.Medium);
@@ -64,7 +61,7 @@ namespace RunescapeSpellbook
                             data.Add($"{audioTrack}", new AudioCueData() {
                                 Id = $"RunescapeSpellbook.{audioTrack}",
                                 Category = "Sound",
-                                FilePaths = new() { Path.Combine(Helper.DirectoryPath, "Assets/Audio", $"{audioTrack}.ogg") },
+                                FilePaths = new List<string>() { Path.Combine(Helper.DirectoryPath, "Assets/Audio", $"{audioTrack}.ogg") },
                             });
                         }
                     }
@@ -92,7 +89,6 @@ namespace RunescapeSpellbook
                     {
                         var eventDict = asset.AsDictionary<string, string>().Data;
                         
-                        //TODO music doesn't resume playing after the sound effect
                         eventDict.Add("RS.0/f Wizard 0/t 600 700",
                             "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
                             "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
@@ -115,7 +111,11 @@ namespace RunescapeSpellbook
 
                         foreach (KeyValuePair<string,string> mail in ModAssets.loadableMail)
                         {
-                            mailDict.Add(mail.Key, mail.Value);
+                            //This removes the mail if it overlaps with another mail - such as if a new mail is added on a date the mod uses
+                            if (!mailDict.ContainsKey(mail.Key)) //TODO make this change the date
+                            {
+                                mailDict.Add(mail.Key, mail.Value);
+                            }
                         }
                     }
                 );
@@ -142,15 +142,14 @@ namespace RunescapeSpellbook
                                     .ToDictionary(i=>i.id,j=> j.characterPreferences[characterName]); //get a dictionary of gifts for this character with their preference
                             
                             if(!itemPreferences.Any()) {continue;} //If we have no data to assign, skip this entirely
-
+                            
                             //If all treasures are the same for a treasureitem, then we consider it the same as gifting the item itself
                             //I.e Fire rune packs will have the same gift value as a fire rune
                             Dictionary<int, PrefType> treasureItems =
                                 ModAssets.modItems.Where(x =>
-                                    x is TreasureObjects treasure && 
-                                    (treasure.GeodeDrops.All(y => y.ItemId == treasure.GeodeDrops[0].ItemId) && ModAssets.modItems.First(z=>z.id.ToString() == treasure.GeodeDrops[0].ItemId).characterPreferences.ContainsKey(characterName)))
-                                    .ToDictionary(i=>i.id,j=>ModAssets.modItems.First(k=>k.id.ToString() == j.GeodeDrops[0].ItemId).characterPreferences[characterName]);
-                            
+                                    x is PackObject pack && ModAssets.modItems.First(z=>z.id == pack.packItem).characterPreferences.ContainsKey(characterName))
+                                    .ToDictionary(i=>i.id,j=> ModAssets.modItems.First(k=>k.id == ((PackObject)j).packItem).characterPreferences[characterName]);
+
                             if (treasureItems.Any()) //Add treasures in to item preferences
                             {
                                 itemPreferences.TryAddMany(treasureItems);
@@ -190,7 +189,7 @@ namespace RunescapeSpellbook
                     
                     foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
                     {
-                        weaponDict.Add(newWeapon.id, newWeapon);
+                        weaponDict.Add(newWeapon.id.ToString(), newWeapon);
                     }
                 });
 
@@ -218,7 +217,7 @@ namespace RunescapeSpellbook
             {
                 foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
                 {
-                    MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id);
+                    MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id.ToString());
                     Game1.player.addItemToInventory(item);
                 }
             }
@@ -240,17 +239,10 @@ namespace RunescapeSpellbook
             
             if (e.Button == SButton.F9)
             {
-                /*
-                Game1.player.FarmerSprite.animateOnce(new FarmerSprite.AnimationFrame[1]
-                {
-                    new FarmerSprite.AnimationFrame(tempID, 1000, secondaryArm: false, flip: false)
-                });
-                */
-                
                 foreach (Farmer farmerRoot in ModAssets.GetFarmers())
                 {
-                    ModMonitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Warn);
-                    ModMonitor.Log($"Exp: {farmerRoot.modData["TofuMagicExperience"]}",LogLevel.Warn);
+                    Instance.Monitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Warn);
+                    Instance.Monitor.Log($"Exp: {farmerRoot.modData["TofuMagicExperience"]}",LogLevel.Warn);
                 }
             }
             
@@ -382,7 +374,7 @@ namespace RunescapeSpellbook
                 if(__instance.type.Value == 429)
                 {
                     if (ModAssets.localFarmerData.selectedSpellID != -1 &&
-                        ModAssets.modSpells[ModAssets.localFarmerData.selectedSpellID].GetType() == typeof(CombatSpell))
+                        ModAssets.modSpells[ModAssets.localFarmerData.selectedSpellID].GetType() == typeof(CombatSpell) && ModAssets.HasMagic(Game1.player))
                     {
                         CombatSpell spell = (CombatSpell)ModAssets.modSpells[ModAssets.localFarmerData.selectedSpellID];
                         Point mousePos = Game1.getMousePosition();
@@ -407,7 +399,14 @@ namespace RunescapeSpellbook
                     }
                     else
                     {
-                        Game1.showRedMessage("No Selected Spell", true);
+                        if (ModAssets.HasMagic(Game1.player))
+                        {
+                            Game1.showRedMessage("No Selected Spell", true);
+                        }
+                        else
+                        {
+                            Game1.showRedMessage("I don't know how to use this", true);
+                        }
                     }
                 }
                 
@@ -437,7 +436,7 @@ namespace RunescapeSpellbook
                 if (__instance.type.Value == 429) //Staff type
                 {
                     StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-                    int level = staffWeaponData.providesRune != -1 ? 10 : int.Parse(staffWeaponData.id) - 4343;
+                    int level = staffWeaponData.providesRune != -1 ? 10 : int.Parse(staffWeaponData.id.ToString()) - 4343;
                     
                     __result = $"Level {level} Battlestaff";
                 }
@@ -507,7 +506,6 @@ namespace RunescapeSpellbook
             
         }
         
-        
         //this patch adds to the first post load - so it maintains between days but if you save and reload it will reset
         [HarmonyPatch(typeof(Game1), "_update")]
         [HarmonyPatch(new Type[] {typeof(GameTime)})]
@@ -562,7 +560,7 @@ namespace RunescapeSpellbook
                         {
                             for (int i = 0; i < item.amount; i++)
                             {
-                                __instance.objectsToDrop.Add(item.itemID);
+                                __instance.objectsToDrop.Add(item.itemID.ToString());
                             }
                         }
                     }

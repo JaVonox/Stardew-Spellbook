@@ -192,7 +192,6 @@ public class InventorySpellMenu : MenuWithInventory
     private void _OnCloseMenu()
     {
         //TODO theres maybe a bug where leaving this menu, even without doing anything gives you Iframes. could be abused for infinite invincibility
-        //TODO seems like players can't ok to exit the menu if they have a held item?
         if (base.heldItem != null)
         {
             Utility.CollectOrDrop(base.heldItem);

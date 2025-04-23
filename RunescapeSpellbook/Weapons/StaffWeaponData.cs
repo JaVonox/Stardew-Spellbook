@@ -4,11 +4,11 @@ namespace RunescapeSpellbook;
 
 public class StaffWeaponData : WeaponData
 {
-    public string id;
+    public int id;
     public float projectileDamageModifier;
     public int providesRune; //Which rune ID to grant infinite of for the sake of spells
     
-    public StaffWeaponData(string id, string name, string displayName, string description, int minSwingDamage, int maxSwingDamage, int spriteIndex, float projectileDamageModifier = 1.0f,
+    public StaffWeaponData(int id, string name, string displayName, string description, int minSwingDamage, int maxSwingDamage, int spriteIndex, float projectileDamageModifier = 1.0f,
         int providesRune = -1, int speedMod = 0, int precision = 0, int defenseMod = 0, float critChanceMod = 0.02f, float critDamageMod = 3f)
     {
         base.Name = name;
@@ -32,4 +32,5 @@ public class StaffWeaponData : WeaponData
         this.projectileDamageModifier = projectileDamageModifier;
         this.providesRune = providesRune;
     }
+    
 }

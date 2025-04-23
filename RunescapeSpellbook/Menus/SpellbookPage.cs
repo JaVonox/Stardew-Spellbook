@@ -277,8 +277,14 @@ public class SpellbookPage : IClickableMenu
         {
             if (!hasPerkPoints)
             {
-                //TODO add different message if you already have the perk
-                Game1.showRedMessage("I don't have enough perk points to do this", true);
+                if (ModAssets.HasPerk(Game1.player, hoverPerkID))
+                {
+                    Game1.showRedMessage("I already have this perk", true);
+                }
+                else
+                {
+                    Game1.showRedMessage("I don't have enough perk points to do this", true);
+                }
                 return;
             }
             

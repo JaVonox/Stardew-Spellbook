@@ -216,6 +216,15 @@ public class SpellEffects : BaseSpellEffects
             Utility.CollectOrDrop(returnItem);
             itemArgs.ConsumeStack(15);
         }
+        else if (itemArgs.ItemId == "709") //hardwood to wood
+        {
+            postCastStackSize = itemArgs.Stack - 1;
+            
+            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"388");
+            returnItem.Stack = 15;
+            Utility.CollectOrDrop(returnItem);
+            itemArgs.ConsumeStack(1);
+        }
         else //Any other recipes
         {
             try
