@@ -119,7 +119,7 @@ public class SpellEffects : BaseSpellEffects
     public static KeyValuePair<bool, string> HighAlchemy(ref Item? itemArgs)
     {
         int postCastStackSize = itemArgs.Stack - 1;
-        Game1.player.Money += itemArgs.salePrice(false);
+        Game1.player.Money += itemArgs.sellToStorePrice(-1L);
         Game1.player.playNearbySoundAll("purchaseRepeat", null);
         itemArgs.ConsumeStack(1);
         if (postCastStackSize == 0)

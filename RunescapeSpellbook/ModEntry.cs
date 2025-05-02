@@ -248,12 +248,28 @@ namespace RunescapeSpellbook
             
             if (e.Button == SButton.F10)
             {
+                Game1.player.changeFriendship(10000, Game1.getCharacterFromName("Wizard"));
+                /*
                 for (int i = 4359; i < 4370; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
                     item.stack.Value = 20;
                     Game1.player.addItemToInventory(item);
                 }
+                */
+            }
+            
+            if (e.Button == SButton.F11)
+            {
+                Game1.player.changeFriendship(10000, Game1.getCharacterFromName("Wizard"));
+                /*
+                for (int i = 4359; i < 4370; i++)
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                    item.stack.Value = 20;
+                    Game1.player.addItemToInventory(item);
+                }
+                */
             }
             
         }
@@ -513,33 +529,21 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(Game1 __instance, GameTime gameTime)
             {
-                if (Game1.gameMode == 3 && Game1.gameModeTicks == 1)
+                if (Game1.gameMode == 3)
                 {
-                    ModAssets.localFarmerData.FirstGameTick();
+                    if (Game1.gameModeTicks == 1)
+                    {
+                        ModAssets.localFarmerData.FirstGameTick();
+                    }
                     
                     if (!Game1.player.modData.ContainsKey("TofuMagicLevel"))
                     {
                         Game1.player.modData.Add("TofuMagicLevel","0");
-                    }
-                    
-                    if (!Game1.player.modData.ContainsKey("TofuMagicExperience"))
-                    {
                         Game1.player.modData.Add("TofuMagicExperience","0");
-                    }
-                    
-                    if (!Game1.player.modData.ContainsKey("TofuMagicProfession1"))
-                    {
                         Game1.player.modData.Add("TofuMagicProfession1","-1");
-                    }
-                    
-                    if (!Game1.player.modData.ContainsKey("TofuMagicProfession2"))
-                    {
                         Game1.player.modData.Add("TofuMagicProfession2","-1");
-                    }
-                    
-                    if (!Game1.player.modData.ContainsKey("HasUnlockedMagic"))
-                    {
                         Game1.player.modData.Add("HasUnlockedMagic","0");
+                        ModAssets.localFarmerData.FirstGameTick();
                     }
                 }
             }
