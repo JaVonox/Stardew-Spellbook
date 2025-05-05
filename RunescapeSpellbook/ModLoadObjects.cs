@@ -536,14 +536,13 @@ public static class ModAssets
             new ItemDrop(4359,1,0.2f),
         } },
         { "Bat", new List<ItemDrop>(){
-            new ItemDrop(4364,2,0.15f),
+            new ItemDrop(4364,1,0.15f),
+            new ItemDrop(4368,1,0.1f),
         } },
         { "Stone Golem", new List<ItemDrop>(){
-            new ItemDrop(4366,1,0.1f),
-            new ItemDrop(4367,2,0.2f),
-            new ItemDrop(4295,3,0.1f),
-            new ItemDrop(4297,3,0.2f),
-            new ItemDrop(4361,1,0.05f),
+            new ItemDrop(4364,1,0.2f),
+            new ItemDrop(4250,1,0.1f),
+            new ItemDrop(4361,1,0.08f),
         } },
     };
 
