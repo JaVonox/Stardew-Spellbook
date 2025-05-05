@@ -510,10 +510,9 @@ public static class ModAssets
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
     {
         { "Big Slime", new List<ItemDrop>(){
-            new ItemDrop(4296,2,0.2f),
-            new ItemDrop(4368,1,0.2f),
-            new ItemDrop(4359,2,0.1f),
-            new ItemDrop(4360,1,0.05f)
+            new ItemDrop(4295,2,0.08f),
+            new ItemDrop(4359,1,0.08f),
+            new ItemDrop(4360,1,0.05f),
         } },
         { "Prismatic Slime", new List<ItemDrop>(){
             new ItemDrop(4295,4,0.9f),
@@ -521,24 +520,24 @@ public static class ModAssets
         } },
         { "Green Slime", new List<ItemDrop>(){
             new ItemDrop(4295,2,0.08f),
-            new ItemDrop(4359,1,0.1f),
-            new ItemDrop(4360,1,0.08f),
+            new ItemDrop(4359,1,0.08f),
+            new ItemDrop(4360,1,0.05f),
         } },
         { "Duggy", new List<ItemDrop>(){
-            new ItemDrop(4359,1,0.3f),
+            new ItemDrop(4359,1,0.2f),
         } },
         { "Fly", new List<ItemDrop>(){
             new ItemDrop(4364,1,0.2f),
             new ItemDrop(4368,1,0.05f),
         } },
         { "Rock Crab", new List<ItemDrop>(){
-            new ItemDrop(4360,1,0.3f),
+            new ItemDrop(4359,1,0.3f),
         } },
         { "Grub", new List<ItemDrop>(){
             new ItemDrop(4296,2,0.1f),
         } },
         { "Bug", new List<ItemDrop>(){
-            new ItemDrop(4368,1,0.1f),
+            new ItemDrop(4368,1,0.08f),
             new ItemDrop(4359,1,0.2f),
         } },
         { "Bat", new List<ItemDrop>(){
