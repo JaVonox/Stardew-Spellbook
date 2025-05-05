@@ -511,8 +511,7 @@ public static class ModAssets
     {
         { "Big Slime", new List<ItemDrop>(){
             new ItemDrop(4295,2,0.08f),
-            new ItemDrop(4359,1,0.08f),
-            new ItemDrop(4360,1,0.05f),
+            new ItemDrop(4359,1,0.02f),
         } },
         { "Prismatic Slime", new List<ItemDrop>(){
             new ItemDrop(4295,4,0.9f),
@@ -520,11 +519,7 @@ public static class ModAssets
         } },
         { "Green Slime", new List<ItemDrop>(){
             new ItemDrop(4295,2,0.08f),
-            new ItemDrop(4359,1,0.08f),
-            new ItemDrop(4360,1,0.05f),
-        } },
-        { "Duggy", new List<ItemDrop>(){
-            new ItemDrop(4359,1,0.2f),
+            new ItemDrop(4359,1,0.02f),
         } },
         { "Fly", new List<ItemDrop>(){
             new ItemDrop(4364,1,0.2f),
