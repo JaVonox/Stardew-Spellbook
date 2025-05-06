@@ -540,8 +540,30 @@ public static class ModAssets
             new ItemDrop(4368,1,0.1f),
         } },
         { "Stone Golem", new List<ItemDrop>(){
-            new ItemDrop(4364,1,0.2f),
-            new ItemDrop(4250,1,0.1f),
+            new ItemDrop(4367,1,0.2f),
+            new ItemDrop(4260,1,0.1f),
+            new ItemDrop(4361,1,0.04f),
+        } },
+        { "Dust Sprit", new List<ItemDrop>(){
+            new ItemDrop(4364,1,0.1f),
+            new ItemDrop(4296,1,0.02f),
+        } },
+        { "Frost Bat", new List<ItemDrop>(){
+            new ItemDrop(4365,1,0.15f),
+            new ItemDrop(4368,1,0.1f),
+        } },
+        { "Ghost", new List<ItemDrop>(){
+            new ItemDrop(4295,3,0.1f),
+            new ItemDrop(4297,2,0.05f),
+            new ItemDrop(4360,1,0.15f),
+        } },
+        { "Frost Jelly", new List<ItemDrop>(){
+            new ItemDrop(4365,1,0.1f),
+            new ItemDrop(4359,1,0.15f),
+        } },
+        { "Skeleton", new List<ItemDrop>(){
+            new ItemDrop(4368,1,0.15f),
+            new ItemDrop(4369,1,0.02f),
             new ItemDrop(4361,1,0.08f),
         } },
     };
