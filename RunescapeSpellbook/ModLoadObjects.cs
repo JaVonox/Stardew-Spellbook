@@ -575,24 +575,25 @@ public static class ModAssets
         { "Lava Crab", new List<ItemDrop>(){
             new ItemDrop(4365,1,0.15f),
             new ItemDrop(4366,1,0.3f),
-            new ItemDrop(4359,2,0.1f),
-            new ItemDrop(4360,2,0.1f),
+            new ItemDrop(4359,2,0.3f),
         } },
         { "Shadow Shaman", new List<ItemDrop>(){
+            new ItemDrop(4296,3,0.2f),
             new ItemDrop(4298,2,0.2f),
-            new ItemDrop(4360,2,0.3f),
+            new ItemDrop(4360,2,0.2f),
         } },
         { "Metal Head", new List<ItemDrop>(){
             new ItemDrop(4367,2,0.3f),
             new ItemDrop(4361,1,0.1f),
         } },
         { "Shadow Brute", new List<ItemDrop>(){
-            new ItemDrop(4368,1,0.3f),
-            new ItemDrop(4369,1,0.3f),
+            new ItemDrop(4368,2,0.3f),
+            new ItemDrop(4369,1,0.1f),
             new ItemDrop(4360,1,0.1f),
         } },
         { "Squid Kid", new List<ItemDrop>(){
             new ItemDrop(4364,3,0.2f),
+            new ItemDrop(4297,2,0.2f),
             new ItemDrop(4359,2,0.2f),
         } },
         { "Sludge", new List<ItemDrop>(){
