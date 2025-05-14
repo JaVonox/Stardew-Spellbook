@@ -426,7 +426,7 @@ public static class ModAssets
             new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
             SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 100% of the items shipping bin value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
-        new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",2,
+        new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",0,
             new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.3f,SpellEffects.Humidify, 10,5,"Humidify",
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
         
@@ -565,7 +565,39 @@ public static class ModAssets
         { "Skeleton", new List<ItemDrop>(){
             new ItemDrop(4368,1,0.15f),
             new ItemDrop(4369,1,0.02f),
+            new ItemDrop(4360,1,0.05f),
             new ItemDrop(4361,1,0.08f),
+        } },
+        { "Lava Bat", new List<ItemDrop>(){
+            new ItemDrop(4364,2,0.15f),
+            new ItemDrop(4366,2,0.15f),
+        } },
+        { "Lava Crab", new List<ItemDrop>(){
+            new ItemDrop(4365,1,0.15f),
+            new ItemDrop(4366,1,0.3f),
+            new ItemDrop(4359,2,0.1f),
+            new ItemDrop(4360,2,0.1f),
+        } },
+        { "Shadow Shaman", new List<ItemDrop>(){
+            new ItemDrop(4298,2,0.2f),
+            new ItemDrop(4360,2,0.3f),
+        } },
+        { "Metal Head", new List<ItemDrop>(){
+            new ItemDrop(4367,2,0.3f),
+            new ItemDrop(4361,1,0.1f),
+        } },
+        { "Shadow Brute", new List<ItemDrop>(){
+            new ItemDrop(4368,1,0.3f),
+            new ItemDrop(4369,1,0.3f),
+            new ItemDrop(4360,1,0.1f),
+        } },
+        { "Squid Kid", new List<ItemDrop>(){
+            new ItemDrop(4364,3,0.2f),
+            new ItemDrop(4359,2,0.2f),
+        } },
+        { "Sludge", new List<ItemDrop>(){
+            new ItemDrop(4295,2,0.2f),
+            new ItemDrop(4359,1,0.1f),
         } },
     };
 
