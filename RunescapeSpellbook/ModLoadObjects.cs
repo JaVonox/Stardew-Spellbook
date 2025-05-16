@@ -587,8 +587,8 @@ public static class ModAssets
             new ItemDrop(4361,1,0.1f),
         } },
         { "Shadow Brute", new List<ItemDrop>(){
+            new ItemDrop(4364,2,0.1f),
             new ItemDrop(4368,2,0.3f),
-            new ItemDrop(4369,1,0.1f),
             new ItemDrop(4360,1,0.1f),
         } },
         { "Squid Kid", new List<ItemDrop>(){
