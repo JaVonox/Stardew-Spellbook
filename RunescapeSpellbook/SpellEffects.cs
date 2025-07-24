@@ -3,6 +3,7 @@ using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.GameData.Machines;
 using StardewValley.Inventories;
+using StardewValley.Locations;
 using StardewValley.Monsters;
 using StardewValley.TerrainFeatures;
 
@@ -97,10 +98,16 @@ public class SpellEffects : BaseSpellEffects
 
     public static KeyValuePair<bool, string> CurePlant(List<TerrainFeature> tiles, int animOffset)
     {
+
         Farmer player = Game1.player;
         GameLocation currentLoc = player.currentLocation;
         List<HoeDirt> tilesToCastOn = tiles.OfType<HoeDirt>().ToList();
 
+        if (Game1.season == Season.Winter && player.currentLocation is not IslandLocation)
+        {
+            return new KeyValuePair<bool, string>(false, "It is too cold to plant things here!");
+        }
+        
         PlayAnimation(() =>
         {
 
@@ -119,7 +126,7 @@ public class SpellEffects : BaseSpellEffects
     public static KeyValuePair<bool, string> HighAlchemy(ref Item? itemArgs)
     {
         int postCastStackSize = itemArgs.Stack - 1;
-        Game1.player.Money += itemArgs.sellToStorePrice(-1L);
+        Game1.player.Money += (int)Math.Floor(itemArgs.sellToStorePrice(-1L) * 1.5f);
         Game1.player.playNearbySoundAll("purchaseRepeat", null);
         itemArgs.ConsumeStack(1);
         if (postCastStackSize == 0)
@@ -229,6 +236,8 @@ public class SpellEffects : BaseSpellEffects
         {
             try
             {
+                //TODO what if items made from wood make multiple copies? also do catalogue items work for this?
+                
                 postCastStackSize = itemArgs.Stack - 1;
                 List<string> delimCraftRecipe = CraftingRecipe.craftingRecipes[itemArgs.Name].Split(' ').ToList(); //Splits recipe into fields. Item ID is always followed by amount
                 delimCraftRecipe[delimCraftRecipe.Count-1] = delimCraftRecipe[delimCraftRecipe.Count-1].Split('/')[0]; //We need to split the final item again because it will have a / in it to delimit other information

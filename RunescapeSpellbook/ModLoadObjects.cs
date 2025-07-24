@@ -61,6 +61,7 @@ public class ModLoadObjects : ObjectData
         base.Texture = "Mods.RunescapeSpellbook.Assets.modsprites";
         base.SpriteIndex = id - 4290;
         base.Category = category;
+        base.ExcludeFromRandomSale = true;
         this.characterPreferences = characterPreferences ?? new Dictionary<string, PrefType>();
     }
 
@@ -75,7 +76,7 @@ public class RunesObjects : ModLoadObjects
     public RunesObjects(int id, string name, string displayName, string description,Dictionary<string, PrefType>? characterPreferences = null) : 
         base(id,name,displayName,description,characterPreferences,"Basic",0)
     {
-        
+        base.Price = 5;
     }
 }
 
@@ -424,7 +425,7 @@ public static class ModAssets
         
         new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",5,
             new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
-            SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 100% of the items shipping bin value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
+            SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 150% of the items value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
         new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",0,
             new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.3f,SpellEffects.Humidify, 10,5,"Humidify",

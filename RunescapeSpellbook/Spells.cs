@@ -240,7 +240,12 @@ public class TilesSpell : Spell
                 return new KeyValuePair<bool, string>(false,this.noTilesMessage);
             }
 
-            doAction(tilesToCastOn,spellAnimOffset);
+            KeyValuePair<bool, string> result = doAction(tilesToCastOn,spellAnimOffset);
+
+            if (!result.Key) //Check if we have any additional issues
+            {
+                return result;
+            }
             
             RemoveRunes();
             AddExperiencePerTile(tilesToCastOn.Count);

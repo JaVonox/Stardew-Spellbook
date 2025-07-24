@@ -248,6 +248,7 @@ namespace RunescapeSpellbook
             
             if (e.Button == SButton.F10)
             {
+                Game1.player.modData["HasUnlockedMagic"] = "1";
                 Game1.player.changeFriendship(10000, Game1.getCharacterFromName("Wizard"));
                 /*
                 for (int i = 4359; i < 4370; i++)
