@@ -89,6 +89,7 @@ namespace RunescapeSpellbook
                     {
                         var eventDict = asset.AsDictionary<string, string>().Data;
                         
+                        //Wizard gives magic book event
                         eventDict.Add("RS.0/f Wizard 0/t 600 700",
                             "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
                             "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
@@ -98,6 +99,50 @@ namespace RunescapeSpellbook
                             "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600" +
                             "/speak Wizard \"Well, that was all. I'll be on my way now.\"" +
                             "/pause 300/end");
+                    }
+                );
+            }
+            
+            //Gunther + Marlon event
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Events/ArchaeologyHouse"))
+            {
+                e.Edit(asset =>
+                    {
+                        var eventDict = asset.AsDictionary<string, string>().Data;
+                        //Wizard gives magic book event
+                        eventDict.Add("RS.1/n RSRunesFound",
+                            "continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3" +
+                            "/pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"" +
+                            "/speak Marlon \"This is an antique! I've been using this blade for decades now!\"" +
+                            "/warp farmer 3 14 /playSound doorClose /pause 1000" +
+                            "/move farmer 0 -1 1" +
+                            "/move farmer 3 0 2" +
+                            "/move farmer 0 1 1" +
+                            "/move farmer 5 0 0" +
+                            "/move farmer 0 -3 0" +
+                            "/move Gunther 0 0 2" +
+                            "/move Marlon 0 0 2" +
+                            "/speak Gunther \"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"" +
+                            "/move Gunther 0 0 0 /pause 500 /jump Gunther 8 /pause 500 /textAboveHead Gunther \"*huff* *puff*\" /pause 2000 /move Gunther 0 0 2"+
+                            "/speak Gunther \"Perhaps the books can wait. What do you need today, @?\"" +
+                            "/question null \"#I found this underground#Can you tell me about this?\"" +
+                            "/speak Gunther \"Let me have a look...\""+
+                            "/pause 1000" +
+                            "/speak Gunther \"Hmm... I'm not quite sure what that is... \""+
+                            "/speak Gunther \"The runes aren't any I recognise either...\""+
+                            "/move Marlon 0 0 3" +
+                            "/speak Marlon \"Ah, well isn't that nostalgic. It's been decades since I've seen one of those.\""+
+                            "/move Gunther 0 0 1" +
+                            "/speak Gunther \"You're familiar with these?\""+
+                            "/speak Marlon \"Not myself, but an old friend of mine used to be obsessed with them.\""+
+                            "/speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\""+
+                            "/move farmer 1 0 0 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000" +
+                            "/speak Marlon \"As I suspected, these are definitely guthixian runestones. Or rather, they contain guthixian runestones.\"" +
+                            "/speak Marlon \"Ol' Ras used to spend hours trying to crack these things open, until I showed up. Turns out a strike with the trusty hammer does the job in seconds.\""+
+                            "/move Marlon 0 1 2" +
+                            "/speak Marlon \"I'd take these down to the blacksmith, If he's worth his prices, he'll be able to open them.\""+
+                            "/speak Marlon \"If you want to actually use the things, you'll have to pry it out of Rasmodius. He's a secretive old man, but get on his good side and he'll talk your ear off.\""+
+                            "/pause 500 /end");
                     }
                 );
             }
@@ -248,9 +293,10 @@ namespace RunescapeSpellbook
             
             if (e.Button == SButton.F10)
             {
+                Instance.Monitor.Log($"Farmer X:{Game1.player.Tile.X} Y:{Game1.player.Tile.Y}");
+                /*
                 Game1.player.modData["HasUnlockedMagic"] = "1";
                 Game1.player.changeFriendship(10000, Game1.getCharacterFromName("Wizard"));
-                /*
                 for (int i = 4359; i < 4370; i++)
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
@@ -262,15 +308,8 @@ namespace RunescapeSpellbook
             
             if (e.Button == SButton.F11)
             {
-                Game1.player.changeFriendship(10000, Game1.getCharacterFromName("Wizard"));
-                /*
-                for (int i = 4359; i < 4370; i++)
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.stack.Value = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-                */
+                Game1.player.mailReceived.Add("RSRunesFound");
+                Game1.warpFarmer(Game1.getLocationRequest("ArchaeologyHouse"),3,14,2);
             }
             
         }
@@ -611,6 +650,39 @@ namespace RunescapeSpellbook
                 {
                     __result = __instance.buffs.IsApplied("430");
                 }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Farmer), "OnItemReceived")]
+        [HarmonyPatch(new Type[] { typeof(Item), typeof(int), typeof(Item),typeof(bool) })]
+        public class FarmerItemRecievedPatcher
+        {
+            public static void Postfix(Farmer __instance,Item item, int countAdded, Item mergedIntoStack, bool hideHudNotification = false)
+            {
+                //If any mod items are picked up for the first time we play a special animation
+                if (!__instance.hasOrWillReceiveMail("RSRunesFound") && ModAssets.modItems.Any(x=> (x is PackObject || x.id == 4359 || x.id == 4360) && x.id.ToString() == item.ItemId))
+                {
+                    __instance.mailReceived.Add("RSRunesFound");
+                    __instance.holdUpItemThenMessage(item,countAdded);
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Farmer), "showReceiveNewItemMessage")]
+        [HarmonyPatch(new Type[] { typeof(Farmer), typeof(Item), typeof(int) })]
+        public class FarmerNewItemAnimPatcher
+        {
+            public static bool Prefix(Farmer __instance,Farmer who, Item item, int countAdded)
+            {
+                //If any mod items are picked up for the first time we play a special animation
+                if (ModAssets.modItems.Any(x=> (x is PackObject || x.id == 4359 || x.id == 4360) && x.id.ToString() == item.ItemId))
+                {
+                    Game1.drawObjectDialogue(new List<string> { "Your hands tingle as you pick up the mysterious object. Maybe the archaeologist will know something about this?"});
+                    who.completelyStopAnimatingOrDoingAction();
+                    return false;
+                }
+
+                return true;
             }
         }
         

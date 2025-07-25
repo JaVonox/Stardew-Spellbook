@@ -78,6 +78,7 @@ public class RunesObjects : ModLoadObjects
     {
         base.Price = 5;
     }
+    
 }
 
 public class SlingshotItem : ModLoadObjects
