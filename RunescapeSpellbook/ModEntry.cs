@@ -13,6 +13,7 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
 using StardewValley.Monsters;
+using StardewValley.Projectiles;
 using StardewValley.Tools;
 using Object = StardewValley.Object;
 
@@ -112,34 +113,25 @@ namespace RunescapeSpellbook
                         //Wizard gives magic book event
                         eventDict.Add("RS.1/n RSRunesFound",
                             "continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3" +
-                            "/pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"" +
+                            "/skippable /pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"" +
                             "/speak Marlon \"This is an antique! I've been using this blade for decades now!\"" +
                             "/warp farmer 3 14 /playSound doorClose /pause 1000" +
-                            "/move farmer 0 -1 1" +
-                            "/move farmer 3 0 2" +
-                            "/move farmer 0 1 1" +
-                            "/move farmer 5 0 0" +
-                            "/move farmer 0 -3 0" +
-                            "/move Gunther 0 0 2" +
-                            "/move Marlon 0 0 2" +
-                            "/speak Gunther \"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"" +
+                            "/move farmer 0 -1 1 /move farmer 3 0 2 /move farmer 0 1 1 /move farmer 5 0 0 /move Marlon 0 0 2 /move farmer 0 -3 0" +
+                            "/move Gunther 0 0 2 /speak Gunther \"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"" +
                             "/move Gunther 0 0 0 /pause 500 /jump Gunther 8 /pause 500 /textAboveHead Gunther \"*huff* *puff*\" /pause 2000 /move Gunther 0 0 2"+
                             "/speak Gunther \"Perhaps the books can wait. What do you need today, @?\"" +
                             "/question null \"#I found this underground#Can you tell me about this?\"" +
-                            "/speak Gunther \"Let me have a look...\""+
-                            "/pause 1000" +
+                            "/speak Gunther \"Let me have a look...\" /pause 1000"+
                             "/speak Gunther \"Hmm... I'm not quite sure what that is... \""+
                             "/speak Gunther \"The runes aren't any I recognise either...\""+
-                            "/move Marlon 0 0 3" +
-                            "/speak Marlon \"Ah, well isn't that nostalgic. It's been decades since I've seen one of those.\""+
-                            "/move Gunther 0 0 1" +
-                            "/speak Gunther \"You're familiar with these?\""+
+                            "/move Marlon 0 0 3 /speak Marlon \"Ah, well isn't that nostalgic. It's been decades since I've seen one of those.\""+
+                            "/move Gunther 0 0 1 /speak Gunther \"You're familiar with these?\""+
                             "/speak Marlon \"Not myself, but an old friend of mine used to be obsessed with them.\""+
-                            "/speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\""+
-                            "/move farmer 1 0 0 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000" +
+                            "/move Marlon 0 0 2 /speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\""+
+                            "/move farmer 1 0 0 /move Marlon 0 0 2 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000" +
                             "/speak Marlon \"As I suspected, these are definitely guthixian runestones. Or rather, they contain guthixian runestones.\"" +
                             "/speak Marlon \"Ol' Ras used to spend hours trying to crack these things open, until I showed up. Turns out a strike with the trusty hammer does the job in seconds.\""+
-                            "/move Marlon 0 1 2" +
+                            "/move Marlon 0 1 2 /move Gunther 0 0 2" +
                             "/speak Marlon \"I'd take these down to the blacksmith, If he's worth his prices, he'll be able to open them.\""+
                             "/speak Marlon \"If you want to actually use the things, you'll have to pry it out of Rasmodius. He's a secretive old man, but get on his good side and he'll talk your ear off.\""+
                             "/pause 500 /end");
@@ -733,5 +725,65 @@ namespace RunescapeSpellbook
                 }
             }
         }
+        
+        /*
+        [HarmonyPatch(typeof(BasicProjectile), "behaviorOnCollisionWithMonster")]
+        [HarmonyPatch(new Type[] { typeof(NPC),typeof(GameLocation) })]
+        public class SlingshotProjectileMonsterHit
+        {
+            public static bool Prefix(BasicProjectile __instance, NPC n, GameLocation location)
+            {
+                if (__instance.itemId != null && (__instance.damagesMonsters.Value && n is Monster))
+                {
+                    Farmer player = __instance.GetPlayerWhoFiredMe(location);
+                    Monster monster = n as Monster;
+                    if (__instance.itemId.ToString() == "(O)4301") //Water Ammo - significantly cuts monster speed
+                    {
+                        HitMonster(__instance,monster,location,player,1);
+                        return false;
+                    }
+                    else if (__instance.itemId.ToString() == "(O)4302") //Earth Ammo - significantly cuts monster defence
+                    {
+                        HitMonster(__instance,monster,location,player,0);
+                        return false;
+                    }
+                }
+                return true; 
+            }
+
+            private static void HitMonster(BasicProjectile __instance, Monster n, GameLocation location, Farmer player, int debuffType)
+            {
+                location.damageMonster(n.GetBoundingBox(), __instance.damageToFarmer.Value, __instance.damageToFarmer.Value + 1, isBomb: false, player, isProjectile: true);
+
+                foreach (NPC npcEffected in location.characters)
+                {
+                    if(!(npcEffected is Monster)) {continue;}
+                    
+                    Monster monsterEffected = npcEffected as Monster;
+                    
+                    if (monsterEffected.mineMonster.Value)
+                    {
+                        //Apply Debuff
+                        switch (debuffType)
+                        {
+                            case 0:
+                                monsterEffected.resilience.Value = 1;
+                                monsterEffected.doEmote(12);
+                                break;
+                            case 1:
+                                monsterEffected.speed = 1;
+                                monsterEffected.doEmote(28);
+                                break;
+                        }
+                    }
+                }
+
+                if (!n.IsInvisible)
+                {
+                    __instance.piercesLeft.Value--;
+                }
+            }
+        }
+        */
     }
 }
