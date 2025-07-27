@@ -13,6 +13,7 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
 using StardewValley.Monsters;
+using StardewValley.Objects;
 using StardewValley.Projectiles;
 using StardewValley.Tools;
 using Object = StardewValley.Object;
@@ -148,10 +149,32 @@ namespace RunescapeSpellbook
 
                         foreach (KeyValuePair<string,string> mail in ModAssets.loadableMail)
                         {
-                            //This removes the mail if it overlaps with another mail - such as if a new mail is added on a date the mod uses
-                            if (!mailDict.ContainsKey(mail.Key)) //TODO make this change the date
+                            string mailKey = mail.Key;
+                            string mailVal = mail.Value;
+                            
+                            while (true) //Loop until we get a valid assignment for mail
                             {
-                                mailDict.Add(mail.Key, mail.Value);
+                                try
+                                {
+                                    //This removes the mail if it overlaps with another mail - such as if a new mail is added on a date the mod uses or if a future update adds the same key
+                                    if (!mailDict.ContainsKey(mailKey))
+                                    {
+                                        mailDict.Add(mailKey, mailVal);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Monitor.Log($"Duplicate mail key: {mailKey}. Attempting to access next available year", LogLevel.Warn);
+                                        string[] mailDelim = mailKey.Split('_'); 
+                                        mailKey = mailDelim[0] + "_" + mailDelim[1] + "_" + (int.Parse(mailDelim[2]) + 1); //Adds mail to the same date next year. increments year until we get a valid value
+
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Monitor.Log(e.Message, LogLevel.Error); //reports mail error if the mail delim method failed. this should be rare, and only should occur with non-dated mail
+                                    break;
+                                }
                             }
                         }
                     }
@@ -285,23 +308,22 @@ namespace RunescapeSpellbook
             
             if (e.Button == SButton.F10)
             {
-                Instance.Monitor.Log($"Farmer X:{Game1.player.Tile.X} Y:{Game1.player.Tile.Y}");
-                /*
-                Game1.player.modData["HasUnlockedMagic"] = "1";
-                Game1.player.changeFriendship(10000, Game1.getCharacterFromName("Wizard"));
-                for (int i = 4359; i < 4370; i++)
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.stack.Value = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-                */
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"4361");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
+                
+                StardewValley.Object item2 = ItemRegistry.Create<StardewValley.Object>($"4362");
+                item2.Stack = 20;
+                Game1.player.addItemToInventory(item2);
+                
+                StardewValley.Object item3 = ItemRegistry.Create<StardewValley.Object>($"4363");
+                item3.Stack = 20;
+                Game1.player.addItemToInventory(item3);
             }
             
             if (e.Button == SButton.F11)
             {
-                Game1.player.mailReceived.Add("RSRunesFound");
-                Game1.warpFarmer(Game1.getLocationRequest("ArchaeologyHouse"),3,14,2);
+                Game1.warpFarmer(Game1.getLocationRequest("Caldera"),23,25,2);
             }
             
         }

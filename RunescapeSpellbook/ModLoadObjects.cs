@@ -63,6 +63,7 @@ public class ModLoadObjects : ObjectData
         base.Category = category;
         base.ExcludeFromRandomSale = true;
         this.characterPreferences = characterPreferences ?? new Dictionary<string, PrefType>();
+        base.Price = 1;
     }
 
     public void AppendObject(string CustomTextureKey, IDictionary<string,ObjectData> ObjectsSet)
@@ -76,7 +77,7 @@ public class RunesObjects : ModLoadObjects
     public RunesObjects(int id, string name, string displayName, string description,Dictionary<string, PrefType>? characterPreferences = null) : 
         base(id,name,displayName,description,characterPreferences,"Basic",0)
     {
-        base.Price = 5;
+        base.Price = 2;
     }
     
 }
@@ -93,7 +94,7 @@ public class SlingshotItem : ModLoadObjects
 public class TreasureObjects : ModLoadObjects
 {
     public TreasureObjects(int id, string name, string displayName, string description, int spriteID,
-        List<ItemDrop> itemDrops, Dictionary<string, PrefType>? characterPreferences = null) :
+        List<ItemDrop> itemDrops, int sellprice = 35, Dictionary<string, PrefType>? characterPreferences = null) :
         base(id, name, displayName, description,characterPreferences, "Basic", 0)
     {
         base.SpriteIndex = spriteID;
@@ -119,6 +120,7 @@ public class TreasureObjects : ModLoadObjects
         
         base.GeodeDropsDefaultItems = false;
         base.GeodeDrops = objects;
+        base.Price = sellprice;
     }
 
 
@@ -139,6 +141,7 @@ public class TreasureObjects : ModLoadObjects
 
         base.GeodeDropsDefaultItems = false;
         base.GeodeDrops = objects;
+        base.Price = 35;
 
     }
 
@@ -336,7 +339,7 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.3),
                 
                 new ItemDrop(4362,1,1,0.05),
-            }, new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}}),
+            },500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}}),
         
         new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. Clint might be able to open it.",22,
             new List<ItemDrop>()
@@ -348,10 +351,10 @@ public static class ModAssets
                 new ItemDrop(4368,2,5,0.5),
                 new ItemDrop(4369,2,5,0.5),
                 
-                new ItemDrop(4295,10,20,0.5),
-                new ItemDrop(4296,10,20,0.5),
-                new ItemDrop(4297,10,20,0.5),
-                new ItemDrop(4298,10,20,0.5),
+                new ItemDrop(4295,20,30,0.5),
+                new ItemDrop(4296,15,20,0.5),
+                new ItemDrop(4297,15,20,0.5),
+                new ItemDrop(4298,15,20,0.5),
                 
                 new ItemDrop(4359,2,4,1),
                 new ItemDrop(4360,3,5,1),
@@ -362,7 +365,7 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.7),
                 new ItemDrop(4356,1,1,0.2),
                 new ItemDrop(4363,1,1,0.05),
-            },new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
+            },1500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
         
         new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. Clint might be able to open it.",23,
             new List<ItemDrop>()
@@ -370,10 +373,10 @@ public static class ModAssets
                 new ItemDrop(4356,1,1,2),
                 new ItemDrop(4357,1,1,0.4),
                 new ItemDrop(4358,1,1,0.4),
-                new ItemDrop(4368,3,6,1),
-                new ItemDrop(4369,3,6,1),
-                new ItemDrop(4360,5,7,1),
-            },new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
+                new ItemDrop(4368,5,10,1),
+                new ItemDrop(4369,5,10,1),
+                new ItemDrop(4360,10,20,1),
+            },2500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
         
         new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. Clint might be able to open it.",24,4291),
         new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. Clint might be able to open it.",25,4292),
@@ -424,7 +427,7 @@ public static class ModAssets
             (i=>i is Item item && DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId))),
             SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
         
-        new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into gold",5,
+        new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into 1.5x its sell price",5,
             new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
             SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 150% of the items value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
@@ -609,8 +612,8 @@ public static class ModAssets
     {
         {
             "RSSpellMailGet",
-            "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a form of focus, a magical battlestaff." +
-            "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not recieve it in one piece. " +
+            "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
+            "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. " +
             "^^   -M. Rasmodius, Wizard[letterbg 2]" +
             "%item object 4351 1 %%" +
             "[#]Wizard's Battlestaff Gift"
