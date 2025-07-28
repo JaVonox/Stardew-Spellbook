@@ -323,7 +323,7 @@ namespace RunescapeSpellbook
             
             if (e.Button == SButton.F11)
             {
-                Game1.warpFarmer(Game1.getLocationRequest("Caldera"),23,25,2);
+                Game1.warpFarmer(Game1.getLocationRequest("Desert"),23,25,2);
             }
             
         }

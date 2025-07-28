@@ -514,8 +514,10 @@ public static class ModAssets
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
     {
-        { "Big Slime", new List<ItemDrop>(){
+        //Caves (Basic)
+        { "Big Slime", new List<ItemDrop>(){ 
             new ItemDrop(4295,2,0.08f),
+            new ItemDrop(4296,2,0.1f),
             new ItemDrop(4359,1,0.02f),
         } },
         { "Prismatic Slime", new List<ItemDrop>(){
@@ -600,10 +602,42 @@ public static class ModAssets
             new ItemDrop(4364,3,0.2f),
             new ItemDrop(4297,2,0.2f),
             new ItemDrop(4359,2,0.2f),
-        } },
+        } }, //Skull Cavern 
         { "Sludge", new List<ItemDrop>(){
             new ItemDrop(4295,2,0.2f),
-            new ItemDrop(4359,1,0.1f),
+            new ItemDrop(4359,1,0.2f),
+        } },
+        { "Serpent", new List<ItemDrop>(){
+            new ItemDrop(4364,2,0.25f),
+            new ItemDrop(4297,6,0.1f),
+            new ItemDrop(4361,1,0.1f),
+        } },
+        { "Carbon Ghost", new List<ItemDrop>(){
+            new ItemDrop(4295,4,0.3f),
+            new ItemDrop(4298,4,0.2f),
+            new ItemDrop(4369,2,0.1f),
+        } },
+        { "Iridium Crab", new List<ItemDrop>(){
+            new ItemDrop(4365,5,0.6f),
+            new ItemDrop(4359,6,0.6f),
+            new ItemDrop(4360,3,0.4f),
+        } },
+        { "Pepper Rex", new List<ItemDrop>(){
+            new ItemDrop(4366,3,1f),
+            new ItemDrop(4296,3,0.5f),
+            new ItemDrop(4361,1,0.5f),
+        } },
+        { "Mummy", new List<ItemDrop>(){
+            new ItemDrop(4367,2,0.2f),
+            new ItemDrop(4295,3,0.3f),
+            new ItemDrop(4368,3,0.3f),
+            new ItemDrop(4369,1,0.2f),
+            new ItemDrop(4362,1,0.1f),
+        } },
+        { "Iridium Bat", new List<ItemDrop>(){
+            new ItemDrop(4364,3,0.5f),
+            new ItemDrop(4369,2,0.2f),
+            new ItemDrop(4362,1,0.2f),
         } },
     };
 
