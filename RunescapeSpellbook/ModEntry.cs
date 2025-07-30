@@ -13,10 +13,7 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
 using StardewValley.Monsters;
-using StardewValley.Objects;
-using StardewValley.Projectiles;
 using StardewValley.Tools;
-using Object = StardewValley.Object;
 
 namespace RunescapeSpellbook
 {
@@ -32,8 +29,20 @@ namespace RunescapeSpellbook
 
             ModAssets.Load(helper);
             
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
+            
+            helper.ConsoleCommands.Add("rs_grantmagic", "Gives the player magic.\n\nUsage: rs_grantmagic <value>\n\n value: the level to set to", this.GrantMagic);
+            helper.ConsoleCommands.Add("rs_setlevel", "Sets the players magic level.\n\nUsage: rs_setlevel <value>\n\n value: the level to set to", this.SetLevel);
+            helper.ConsoleCommands.Add("rs_setexp", "Sets the players experience level.\n\nUsage: rs_setexp <value>\n\n value: the experience to set to", this.SetExp);
+            helper.ConsoleCommands.Add("rs_addexp", "Adds to the players experience level.\n\nUsage: rs_addexp <value>\n\n value: the experience to add", this.AddExp);
+            helper.ConsoleCommands.Add("rs_clearperks", "Clears a players perks.\n\nUsage: rs_clearperks", this.ResetPerks);
+            helper.ConsoleCommands.Add("rs_info", "Dumps some info about all players to console.\n\nUsage: rs_info", this.PlayerInfo);
+            helper.ConsoleCommands.Add("rs_grantrunes", "Gives the player some runes.\n\nUsage: rs_grantrunes <value>\n\n value: default, rune name, elemental, catalytic, teleport, utility, combat, combat2", this.GrantRunes);
+            helper.ConsoleCommands.Add("rs_grantstaff", "Gives the player staves.\n\nUsage: rs_grantstaff", this.GrantStaffs);
+            helper.ConsoleCommands.Add("rs_grantammo", "Gives the player ammo.\n\nUsage: rs_grantammo", this.GrantAmmo);
+            helper.ConsoleCommands.Add("rs_granttreasure", "Gives the player treasures.\n\nUsage: rs_granttreasure", this.GrantTreasures);
+            helper.ConsoleCommands.Add("rs_grantpacks", "Gives the player packs.\n\nUsage: rs_grantpacks", this.GrantPacks);
+            //helper.ConsoleCommands.Add("rs_unpackall", "Unpacks all treasures and packs in the players inventory and grants the item.\n\nUsage: rs_unpackall", this.UnpackAll);
         }
             
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
@@ -254,78 +263,6 @@ namespace RunescapeSpellbook
                 });
 
             }
-        }
-
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
-        {
-            if (!Context.IsWorldReady)
-            {
-                return;
-            }
-
-            if (e.Button == SButton.F5)
-            {
-                for (int i = 4291; i < 4303; i++)
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.Stack = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-            }
-
-            if (e.Button == SButton.F6)
-            {
-                foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
-                {
-                    MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id.ToString());
-                    Game1.player.addItemToInventory(item);
-                }
-            }
-            
-            if (e.Button == SButton.F7)
-            {
-                Game1.player.modData["TofuMagicLevel"] = "0";
-                Game1.player.modData["TofuMagicExperience"] = "0";
-                Game1.player.modData["TofuMagicProfession1"] = "-1";
-                Game1.player.modData["TofuMagicProfession2"] = "-1";
-                Game1.player.modData["HasUnlockedMagic"] = "0";
-            }
-            
-            if (e.Button == SButton.F8)
-            {
-                ModAssets.IncrementMagicExperience(Game1.player,5000);
-                Monitor.Log("Set Extra EXP", LogLevel.Info);
-            }
-            
-            if (e.Button == SButton.F9)
-            {
-                foreach (Farmer farmerRoot in ModAssets.GetFarmers())
-                {
-                    Instance.Monitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Warn);
-                    Instance.Monitor.Log($"Exp: {farmerRoot.modData["TofuMagicExperience"]}",LogLevel.Warn);
-                }
-            }
-            
-            if (e.Button == SButton.F10)
-            {
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"4361");
-                item.Stack = 20;
-                Game1.player.addItemToInventory(item);
-                
-                StardewValley.Object item2 = ItemRegistry.Create<StardewValley.Object>($"4362");
-                item2.Stack = 20;
-                Game1.player.addItemToInventory(item2);
-                
-                StardewValley.Object item3 = ItemRegistry.Create<StardewValley.Object>($"4363");
-                item3.Stack = 20;
-                Game1.player.addItemToInventory(item3);
-            }
-            
-            if (e.Button == SButton.F11)
-            {
-                Game1.warpFarmer(Game1.getLocationRequest("Desert"),23,25,2);
-            }
-            
         }
         
         //Add menu item to getTabNumberFromName
@@ -612,7 +549,9 @@ namespace RunescapeSpellbook
             {
                 if (ModAssets.monsterDrops.ContainsKey(name))
                 {
-                    foreach (ItemDrop item in ModAssets.monsterDrops[name])
+                    List<ItemDrop> monsterDrops = ModAssets.monsterDrops[name];
+
+                    foreach (ItemDrop item in monsterDrops)
                     {
                         if (Game1.random.NextDouble() <= item.chance)
                         {
@@ -713,6 +652,30 @@ namespace RunescapeSpellbook
             }
         }
         
+        //Certain Bat AI enemies do not assign drops via the usual method. This modification hardcodes some solutions to add in items for these enemies
+        [HarmonyPatch(typeof(Bat), "getExtraDropItems")]
+        public class HauntedSkullPatcher
+        {
+            public static void Postfix(ref List<Item> __result,Bat __instance)
+            {
+                if (__instance.hauntedSkull.Value && __instance.cursedDoll.Value)
+                {
+                    foreach (ItemDrop item in ModAssets.monsterDrops["Haunted Skull"])
+                    {
+                        if (Game1.random.NextDouble() <= item.chance)
+                        {
+                            for (int i = 0; i < item.amount; i++) //For some reason having single stacked items on the ground as monster drops just feels unnatural
+                            {
+                                StardewValley.Object generatedItem = ItemRegistry.Create<StardewValley.Object>($"{item.itemID}");
+                                __result.Add(generatedItem);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        
         [HarmonyPatch(typeof(Slingshot), "canThisBeAttached")]
         [HarmonyPatch(new Type[] { typeof(StardewValley.Object),typeof(int) })]
         public class SlingshotAttachmentPatcher
@@ -807,5 +770,319 @@ namespace RunescapeSpellbook
             }
         }
         */
+        
+        //Console Commands
+        private bool HasNoMagic()
+        {
+            if (!ModAssets.HasMagic(Game1.player))
+            {
+                this.Monitor.Log("You don't have access to magic, use rs_grantmagic to give magic access",LogLevel.Warn);
+                return true;
+            }
+
+            return false;
+        }
+        
+        private bool HasNoWorldContextReady()
+        {
+            if (!Context.IsWorldReady)
+            {
+                this.Monitor.Log("World not yet initialised",LogLevel.Warn);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void GrantMagic(string command, string[] args)
+        {
+            if(HasNoWorldContextReady()){return;}
+            
+            if (ModAssets.HasMagic(Game1.player))
+            {
+                this.Monitor.Log("You already have access to magic",LogLevel.Warn);
+                return;
+            }
+            Game1.player.eventsSeen.Add("RS.0");
+            this.Monitor.Log("Added magic");
+            int reqLevel;
+            if (args.Length > 0 && int.TryParse(args[0], out reqLevel))
+            {
+                reqLevel = Math.Clamp(reqLevel, 0, 10);
+                Game1.player.modData["TofuMagicLevel"] = (reqLevel).ToString();
+                Game1.player.modData["TofuMagicExperience"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
+                this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
+            }
+        }
+    
+        private void SetLevel(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+            if (args.Length == 0)
+            {
+                this.Monitor.Log("Specify a magic level to apply",LogLevel.Error);
+                return;
+            }
+            
+            int reqLevel;
+            if (int.TryParse(args[0], out reqLevel))
+            {
+                reqLevel = Math.Clamp(reqLevel, 0, 10);
+                Game1.player.modData["TofuMagicLevel"] = (reqLevel).ToString();
+                Game1.player.modData["TofuMagicExperience"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
+                this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
+            }
+        }
+        
+        private void SetExp(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+            if (args.Length == 0)
+            {
+                this.Monitor.Log("Specify an amount of exp to set to",LogLevel.Error);
+                return;
+            }
+            
+            int reqExp;
+            if (int.TryParse(args[0], out reqExp))
+            {
+                reqExp = Math.Clamp(reqExp, 0, 15000);
+                Game1.player.modData["TofuMagicLevel"] = "0";
+                ModAssets.IncrementMagicExperience(Game1.player, reqExp);
+                this.Monitor.Log($"Set experience to {reqExp}",LogLevel.Info);
+            }
+        }
+        
+        private void AddExp(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+            if (args.Length == 0)
+            {
+                this.Monitor.Log("Specify an amount of exp to add",LogLevel.Error);
+                return;
+            }
+            
+            int reqAddExp;
+            if (int.TryParse(args[0], out reqAddExp))
+            {
+                reqAddExp = Math.Clamp(reqAddExp, 0, Farmer.getBaseExperienceForLevel(10) - ModAssets.GetFarmerExperience(Game1.player));
+                ModAssets.IncrementMagicExperience(Game1.player, reqAddExp);
+                this.Monitor.Log($"Added {reqAddExp} experience to player",LogLevel.Info);
+            }
+        }
+        
+        private void ResetPerks(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+            
+            Game1.player.modData["TofuMagicProfession1"] = "-1";
+            Game1.player.modData["TofuMagicProfession2"] = "-1";
+            
+            this.Monitor.Log($"Removed assigned perks",LogLevel.Info);
+        }
+        
+        private void PlayerInfo(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+
+            foreach (Farmer farmerRoot in ModAssets.GetFarmers())
+            {
+                Instance.Monitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Info);
+                Instance.Monitor.Log($"HasMagic: {ModAssets.HasMagic(farmerRoot)}",LogLevel.Info);
+                Instance.Monitor.Log($"Level: {ModAssets.GetFarmerMagicLevel(farmerRoot)}",LogLevel.Info);
+                Instance.Monitor.Log($"Exp: {farmerRoot.modData["TofuMagicExperience"]}",LogLevel.Info);
+                
+                List<int> perkIDs = ModAssets.PerksAssigned(farmerRoot);
+                int perkIndex = 1;
+                foreach (int id in perkIDs)
+                {
+                    string perkName = id == -1 ? "Unassigned" : ModAssets.perks.Where(x=>x.perkID==id).Select(x=>x.perkName).First();
+                    Instance.Monitor.Log($"Perk Slot {perkIndex}: {perkName}",LogLevel.Info);
+                }
+            }
+        }
+        private void GrantElemRunes()
+        {
+            for (int i = 4291; i <= 4294; i++)
+            {
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                item.Stack = 255;
+                Game1.player.addItemToInventory(item);
+            }
+        }
+        private void GrantRunes(string command, string[] args)
+        {
+            if(HasNoWorldContextReady()){return;}
+
+            string runeReq;
+            if (args.Length == 0)
+            {
+                runeReq = "default";
+            }
+            else
+            {
+                runeReq = args[0].ToLower();
+            }
+            
+            if (runeReq == "default")
+            {
+                foreach (int id in ModAssets.modItems.Where(x => x is RunesObjects && x.id != 4290).Select(y=>y.id))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{id}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
+            }
+            else if (runeReq == "elemental" || runeReq == "elem")
+            {
+                GrantElemRunes();
+            }
+            else if (runeReq == "catalytic" || runeReq == "cat" || runeReq == "cata")
+            {
+                for (int i = 4295; i <= 4300; i++)
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
+            }
+            else if (runeReq == "teleport" || runeReq == "tele")
+            {
+                GrantElemRunes();
+                
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"4295");
+                item.Stack = 255;
+                Game1.player.addItemToInventory(item);
+            }
+            else if (runeReq == "utility" || runeReq == "util")
+            {
+                GrantElemRunes();
+                
+                for (int i = 4296; i <= 4298; i++)
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
+            }
+            else if (runeReq == "combat" || runeReq == "comb")
+            {
+                GrantElemRunes();
+                
+                for (int i = 4299; i <= 4300; i++)
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
+            }
+            else if (runeReq == "combat2" || runeReq == "com2" || runeReq == "comb2")
+            {
+                GrantElemRunes();
+                
+                for (int i = 4297; i <= 4300; i++)
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
+            }
+            else
+            {
+                List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x is RunesObjects && x.Name.ToLower().Contains(runeReq)).ToList();
+                if (matchList.Count == 0)
+                {
+                    this.Monitor.Log($"Invalid rune set to grant {runeReq}",LogLevel.Error);
+                    return;
+                }
+                else
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{matchList[0].id}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
+                
+            }
+            
+            this.Monitor.Log($"Granted runes from set {runeReq}",LogLevel.Info);
+        }
+        
+        private void GrantAmmo(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+            
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x is SlingshotItem))
+            {
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 255;
+                Game1.player.addItemToInventory(item);
+            }
+            
+            this.Monitor.Log($"Granted all ammos",LogLevel.Info);
+        }
+        private void GrantStaffs(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+
+            foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
+            {
+                MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id.ToString());
+                Game1.player.addItemToInventory(item);
+            }
+            
+            this.Monitor.Log($"Granted all staves",LogLevel.Info);
+        }
+        
+        private void GrantTreasures(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+            
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x is TreasureObjects && x is not PackObject))
+            {
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
+            }
+            
+            this.Monitor.Log($"Granted all treasures",LogLevel.Info);
+        }
+        
+        private void GrantPacks(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+            
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x is PackObject))
+            {
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
+            }
+            
+            this.Monitor.Log($"Granted all packs",LogLevel.Info);
+        }
+        
+        private void UnpackAll(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+            
+            //TODO doesn't work yet. seems to only produce the same one item. Geode crusher is also broken with this
+            
+            foreach (TreasureObjects treasureType in ModAssets.modItems.Where(x=>x is TreasureObjects))
+            {
+                int playerTreasureCount = Game1.player.Items.CountId($"{treasureType.id}");
+                
+                for (int i = 0; i < playerTreasureCount; i++)
+                {
+                    Item openedItem = Utility.getTreasureFromGeode(Game1.player.Items.GetById($"{treasureType.id}").First());
+                    this.Monitor.Log($"Opened treasure {treasureType.Name} into {openedItem.DisplayName} with amount {openedItem.Stack}",LogLevel.Info);
+                    Game1.player.dropItem(openedItem);
+                    Game1.player.Items.ReduceId($"{treasureType.id}", 1);
+                }
+            }
+            //TODO add "no packs/treasures" return
+        }
     }
 }

@@ -27,7 +27,6 @@ public struct ItemDrop
         this.minAmount = amount;
         this.maxAmount = amount;
     }
-    
     public ItemDrop(int itemID, int minAmount, int maxAmount, double weight = 1.0) 
     {
         this.itemID = itemID;
@@ -50,7 +49,6 @@ public class ModLoadObjects : ObjectData
 {
     public int id;
     public Dictionary<string, PrefType>? characterPreferences;
-
     public ModLoadObjects(int id, string name, string displayName, string description, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
     {
         this.id = id;
@@ -269,7 +267,7 @@ public static class ModAssets
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}}),
         new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",
             new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}}),
-        
+
         new SlingshotItem(4301,"Ammo_Water","Water Orb","Slingshot ammo enchanted with the power of water",30),
         new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Slingshot ammo enchanted with the power of earth",31),
         
@@ -471,28 +469,28 @@ public static class ModAssets
             new Dictionary<int, int>() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
         
         new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",0,
-            new Dictionary<int, int>() { {4299, 1},{4291,1}}, 1,25,15,0,Color.White,"WindStrike"),
+            new Dictionary<int, int>() { {4299, 1},{4291,1}}, 1,40,15,0,Color.White,"WindStrike"),
        
         new CombatSpell(15,"Combat_Water","Water Bolt","A low level water missile",2,
-            new Dictionary<int, int>() { {4299, 2},{4291,2},{4292,2}},2, 35,16,1,Color.DarkCyan,"WaterBolt"),
+            new Dictionary<int, int>() { {4299, 2},{4291,2},{4292,2}},2, 70,16,1,Color.DarkCyan,"WaterBolt"),
         
         new CombatSpell(16,"Combat_Undead","Crumble Undead","Hits undead monsters for extra damage",4,
-            new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}},4, 30,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
+            new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}},4, 60,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
         
         new CombatSpell(17,"Combat_Earth","Earth Blast","A medium level earth missile",6,
-            new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,3}},4, 60,16,1,Color.DarkGreen,"EarthBlast"),
+            new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,3}},4, 90,16,1,Color.DarkGreen,"EarthBlast"),
         
         new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
-            new Dictionary<int, int>() { {4300, 2},{4291,3},{4293,4}},5, 95,15,2,Color.OrangeRed,"FireWave"),
+            new Dictionary<int, int>() { {4300, 2},{4291,3},{4293,4}},5, 120,15,2,Color.OrangeRed,"FireWave"),
         
         new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 60 seconds",7,
             new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
-            new Dictionary<int, int>() { {4300, 2},{4298,2},{4293,4}},6, 65,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
+            new Dictionary<int, int>() { {4300, 2},{4298,2},{4293,4}},6, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
         
         new CombatSpell(21,"Combat_Blood","Blood Barrage","Fires a strong vampiric blood missile",10,
-            new Dictionary<int, int>() { {4300, 4},{4297,3}}, 10,80,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
+            new Dictionary<int, int>() { {4300, 4},{4297,3}}, 10,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
         
         new InventorySpell(22,"Menu_Plank","Plank Make","Turns wood into hardwood and vice versa and uncrafts wooden items into wood",3,
             new Dictionary<int, int>() { {4298, 1},{4297,1}},5,
@@ -639,6 +637,45 @@ public static class ModAssets
             new ItemDrop(4369,2,0.2f),
             new ItemDrop(4362,1,0.2f),
         } },
+        { "Haunted Skull", new List<ItemDrop>(){ //Quarry Mine
+            new ItemDrop(4297,3,0.4f),
+            new ItemDrop(4298,3,0.3f),
+            new ItemDrop(4361,1,0.05f),
+            new ItemDrop(4362,1,0.02f),
+        } },
+        { "Hot Head", new List<ItemDrop>(){ //Ginger Island/Volcano
+            new ItemDrop(4366,2,0.3f),
+            new ItemDrop(4369,3,0.2f),
+            new ItemDrop(4360,2,0.2f),
+        } },
+        { "Tiger Slime", new List<ItemDrop>(){
+            new ItemDrop(4365,2,0.1f),
+            new ItemDrop(4367,1,0.2f),
+            new ItemDrop(4296,5,0.3f),
+            new ItemDrop(4368,3,0.3f),
+        } },
+        { "Magma Sprite", new List<ItemDrop>(){
+            new ItemDrop(4364,3,0.2f),
+            new ItemDrop(4366,2,0.3f),
+        } },
+        { "Dwarvish Sentry", new List<ItemDrop>(){
+            new ItemDrop(4295,4,0.24f),
+            new ItemDrop(4297,10,0.2f),
+            new ItemDrop(4369,3,0.3f),
+            new ItemDrop(4363,1,0.05f),
+        } },
+        { "Magma Duggy", new List<ItemDrop>(){
+            new ItemDrop(4366,2,0.3f),
+            new ItemDrop(4359,5,0.3f),
+            new ItemDrop(4363,1,0.05f),
+        } },
+        { "Magma Sparker", new List<ItemDrop>(){
+            new ItemDrop(4366,2,0.3f),
+        } },
+        { "False Magma Cap", new List<ItemDrop>(){
+            new ItemDrop(4367,1,0.2f),
+            new ItemDrop(4297,10,0.2f),
+        } },
     };
 
     //Mail to be loaded into the game
@@ -758,7 +795,8 @@ public static class ModAssets
         {
             return true;
         }
-        else if (farmer.eventsSeen.Contains("RS.0"))
+        
+        if (farmer.eventsSeen.Contains("RS.0"))
         {
             farmer.modData["HasUnlockedMagic"] = "1";
             return true;
