@@ -42,7 +42,7 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_grantammo", "Gives the player ammo.\n\nUsage: rs_grantammo", this.GrantAmmo);
             helper.ConsoleCommands.Add("rs_granttreasure", "Gives the player treasures.\n\nUsage: rs_granttreasure", this.GrantTreasures);
             helper.ConsoleCommands.Add("rs_grantpacks", "Gives the player packs.\n\nUsage: rs_grantpacks", this.GrantPacks);
-            //helper.ConsoleCommands.Add("rs_unpackall", "Unpacks all treasures and packs in the players inventory and grants the item.\n\nUsage: rs_unpackall", this.UnpackAll);
+            helper.ConsoleCommands.Add("rs_miscDebug", "Runs a command left in for testing. Do not use. \n\nUsage: rs_miscDebug", this.DebugCommand);
         }
             
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
@@ -101,7 +101,7 @@ namespace RunescapeSpellbook
                         var eventDict = asset.AsDictionary<string, string>().Data;
                         
                         //Wizard gives magic book event
-                        eventDict.Add("RS.0/f Wizard 0/t 600 700",
+                        eventDict.Add("RS.0/f Wizard 0/t 600 1200",
                             "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
                             "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
                             "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
@@ -134,7 +134,7 @@ namespace RunescapeSpellbook
                             "/speak Gunther \"Let me have a look...\" /pause 1000"+
                             "/speak Gunther \"Hmm... I'm not quite sure what that is... \""+
                             "/speak Gunther \"The runes aren't any I recognise either...\""+
-                            "/move Marlon 0 0 3 /speak Marlon \"Ah, well isn't that nostalgic. It's been decades since I've seen one of those.\""+
+                            "/move Marlon 0 0 3 /speak Marlon \"Ah, well isn't that nostalgic.\""+
                             "/move Gunther 0 0 1 /speak Gunther \"You're familiar with these?\""+
                             "/speak Marlon \"Not myself, but an old friend of mine used to be obsessed with them.\""+
                             "/move Marlon 0 0 2 /speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\""+
@@ -333,6 +333,25 @@ namespace RunescapeSpellbook
             }
         }
 
+        //Prevent Geode crushing for special items
+        [HarmonyPatch(typeof(Utility), "IsGeode")]
+        [HarmonyPatch(new Type[] { typeof(Item),typeof(bool)})]
+        public class GeodeCrusherPatch
+        {
+            public static bool Prefix(ref bool __result, Item item, bool disallow_special_geodes)
+            {
+                //Special geode blocking check now includes TreasureObjects, since those can output weapons. This prevents bugs with using geodes in the geode crusher.
+                //ContextTags could be used to do this as well, but it seems to cause errors too.
+                if (disallow_special_geodes && ModAssets.modItems.Any(x => x.id.ToString() == item.ItemId && x.id != 4359 && x.id != 4360 && x is TreasureObjects && x is not PackObject))
+                {
+                    __result = false;
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         public static class MeleeWeaponPatches
         {
         //Add to weapon swipe
@@ -371,7 +390,7 @@ namespace RunescapeSpellbook
             }
         }
         
-        //TODO check for and remove forge + enchant ability from staves
+        //TODO add Custom forge enchants to replace existing forge enchants 
         [HarmonyPatch(typeof(MeleeWeapon), "FireProjectile")]
         [HarmonyPatch(new Type[] { typeof(Farmer) })]
         public class FireProjectilePatcher
@@ -1050,6 +1069,12 @@ namespace RunescapeSpellbook
             this.Monitor.Log($"Granted all treasures",LogLevel.Info);
         }
         
+        private void DebugCommand(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+            Game1.warpFarmer("Caldera",24,30,2);
+        }
+        
         private void GrantPacks(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
@@ -1062,27 +1087,6 @@ namespace RunescapeSpellbook
             }
             
             this.Monitor.Log($"Granted all packs",LogLevel.Info);
-        }
-        
-        private void UnpackAll(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-            
-            //TODO doesn't work yet. seems to only produce the same one item. Geode crusher is also broken with this
-            
-            foreach (TreasureObjects treasureType in ModAssets.modItems.Where(x=>x is TreasureObjects))
-            {
-                int playerTreasureCount = Game1.player.Items.CountId($"{treasureType.id}");
-                
-                for (int i = 0; i < playerTreasureCount; i++)
-                {
-                    Item openedItem = Utility.getTreasureFromGeode(Game1.player.Items.GetById($"{treasureType.id}").First());
-                    this.Monitor.Log($"Opened treasure {treasureType.Name} into {openedItem.DisplayName} with amount {openedItem.Stack}",LogLevel.Info);
-                    Game1.player.dropItem(openedItem);
-                    Game1.player.Items.ReduceId($"{treasureType.id}", 1);
-                }
-            }
-            //TODO add "no packs/treasures" return
         }
     }
 }

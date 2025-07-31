@@ -5,6 +5,7 @@ using StardewValley;
 using StardewValley.BellsAndWhistles;
 using StardewValley.Monsters;
 using StardewValley.Projectiles;
+using StardewValley.TerrainFeatures;
 using StardewValley.TokenizableStrings;
 
 namespace RunescapeSpellbook;
@@ -79,6 +80,10 @@ public class MagicProjectile : BasicProjectile
         }
     }
     
+    //Allows piercing through objects like rocks
+    public override void behaviorOnCollisionWithTerrainFeature(TerrainFeature t, Vector2 tileLocation, GameLocation location)
+    {
+    }
     public override void draw(SpriteBatch b)
     {
         float current_scale = 4f * localScale;

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HarmonyLib;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
 using StardewModdingAPI;
@@ -140,7 +141,6 @@ public class TreasureObjects : ModLoadObjects
         base.GeodeDropsDefaultItems = false;
         base.GeodeDrops = objects;
         base.Price = 35;
-
     }
 
     /// <summary>
@@ -274,19 +274,19 @@ public static class ModAssets
         new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. Clint might be able to open it.",19,
             new List<ItemDrop>()
             {
-                new ItemDrop(4291, 7, 12, 1.5),
-                new ItemDrop(4291, 13, 23, 0.5),
-                new ItemDrop(4291, 25, 35, 0.25),
+                new ItemDrop(4291, 10, 12, 1),
+                new ItemDrop(4291, 13, 23, 0.6),
+                new ItemDrop(4291, 25, 35, 0.35),
                 
-                new ItemDrop(4292, 7, 12, 1.5),
+                new ItemDrop(4292, 10, 12, 1),
                 new ItemDrop(4292, 13, 23, 0.5),
                 new ItemDrop(4292, 25, 35, 0.25),
                 
-                new ItemDrop(4293, 7, 12, 1.5),
+                new ItemDrop(4293, 10, 12, 1),
                 new ItemDrop(4293, 13, 23, 0.5),
                 new ItemDrop(4293, 25, 35, 0.25),
                 
-                new ItemDrop(4294, 7, 12, 1.5),
+                new ItemDrop(4294, 10, 12, 1),
                 new ItemDrop(4294, 13, 23, 0.5),
                 new ItemDrop(4294, 25, 35, 0.25),
             }),
@@ -294,41 +294,40 @@ public static class ModAssets
         new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. Clint might be able to open it.",20,
             new List<ItemDrop>()
             {
-                new ItemDrop(4295, 2, 7, 1),
+                new ItemDrop(4295, 5, 12, 1),
                 
-                new ItemDrop(4296, 2, 7, 1),
+                new ItemDrop(4296, 7, 12, 1),
                 
-                new ItemDrop(4297, 2, 7, 1),
+                new ItemDrop(4297, 7, 12, 1),
                 
-                new ItemDrop(4298, 2, 7, 1),
+                new ItemDrop(4298, 7, 12, 1),
                 
-                new ItemDrop(4299, 7, 12, 1.5),
-                new ItemDrop(4299, 13, 23, 0.5),
+                new ItemDrop(4299, 10, 15, 1),
+                new ItemDrop(4299, 16, 23, 0.5),
                 new ItemDrop(4299, 25, 35, 0.25),
                 
-                new ItemDrop(4300, 7, 12, 1),
-                new ItemDrop(4300, 13, 23, 0.5),
-                new ItemDrop(4300, 25, 35, 0.25),
+                new ItemDrop(4300, 10, 15, 0.5),
+                new ItemDrop(4300, 16, 23, 0.25),
+                new ItemDrop(4300, 25, 35, 0.1),
             }),
         
         new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. Clint might be able to open it.",21,
             new List<ItemDrop>()
             {
-                new ItemDrop(4364,2,4,0.8),
-                new ItemDrop(4365,1,3,0.5),
-                new ItemDrop(4366,1,3,0.5),
-                new ItemDrop(4367,1,3,0.5),
-                new ItemDrop(4368,1,3,0.5),
-                new ItemDrop(4369,3,3,0.5),
+                new ItemDrop(4364,3,6,0.8),
+                new ItemDrop(4365,3,5,0.5),
+                new ItemDrop(4366,3,5,0.5),
+                new ItemDrop(4367,3,5,0.5),
+                new ItemDrop(4368,3,6,0.5),
+                new ItemDrop(4369,1,3,0.5),
                 
-                new ItemDrop(4295,5,15,0.5),
-                new ItemDrop(4296,5,15,0.5),
-                new ItemDrop(4297,5,15,0.5),
-                new ItemDrop(4298,5,15,0.5),
+                new ItemDrop(4295,10,15,0.5),
+                new ItemDrop(4296,10,15,0.5),
+                new ItemDrop(4297,10,15,0.5),
+                new ItemDrop(4298,10,15,0.5),
                 
-                new ItemDrop(4300,10,25,1.1),
-                new ItemDrop(4359,1,3,1),
-                new ItemDrop(4360,2,4,1),
+                new ItemDrop(4359,5,7,1),
+                new ItemDrop(4360,3,7,1),
                 
                 new ItemDrop(4351,1,1,0.8),
                 new ItemDrop(4352,1,1,0.3),
@@ -342,27 +341,27 @@ public static class ModAssets
         new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. Clint might be able to open it.",22,
             new List<ItemDrop>()
             {
-                new ItemDrop(4364,2,6,0.8),
-                new ItemDrop(4365,2,5,0.5),
-                new ItemDrop(4366,2,5,0.5),
-                new ItemDrop(4367,2,5,0.5),
-                new ItemDrop(4368,2,5,0.5),
-                new ItemDrop(4369,2,5,0.5),
+                new ItemDrop(4364,5,9,0.8),
+                new ItemDrop(4365,5,9,0.5),
+                new ItemDrop(4366,5,9,0.5),
+                new ItemDrop(4367,5,9,0.5),
+                new ItemDrop(4368,5,9,0.5),
+                new ItemDrop(4369,3,7,0.5),
                 
                 new ItemDrop(4295,20,30,0.5),
-                new ItemDrop(4296,15,20,0.5),
-                new ItemDrop(4297,15,20,0.5),
-                new ItemDrop(4298,15,20,0.5),
+                new ItemDrop(4296,20,30,0.5),
+                new ItemDrop(4297,20,30,0.5),
+                new ItemDrop(4298,20,30,0.5),
                 
-                new ItemDrop(4359,2,4,1),
-                new ItemDrop(4360,3,5,1),
+                new ItemDrop(4359,8,13,1),
+                new ItemDrop(4360,5,10,1),
                 
                 new ItemDrop(4352,1,1,0.7),
                 new ItemDrop(4353,1,1,0.7),
                 new ItemDrop(4354,1,1,0.7),
                 new ItemDrop(4355,1,1,0.7),
-                new ItemDrop(4356,1,1,0.2),
-                new ItemDrop(4363,1,1,0.05),
+                new ItemDrop(4356,1,1,0.4),
+                new ItemDrop(4363,1,1,0.1),
             },1500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
         
         new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. Clint might be able to open it.",23,
@@ -542,7 +541,7 @@ public static class ModAssets
         } },
         { "Bat", new List<ItemDrop>(){
             new ItemDrop(4364,1,0.15f),
-            new ItemDrop(4368,1,0.1f),
+            new ItemDrop(4368,1,0.25f),
         } },
         { "Stone Golem", new List<ItemDrop>(){
             new ItemDrop(4367,1,0.2f),
@@ -556,7 +555,7 @@ public static class ModAssets
         { "Frost Bat", new List<ItemDrop>(){
             new ItemDrop(4364,1,0.05f),
             new ItemDrop(4365,1,0.15f),
-            new ItemDrop(4368,1,0.1f),
+            new ItemDrop(4368,1,0.3f),
         } },
         { "Ghost", new List<ItemDrop>(){
             new ItemDrop(4295,3,0.1f),
@@ -568,7 +567,7 @@ public static class ModAssets
             new ItemDrop(4359,1,0.2f),
         } },
         { "Skeleton", new List<ItemDrop>(){
-            new ItemDrop(4368,1,0.15f),
+            new ItemDrop(4368,2,0.3f),
             new ItemDrop(4369,1,0.02f),
             new ItemDrop(4360,1,0.05f),
             new ItemDrop(4361,1,0.08f),
@@ -609,6 +608,7 @@ public static class ModAssets
             new ItemDrop(4364,2,0.25f),
             new ItemDrop(4297,6,0.1f),
             new ItemDrop(4361,1,0.1f),
+            new ItemDrop(4368,2,0.1f),
         } },
         { "Carbon Ghost", new List<ItemDrop>(){
             new ItemDrop(4295,4,0.3f),
@@ -653,6 +653,7 @@ public static class ModAssets
             new ItemDrop(4367,1,0.2f),
             new ItemDrop(4296,5,0.3f),
             new ItemDrop(4368,3,0.3f),
+            new ItemDrop(4369,2,0.1f),
         } },
         { "Magma Sprite", new List<ItemDrop>(){
             new ItemDrop(4364,3,0.2f),
