@@ -101,7 +101,7 @@ namespace RunescapeSpellbook
                         var eventDict = asset.AsDictionary<string, string>().Data;
                         
                         //Wizard gives magic book event
-                        eventDict.Add("RS.0/f Wizard 0/t 600 1200",
+                        eventDict.Add("RS.0/f Wizard 1000/t 600 1200",
                             "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
                             "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
                             "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +

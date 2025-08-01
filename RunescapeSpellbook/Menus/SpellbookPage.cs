@@ -309,7 +309,7 @@ public class SpellbookPage : IClickableMenu
         if (!hasMagic)
         {
             const string messageLine1 = "I don't know any runic spells yet";
-            const string messageLine2 = "I might be able to learn some if I reach level 5";
+            const string messageLine2 = "I might be able to learn some if I reach level 4";
             const string messageLine3 = "friendship with someone with experience in magic";
             
             Vector2 message1Size = Game1.dialogueFont.MeasureString(messageLine1);
