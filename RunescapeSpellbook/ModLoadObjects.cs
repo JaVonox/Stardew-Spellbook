@@ -545,7 +545,7 @@ public static class ModAssets
         } },
         { "Stone Golem", new List<ItemDrop>(){
             new ItemDrop(4367,1,0.2f),
-            new ItemDrop(4260,1,0.1f),
+            new ItemDrop(4360,1,0.1f),
             new ItemDrop(4361,1,0.04f),
         } },
         { "Dust Spirit", new List<ItemDrop>(){
