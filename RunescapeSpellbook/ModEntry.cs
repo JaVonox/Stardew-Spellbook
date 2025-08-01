@@ -85,7 +85,7 @@ namespace RunescapeSpellbook
                     {
                         var objectDict = asset.AsDictionary<string, ObjectData>().Data;
 
-                        foreach (ModLoadObjects newObject in ModAssets.modItems)
+                        foreach (ModLoadObjects newObject in ModAssets.modItems.Values)
                         {
                             newObject.AppendObject("Mods.RunescapeSpellbook.Assets.modsprites", objectDict);
                         }
@@ -174,9 +174,15 @@ namespace RunescapeSpellbook
                                     else
                                     {
                                         Monitor.Log($"Duplicate mail key: {mailKey}. Attempting to access next available year", LogLevel.Warn);
-                                        string[] mailDelim = mailKey.Split('_'); 
-                                        mailKey = mailDelim[0] + "_" + mailDelim[1] + "_" + (int.Parse(mailDelim[2]) + 1); //Adds mail to the same date next year. increments year until we get a valid value
-
+                                        string[] mailDelim = mailKey.Split('_');
+                                        int newYear = int.Parse(mailDelim[2]) + 1;
+                                        
+                                        if (newYear > 255)
+                                        {
+                                            throw new Exception($"Couldn't find a new year for {mailKey} before 255");
+                                        }
+                                        
+                                        mailKey = mailDelim[0] + "_" + mailDelim[1] + "_" + newYear; //Adds mail to the same date next year. increments year until we get a valid value
                                     }
                                 }
                                 catch (Exception e)
@@ -202,13 +208,13 @@ namespace RunescapeSpellbook
                         {
                             //Add all items from the mod to universal dislikes
                             preferencesDict["Universal_Dislike"] = preferencesDict["Universal_Dislike"] +
-                                                                   " " + ModAssets.modItems.Select(x => x.id).Join(null," ");
+                                                                   " " + ModAssets.modItems.Keys.Join(null," ");
                         }
                         else if (!characterName.Contains("Universal_")) //We only accept non universals for this so far
                         {
                             Dictionary<int,PrefType> itemPreferences = 
-                                ModAssets.modItems.Where(x=>x.characterPreferences.Keys.Contains(characterName))
-                                    .ToDictionary(i=>i.id,j=> j.characterPreferences[characterName]); //get a dictionary of gifts for this character with their preference
+                                ModAssets.modItems.Where(x=>x.Value.characterPreferences != null && x.Value.characterPreferences.Keys.Contains(characterName))
+                                    .ToDictionary(i=>i.Value.id,j=> j.Value.characterPreferences[characterName]); //get a dictionary of gifts for this character with their preference
                             
                             if(!itemPreferences.Any()) {continue;} //If we have no data to assign, skip this entirely
                             
@@ -216,8 +222,8 @@ namespace RunescapeSpellbook
                             //I.e Fire rune packs will have the same gift value as a fire rune
                             Dictionary<int, PrefType> treasureItems =
                                 ModAssets.modItems.Where(x =>
-                                    x is PackObject pack && ModAssets.modItems.First(z=>z.id == pack.packItem).characterPreferences.ContainsKey(characterName))
-                                    .ToDictionary(i=>i.id,j=> ModAssets.modItems.First(k=>k.id == ((PackObject)j).packItem).characterPreferences[characterName]);
+                                    x.Value is PackObject pack && ModAssets.modItems.ContainsKey(pack.packItem) && ModAssets.modItems[pack.packItem].characterPreferences.ContainsKey(characterName))
+                                    .ToDictionary(i=>i.Value.id,j=> ModAssets.modItems[((PackObject)j.Value).packItem].characterPreferences[characterName]);
 
                             if (treasureItems.Any()) //Add treasures in to item preferences
                             {
@@ -342,10 +348,13 @@ namespace RunescapeSpellbook
             {
                 //Special geode blocking check now includes TreasureObjects, since those can output weapons. This prevents bugs with using geodes in the geode crusher.
                 //ContextTags could be used to do this as well, but it seems to cause errors too.
-                if (disallow_special_geodes && ModAssets.modItems.Any(x => x.id.ToString() == item.ItemId && x.id != 4359 && x.id != 4360 && x is TreasureObjects && x is not PackObject))
+                if (disallow_special_geodes && int.TryParse(item.ItemId, out int outID) && ModAssets.modItems.TryGetValue(outID, out ModLoadObjects modItem))
                 {
-                    __result = false;
-                    return false;
+                    if (outID != 4359 && outID != 4360 && modItem is TreasureObjects && modItem is not PackObject)
+                    {
+                        __result = false;
+                        return false;
+                    }
                 }
 
                 return true;
@@ -408,8 +417,16 @@ namespace RunescapeSpellbook
                         int mouseY = mousePos.Y + Game1.viewport.Y;
 
                         List<MagicProjectile> generatedProjectiles;
-                        StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, staffWeaponData, mouseX, mouseY, out generatedProjectiles);
+                        
+                        var cachedDataField = Traverse.Create(__instance).Field("cachedData");
+                        var cachedData = cachedDataField.GetValue();
+
+                        if (cachedData is not StaffWeaponData)
+                        {
+                            Instance.Monitor.Log("Invalid cast to staff weapon", LogLevel.Error);
+                            return;
+                        }
+                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, (StaffWeaponData)cachedData, mouseX, mouseY, out generatedProjectiles);
 
                         if (castReturn.Key && generatedProjectiles.Count > 0)
                         {
@@ -462,7 +479,7 @@ namespace RunescapeSpellbook
                 if (__instance.type.Value == 429) //Staff type
                 {
                     StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-                    int level = staffWeaponData.providesRune != -1 ? 10 : int.Parse(staffWeaponData.id.ToString()) - 4343;
+                    int level = staffWeaponData.providesRune != -1 ? 10 : staffWeaponData.id - 4343;
                     
                     __result = $"Level {level} Battlestaff";
                 }
@@ -522,7 +539,7 @@ namespace RunescapeSpellbook
                         Utility.drawWithShadow(spriteBatch, ModAssets.extraTextures,
                             new Vector2(x + 16 + 4, y + 16 + 4), new Rectangle(26, 0, 10, 10), Color.White, 0f,
                             Vector2.Zero, 4f, flipped: false, 1f);
-                        Utility.drawTextWithShadow(spriteBatch, $"{ModAssets.modItems.First(x=>x.id == staffWeaponData.providesRune).DisplayName}", font,
+                        Utility.drawTextWithShadow(spriteBatch, $"{ModAssets.modItems[staffWeaponData.providesRune].DisplayName}", font,
                             new Vector2(x + 16 + 52, y + 16 + 12), c3 * 0.9f * alpha);
                         y += extraSize;
                     }
@@ -532,30 +549,22 @@ namespace RunescapeSpellbook
             
         }
         
-        //this patch adds to the first post load - so it maintains between days but if you save and reload it will reset
-        [HarmonyPatch(typeof(Game1), "_update")]
-        [HarmonyPatch(new Type[] {typeof(GameTime)})]
-        public class FirstFrameAfterLoadPatcher
+        //This patch runs
+        [HarmonyPatch(typeof(Farmer), "farmerInit")]
+        public class SetupModVariablesPatcher
         {
-            public static void Postfix(Game1 __instance, GameTime gameTime)
+            public static void Postfix(Farmer __instance)
             {
-                if (Game1.gameMode == 3)
+                if (!__instance.modData.ContainsKey("TofuMagicLevel"))
                 {
-                    if (Game1.gameModeTicks == 1)
-                    {
-                        ModAssets.localFarmerData.FirstGameTick();
-                    }
-                    
-                    if (!Game1.player.modData.ContainsKey("TofuMagicLevel"))
-                    {
-                        Game1.player.modData.Add("TofuMagicLevel","0");
-                        Game1.player.modData.Add("TofuMagicExperience","0");
-                        Game1.player.modData.Add("TofuMagicProfession1","-1");
-                        Game1.player.modData.Add("TofuMagicProfession2","-1");
-                        Game1.player.modData.Add("HasUnlockedMagic","0");
-                        ModAssets.localFarmerData.FirstGameTick();
-                    }
+                    __instance.modData.Add("TofuMagicLevel","0");
+                    __instance.modData.Add("TofuMagicExperience","0");
+                    __instance.modData.Add("TofuMagicProfession1","-1");
+                    __instance.modData.Add("TofuMagicProfession2","-1");
+                    __instance.modData.Add("HasUnlockedMagic","0");
                 }
+                
+                ModAssets.localFarmerData.Reset();
             }
         }
         
@@ -632,10 +641,13 @@ namespace RunescapeSpellbook
             public static void Postfix(Farmer __instance,Item item, int countAdded, Item mergedIntoStack, bool hideHudNotification = false)
             {
                 //If any mod items are picked up for the first time we play a special animation
-                if (!__instance.hasOrWillReceiveMail("RSRunesFound") && ModAssets.modItems.Any(x=> (x is PackObject || x.id == 4359 || x.id == 4360) && x.id.ToString() == item.ItemId))
+                if (!__instance.hasOrWillReceiveMail("RSRunesFound") && int.TryParse(item.ItemId, out int itemId) && ModAssets.modItems.TryGetValue(itemId, out var modItem))
                 {
-                    __instance.mailReceived.Add("RSRunesFound");
-                    __instance.holdUpItemThenMessage(item,countAdded);
+                    if (modItem is PackObject || itemId == 4359 || itemId == 4360)
+                    {
+                        __instance.mailReceived.Add("RSRunesFound");
+                        __instance.holdUpItemThenMessage(item, countAdded);
+                    }
                 }
             }
         }
@@ -647,11 +659,17 @@ namespace RunescapeSpellbook
             public static bool Prefix(Farmer __instance,Farmer who, Item item, int countAdded)
             {
                 //If any mod items are picked up for the first time we play a special animation
-                if (ModAssets.modItems.Any(x=> (x is PackObject || x.id == 4359 || x.id == 4360) && x.id.ToString() == item.ItemId))
+                if (int.TryParse(item.ItemId, out int itemId) && ModAssets.modItems.TryGetValue(itemId, out var modItem))
                 {
-                    Game1.drawObjectDialogue(new List<string> { "Your hands tingle as you pick up the mysterious object. Maybe the archaeologist will know something about this?"});
-                    who.completelyStopAnimatingOrDoingAction();
-                    return false;
+                    if (modItem is PackObject || itemId == 4359 || itemId == 4360)
+                    {
+                        Game1.drawObjectDialogue(new List<string>
+                        {
+                            "Your hands tingle as you pick up the mysterious object. Maybe the archaeologist will know something about this?"
+                        });
+                        who.completelyStopAnimatingOrDoingAction();
+                        return false;
+                    }
                 }
 
                 return true;
@@ -948,7 +966,7 @@ namespace RunescapeSpellbook
             
             if (runeReq == "default")
             {
-                foreach (int id in ModAssets.modItems.Where(x => x is RunesObjects && x.id != 4290).Select(y=>y.id))
+                foreach (int id in ModAssets.modItems.Where(x => x.Value is RunesObjects && x.Key != 4290).Select(y=>y.Key))
                 {
                     StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{id}");
                     item.Stack = 255;
@@ -1011,7 +1029,7 @@ namespace RunescapeSpellbook
             }
             else
             {
-                List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x is RunesObjects && x.Name.ToLower().Contains(runeReq)).ToList();
+                List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.Name.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
                 if (matchList.Count == 0)
                 {
                     this.Monitor.Log($"Invalid rune set to grant {runeReq}",LogLevel.Error);
@@ -1033,7 +1051,7 @@ namespace RunescapeSpellbook
         {
             if (HasNoWorldContextReady()){return;}
             
-            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x is SlingshotItem))
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SlingshotItem).Select(y=>y.Value))
             {
                 StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
                 item.Stack = 255;
@@ -1059,7 +1077,7 @@ namespace RunescapeSpellbook
         {
             if (HasNoWorldContextReady()){return;}
             
-            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x is TreasureObjects && x is not PackObject))
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is TreasureObjects && x.Value is not PackObject).Select(y=>y.Value))
             {
                 StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
                 item.Stack = 20;
@@ -1079,7 +1097,7 @@ namespace RunescapeSpellbook
         {
             if (HasNoWorldContextReady()){return;}
             
-            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x is PackObject))
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PackObject).Select(y=>y.Value))
             {
                 StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
                 item.Stack = 20;

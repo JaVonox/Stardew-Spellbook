@@ -72,18 +72,24 @@ public class InventorySpellMenu : MenuWithInventory
     public override void update(GameTime time)
     {
         currentFrame = currentFrame % 1000 == 0 ? 1 : currentFrame + 1;
+
+        bool frameNeedsEvaluation = currentFrame % 30 == 1;
         
-        reevaluateCannotCast();
-        
+        if (frameNeedsEvaluation)
+        {
+            reevaluateCannotCast();
+        }
+
         spellIcon.bounds.X = casterX + 80 + (!cannotCast && !isAnimatingCast ? Game1.random.Next(-1, 1) : 0);
         spellIcon.bounds.Y = (centreY - 15) - (ModAssets.spellsSize / 2) + (!cannotCast && !isAnimatingCast ? Game1.random.Next(-1, 1) : 0);
 
         spellIcon.sourceRect = new Rectangle((cannotCast || isAnimatingCast ? ModAssets.spellsSize : 0), 
             ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize);
-        
-        if (!cannotCast && !isAnimatingCast)
+
+        if (frameNeedsEvaluation)
         {
-            if (currentFrame % 30 == 1)
+            
+            if (!cannotCast && !isAnimatingCast)
             {
                 fluffSprites.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(346, 392, 8, 8),
                     new Vector2(spellIcon.bounds.X + Game1.random.Next(ModAssets.spellsSize),

@@ -51,7 +51,7 @@ public class MagicProjectile : BasicProjectile
         if (n is Monster)
         {
             int combatDamage = damageToFarmer.Value; //Crit is already calculated in this stage, but we have to apply extra effects on top to account for undead/blood
-            CombatSpell castSpell = (CombatSpell)ModAssets.modSpells.First(x => x.id == this.projectileSpellID.Value);
+            CombatSpell castSpell = (CombatSpell)ModAssets.modSpells[projectileSpellID.Value];
             
             bool shouldBeBomb = false; //Mummies can only be killed by bombs and crusader weapons, so this allows us to make the projectile a bomb under certain circumstances
             

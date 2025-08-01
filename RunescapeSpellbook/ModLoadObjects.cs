@@ -238,7 +238,7 @@ public static class ModAssets
     public static Texture2D extraTextures; //Includes spells + basic icons
     public static Texture2D animTextures;
 
-    public static PlayerModData localFarmerData;
+    public static PlayerLocalData localFarmerData;
     
     public const int spellsY = 16;
     public const int spellsSize = 80;
@@ -246,32 +246,32 @@ public static class ModAssets
     
     public const int animFrames = 4; 
     
-    public static ModLoadObjects[] modItems = {
-        new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object."),
-        new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes"),
-        new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",
-            new Dictionary<string, PrefType>(){{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}}),
-        new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",
-            new Dictionary<string, PrefType>(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}}),
-        new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",
-            new Dictionary<string, PrefType>(){{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}}),
-        new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",
-            new Dictionary<string, PrefType>(){{"Wizard",PrefType.Like}}),
-        new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",
-            new Dictionary<string, PrefType>(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}}),
-        new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}}),
-        new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}}),
-        new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}}),
-        new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",
-            new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}}),
+    public static Dictionary<int,ModLoadObjects> modItems = new Dictionary<int,ModLoadObjects>{
+        {4290,new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object.")},
+        {4291,new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes")},
+        {4292,new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",
+            new Dictionary<string, PrefType>(){{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
+        {4293,new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",
+            new Dictionary<string, PrefType>(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
+        {4294,new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",
+            new Dictionary<string, PrefType>(){{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
+        {4295,new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",
+            new Dictionary<string, PrefType>(){{"Wizard",PrefType.Like}})},
+        {4296,new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",
+            new Dictionary<string, PrefType>(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
+        {4297,new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
+        {4298,new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
+        {4299,new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
+        {4300,new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",
+            new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
 
-        new SlingshotItem(4301,"Ammo_Water","Water Orb","Slingshot ammo enchanted with the power of water",30),
-        new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Slingshot ammo enchanted with the power of earth",31),
+        {4301,new SlingshotItem(4301,"Ammo_Water","Water Orb","Slingshot ammo enchanted with the power of water",30)},
+        {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Slingshot ammo enchanted with the power of earth",31)},
         
-        new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. Clint might be able to open it.",19,
+        {4359,new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. Clint might be able to open it.",19,
             new List<ItemDrop>()
             {
                 new ItemDrop(4291, 10, 12, 1),
@@ -289,9 +289,9 @@ public static class ModAssets
                 new ItemDrop(4294, 10, 12, 1),
                 new ItemDrop(4294, 13, 23, 0.5),
                 new ItemDrop(4294, 25, 35, 0.25),
-            }),
+            })},
         
-        new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. Clint might be able to open it.",20,
+        {4360,new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. Clint might be able to open it.",20,
             new List<ItemDrop>()
             {
                 new ItemDrop(4295, 5, 12, 1),
@@ -309,9 +309,9 @@ public static class ModAssets
                 new ItemDrop(4300, 10, 15, 0.5),
                 new ItemDrop(4300, 16, 23, 0.25),
                 new ItemDrop(4300, 25, 35, 0.1),
-            }),
+            })},
         
-        new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. Clint might be able to open it.",21,
+        {4361, new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. Clint might be able to open it.",21,
             new List<ItemDrop>()
             {
                 new ItemDrop(4364,3,6,0.8),
@@ -336,9 +336,9 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.3),
                 
                 new ItemDrop(4362,1,1,0.05),
-            },500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}}),
+            },500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}})},
         
-        new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. Clint might be able to open it.",22,
+        {4362,new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. Clint might be able to open it.",22,
             new List<ItemDrop>()
             {
                 new ItemDrop(4364,5,9,0.8),
@@ -362,9 +362,9 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.7),
                 new ItemDrop(4356,1,1,0.4),
                 new ItemDrop(4363,1,1,0.1),
-            },1500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
+            },1500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
         
-        new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. Clint might be able to open it.",23,
+        {4363,new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. Clint might be able to open it.",23,
             new List<ItemDrop>()
             {
                 new ItemDrop(4356,1,1,2),
@@ -373,14 +373,14 @@ public static class ModAssets
                 new ItemDrop(4368,5,10,1),
                 new ItemDrop(4369,5,10,1),
                 new ItemDrop(4360,10,20,1),
-            },2500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}}),
+            },2500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
         
-        new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. Clint might be able to open it.",24,4291),
-        new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. Clint might be able to open it.",25,4292),
-        new PackObject(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes. Clint might be able to open it.",26,4293),
-        new PackObject(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. Clint might be able to open it.",27,4294),
-        new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. Clint might be able to open it.",28,4299),
-        new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. Clint might be able to open it.",29,4300),
+        {4364,new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. Clint might be able to open it.",24,4291)},
+        {4365,new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. Clint might be able to open it.",25,4292)},
+        {4366,new PackObject(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes. Clint might be able to open it.",26,4293)},
+        {4367,new PackObject(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. Clint might be able to open it.",27,4294)},
+        {4368,new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. Clint might be able to open it.",28,4299)},
+        {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. Clint might be able to open it.",29,4300)},
     };
     
     //These are custom melee weapons that use 
@@ -496,7 +496,7 @@ public static class ModAssets
             (i => i is Item item && (item.itemId.Value == "388" || item.itemId.Value == "709" || 
                                      (CraftingRecipe.craftingRecipes.ContainsKey(item.Name) 
                                       && CraftingRecipe.craftingRecipes[item.Name].Split(' ').ToList() is List<string> recipes 
-                                      && ((recipes.IndexOf("388") != -1 && recipes.IndexOf("388") + 1 % 2 != 0) || (recipes.IndexOf("709") != -1 && recipes.IndexOf("709") + 1 % 2 != 0) ) )))
+                                      && ((recipes.IndexOf("388") != -1 && (recipes.IndexOf("388") + 1) % 2 != 0) || (recipes.IndexOf("709") != -1 && recipes.IndexOf("709") + 1 % 2 != 0) ) )))
             ,SpellEffects.PlankMake,
             "Breaks down wooden items into wood, and converts 15 wood into 1 hardwood and vice versa. For recipes that require more than wood, it will only return the wood.",3,"Degrime"),
     };
@@ -741,7 +741,7 @@ public static class ModAssets
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
         animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
-        localFarmerData = new PlayerModData();
+        localFarmerData = new PlayerLocalData();
 
         infiniteRuneReferences = new Dictionary<int, List<string>>();
         //Generate the lookup dictionary for determining what weapons give infinite values for each rune
@@ -920,14 +920,14 @@ public static class ModAssets
     }
 }
 
-public class PlayerModData
+public class PlayerLocalData
 {
     public int selectedSpellID;
-    public PlayerModData()
+    public PlayerLocalData()
     {
         selectedSpellID = -1;
     }
-    public void FirstGameTick()
+    public void Reset()
     {
         selectedSpellID = -1;
     }
