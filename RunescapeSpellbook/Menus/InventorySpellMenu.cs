@@ -69,6 +69,8 @@ public class InventorySpellMenu : MenuWithInventory
     {
         cannotCast = inputSpot.item == null || !targetSpell.CanCastSpell().Key;
     }
+
+    private const int MAX_FLUFF_SPRITES = 50;
     public override void update(GameTime time)
     {
         currentFrame = currentFrame % 1000 == 0 ? 1 : currentFrame + 1;
@@ -89,7 +91,7 @@ public class InventorySpellMenu : MenuWithInventory
         if (frameNeedsEvaluation)
         {
             
-            if (!cannotCast && !isAnimatingCast)
+            if (!cannotCast && !isAnimatingCast && fluffSprites.Count < MAX_FLUFF_SPRITES)
             {
                 fluffSprites.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(346, 392, 8, 8),
                     new Vector2(spellIcon.bounds.X + Game1.random.Next(ModAssets.spellsSize),
@@ -198,6 +200,10 @@ public class InventorySpellMenu : MenuWithInventory
     private void _OnCloseMenu()
     {
         //TODO theres maybe a bug where leaving this menu, even without doing anything gives you Iframes. could be abused for infinite invincibility
+        
+        fluffSprites.Clear();
+        castAnim = null;
+        
         if (base.heldItem != null)
         {
             Utility.CollectOrDrop(base.heldItem);
@@ -207,7 +213,7 @@ public class InventorySpellMenu : MenuWithInventory
         {
             Utility.CollectOrDrop(inputSpot.item);
         }
-
+        
         base.heldItem = null;
         inputSpot.item = null;
         caster.FarmerSprite.PauseForSingleAnimation = false;

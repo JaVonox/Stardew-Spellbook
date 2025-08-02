@@ -268,9 +268,9 @@ public class SpellEffects : BaseSpellEffects
                     itemArgs.ConsumeStack(1);
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return new KeyValuePair<bool, string>(false, $"An unexpected error occured {e.Message}");
+                return new KeyValuePair<bool, string>(false, $"An unexpected error occured");
             }
         }
 

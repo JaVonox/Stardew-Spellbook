@@ -155,7 +155,8 @@ public class TreasureObjects : ModLoadObjects
         {
             return desiredChance; //If its the first index we always have the desired chance
         }
-        else if (calculatedIndex == items.Count - 1)
+        
+        if (calculatedIndex == items.Count - 1)
         {
             return 1; //final item will always have 100% chance
         }
