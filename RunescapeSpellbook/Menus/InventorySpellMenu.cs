@@ -30,7 +30,7 @@ public class InventorySpellMenu : MenuWithInventory
         runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
         this.targetSpell = targetSpell;
         this.selectablePredicate = selectablePredicate;
-        currentFrame = Game1.random.Next(16);
+        currentFrame = 0;
         if (yPositionOnScreen == IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder)
         {
             movePosition(0, -IClickableMenu.spaceToClearTopBorder);
@@ -73,24 +73,22 @@ public class InventorySpellMenu : MenuWithInventory
     private const int MAX_FLUFF_SPRITES = 50;
     public override void update(GameTime time)
     {
-        currentFrame = currentFrame % 1000 == 0 ? 1 : currentFrame + 1;
-
-        bool frameNeedsEvaluation = currentFrame % 30 == 1;
-        
-        if (frameNeedsEvaluation)
+        bool operationFrame = currentFrame % 30 == 0;
+        if (operationFrame)
         {
             reevaluateCannotCast();
         }
-
+        
+        currentFrame = currentFrame % 1000 == 0 ? 1 : currentFrame + 1;
+        
         spellIcon.bounds.X = casterX + 80 + (!cannotCast && !isAnimatingCast ? Game1.random.Next(-1, 1) : 0);
         spellIcon.bounds.Y = (centreY - 15) - (ModAssets.spellsSize / 2) + (!cannotCast && !isAnimatingCast ? Game1.random.Next(-1, 1) : 0);
 
         spellIcon.sourceRect = new Rectangle((cannotCast || isAnimatingCast ? ModAssets.spellsSize : 0), 
             ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize);
 
-        if (frameNeedsEvaluation)
+        if (operationFrame)
         {
-            
             if (!cannotCast && !isAnimatingCast && fluffSprites.Count < MAX_FLUFF_SPRITES)
             {
                 fluffSprites.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(346, 392, 8, 8),

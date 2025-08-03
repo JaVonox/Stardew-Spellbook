@@ -1,13 +1,9 @@
-﻿using HarmonyLib;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Netcode;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.Objects;
-using StardewValley.GameData.Weapons;
-using StardewValley.ItemTypeDefinitions;
-using StardewValley.Network;
+using StardewValley.GameData.Shops;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
@@ -73,8 +69,8 @@ public class ModLoadObjects : ObjectData
 
 public class RunesObjects : ModLoadObjects
 {
-    public RunesObjects(int id, string name, string displayName, string description,Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",0)
+    public RunesObjects(int id, string name, string displayName, string description,int category,Dictionary<string, PrefType>? characterPreferences = null) : 
+        base(id,name,displayName,description,characterPreferences,"Basic",category)
     {
         base.Price = 2;
     }
@@ -84,7 +80,7 @@ public class RunesObjects : ModLoadObjects
 public class SlingshotItem : ModLoadObjects
 {
     public SlingshotItem(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",0)
+        base(id,name,displayName,description,characterPreferences,"Basic",-2)
     {
         base.SpriteIndex = spriteID;
     }
@@ -94,7 +90,7 @@ public class TreasureObjects : ModLoadObjects
 {
     public TreasureObjects(int id, string name, string displayName, string description, int spriteID,
         List<ItemDrop> itemDrops, int sellprice = 35, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id, name, displayName, description,characterPreferences, "Basic", 0)
+        base(id, name, displayName, description,characterPreferences, "Basic", -28)
     {
         base.SpriteIndex = spriteID;
         List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
@@ -124,7 +120,7 @@ public class TreasureObjects : ModLoadObjects
 
 
     public TreasureObjects(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",0)
+        base(id,name,displayName,description,characterPreferences,"Basic",-28)
     {
         base.SpriteIndex = spriteID;
         List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
@@ -234,6 +230,24 @@ public class PerkData
     }
 }
 
+public class ShopListings
+{
+    public readonly ShopItemData itemData;
+
+    public ShopListings(string qualifiedID, int price, int minStack = -1, int maxstack = -1, string condition = "",
+        int toolUpgradeLevel = -1)
+    {
+        itemData = new ShopItemData();
+        itemData.Id = qualifiedID;
+        itemData.ItemId = qualifiedID;
+        itemData.Price = price;
+        itemData.MinStack = minStack;
+        itemData.MaxStack = maxstack;
+        itemData.Condition = condition == "" ? null : condition;
+        itemData.ToolUpgradeLevel = toolUpgradeLevel;
+    }
+}
+
 public static class ModAssets
 {
     public static Texture2D extraTextures; //Includes spells + basic icons
@@ -248,31 +262,31 @@ public static class ModAssets
     public const int animFrames = 4; 
     
     public static Dictionary<int,ModLoadObjects> modItems = new Dictionary<int,ModLoadObjects>{
-        {4290,new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object.")},
-        {4291,new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes")},
-        {4292,new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",
+        {4290,new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object.",-999)},
+        {4291,new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes",-429)},
+        {4292,new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",-429,
             new Dictionary<string, PrefType>(){{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
-        {4293,new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",
+        {4293,new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",-429,
             new Dictionary<string, PrefType>(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
-        {4294,new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",
+        {4294,new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",-429,
             new Dictionary<string, PrefType>(){{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
-        {4295,new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",
+        {4295,new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",-431,
             new Dictionary<string, PrefType>(){{"Wizard",PrefType.Like}})},
-        {4296,new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",
+        {4296,new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",-431,
             new Dictionary<string, PrefType>(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {4297,new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",
+        {4297,new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",-431,
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
-        {4298,new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",
+        {4298,new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",-431,
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {4299,new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",
+        {4299,new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",-430,
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
-        {4300,new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",
+        {4300,new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",-430,
             new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
 
         {4301,new SlingshotItem(4301,"Ammo_Water","Water Orb","Slingshot ammo enchanted with the power of water",30)},
         {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Slingshot ammo enchanted with the power of earth",31)},
         
-        {4359,new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. Clint might be able to open it.",19,
+        {4359,new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
             new List<ItemDrop>()
             {
                 new ItemDrop(4291, 10, 12, 1),
@@ -290,9 +304,9 @@ public static class ModAssets
                 new ItemDrop(4294, 10, 12, 1),
                 new ItemDrop(4294, 13, 23, 0.5),
                 new ItemDrop(4294, 25, 35, 0.25),
-            })},
+            },40)},
         
-        {4360,new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. Clint might be able to open it.",20,
+        {4360,new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. A blacksmith might be able to open it.",20,
             new List<ItemDrop>()
             {
                 new ItemDrop(4295, 5, 12, 1),
@@ -310,27 +324,14 @@ public static class ModAssets
                 new ItemDrop(4300, 10, 15, 0.5),
                 new ItemDrop(4300, 16, 23, 0.25),
                 new ItemDrop(4300, 25, 35, 0.1),
-            })},
+            },70)},
         
-        {4361, new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. Clint might be able to open it.",21,
+        {4361, new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. A blacksmith might be able to open it.",21,
             new List<ItemDrop>()
             {
-                new ItemDrop(4364,3,6,0.8),
-                new ItemDrop(4365,3,5,0.5),
-                new ItemDrop(4366,3,5,0.5),
-                new ItemDrop(4367,3,5,0.5),
-                new ItemDrop(4368,3,6,0.5),
-                new ItemDrop(4369,1,3,0.5),
+                new ItemDrop(4359,5,10,0.5),
+                new ItemDrop(4360,5,10,0.5),
                 
-                new ItemDrop(4295,10,15,0.5),
-                new ItemDrop(4296,10,15,0.5),
-                new ItemDrop(4297,10,15,0.5),
-                new ItemDrop(4298,10,15,0.5),
-                
-                new ItemDrop(4359,5,7,1),
-                new ItemDrop(4360,3,7,1),
-                
-                new ItemDrop(4351,1,1,0.8),
                 new ItemDrop(4352,1,1,0.3),
                 new ItemDrop(4353,1,1,0.3),
                 new ItemDrop(4354,1,1,0.3),
@@ -339,49 +340,35 @@ public static class ModAssets
                 new ItemDrop(4362,1,1,0.05),
             },500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}})},
         
-        {4362,new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. Clint might be able to open it.",22,
+        {4362,new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. A blacksmith might be able to open it.",22,
             new List<ItemDrop>()
             {
-                new ItemDrop(4364,5,9,0.8),
-                new ItemDrop(4365,5,9,0.5),
-                new ItemDrop(4366,5,9,0.5),
-                new ItemDrop(4367,5,9,0.5),
-                new ItemDrop(4368,5,9,0.5),
-                new ItemDrop(4369,3,7,0.5),
-                
-                new ItemDrop(4295,20,30,0.5),
-                new ItemDrop(4296,20,30,0.5),
-                new ItemDrop(4297,20,30,0.5),
-                new ItemDrop(4298,20,30,0.5),
-                
-                new ItemDrop(4359,8,13,1),
-                new ItemDrop(4360,5,10,1),
+                new ItemDrop(4359,10,15,0.5),
+                new ItemDrop(4360,10,15,0.5),
                 
                 new ItemDrop(4352,1,1,0.7),
                 new ItemDrop(4353,1,1,0.7),
                 new ItemDrop(4354,1,1,0.7),
                 new ItemDrop(4355,1,1,0.7),
-                new ItemDrop(4356,1,1,0.4),
+                new ItemDrop(4356,1,1,0.5),
                 new ItemDrop(4363,1,1,0.1),
             },1500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
         
-        {4363,new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. Clint might be able to open it.",23,
+        {4363,new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. A blacksmith might be able to open it.",23,
             new List<ItemDrop>()
             {
                 new ItemDrop(4356,1,1,2),
                 new ItemDrop(4357,1,1,0.4),
                 new ItemDrop(4358,1,1,0.4),
-                new ItemDrop(4368,5,10,1),
-                new ItemDrop(4369,5,10,1),
-                new ItemDrop(4360,10,20,1),
+                new ItemDrop(4360,15,20,1),
             },2500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
         
-        {4364,new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. Clint might be able to open it.",24,4291)},
-        {4365,new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. Clint might be able to open it.",25,4292)},
-        {4366,new PackObject(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes. Clint might be able to open it.",26,4293)},
-        {4367,new PackObject(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. Clint might be able to open it.",27,4294)},
-        {4368,new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. Clint might be able to open it.",28,4299)},
-        {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. Clint might be able to open it.",29,4300)},
+        {4364,new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. A blacksmith might be able to open it.",24,4291)},
+        {4365,new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. A blacksmith might be able to open it.",25,4292)},
+        {4366,new PackObject(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes. A blacksmith might be able to open it.",26,4293)},
+        {4367,new PackObject(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. A blacksmith might be able to open it.",27,4294)},
+        {4368,new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. A blacksmith might be able to open it.",28,4299)},
+        {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. A blacksmith might be able to open it.",29,4300)},
     };
     
     //These are custom melee weapons that use 
@@ -420,16 +407,16 @@ public static class ModAssets
         new TeleportSpell(1,"Teleport_Home","Farm Teleport","Teleports you outside your Farm",4,
             new Dictionary<int, int>() { {4295, 1},{4291,3},{4294,3} },10, "BusStop", 19, 23,2),
         
-        new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal",1,
+        new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal, or burns wood into coal at a discount",1,
             new Dictionary<int, int>() { {4296, 1},{4293,4}},15,
-            (i=>i is Item item && DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId))),
-            SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
+            (i=>i is Item item && (item.QualifiedItemId == "(O)388" || DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId)))),
+            SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost, or smelt wood into coal. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
         
         new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into 1.5x its sell price",5,
             new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
             SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 150% of the items value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
-        new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",0,
+        new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",1,
             new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.3f,SpellEffects.Humidify, 10,5,"Humidify",
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
         
@@ -453,7 +440,7 @@ public static class ModAssets
             new Dictionary<int, int>() { {4295, 2},{4292,5},{4293,5}},15, "IslandSouth",21,37,0,
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("willyBoatFixed")))),
         
-        new TeleportSpell(10,"Teleport_Caves","Caves Teleport","Teleports you to the pelican town mines",1,
+        new TeleportSpell(10,"Teleport_Caves","Caves Teleport","Teleports you to the pelican town mines",2,
             new Dictionary<int, int>() { {4295, 1},{4291,5}},10, "Mountain",54,7,0, 
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("landslideDone")))),
         
@@ -680,6 +667,15 @@ public static class ModAssets
         } },
     };
 
+    //Items to be put in shops
+    public static Dictionary<string, List<ShopListings>> loadedShops = new Dictionary<string, List<ShopListings>>()
+    {
+        {"AdventureShop", new List<ShopListings>()
+        {
+            new ShopListings("(W)4351",2000,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+        }}
+    };
+    
     //Mail to be loaded into the game
     public static Dictionary<string, string> loadableMail = new Dictionary<string, string>()
     {
@@ -732,6 +728,56 @@ public static class ModAssets
         }
     };
 
+    public static Dictionary<string, Dictionary<string,string>> loadableEvents = new Dictionary<string, Dictionary<string,string>>()
+    {
+        {
+            "Data/Events/Farm", new Dictionary<string,string>()
+            {
+                {
+                    "RS.0/f Wizard 1000/t 600 1200",
+                    "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
+                    "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
+                    "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
+                    "/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"" +
+                    "/stopMusic /itemAboveHead 4290 /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail RSSpellMailGet" +
+                    "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600" +
+                    "/speak Wizard \"Well, that was all. I'll be on my way now.\"" +
+                    "/pause 300/end"
+                }
+            }
+        },
+        {
+            "Data/Events/ArchaeologyHouse", new Dictionary<string,string>()
+            {
+                {
+                    "RS.1/n RSRunesFound",
+                    "continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3" +
+                    "/skippable /pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"" +
+                    "/speak Marlon \"This is an antique! I've been using this blade for decades now!\"" +
+                    "/warp farmer 3 14 /playSound doorClose /pause 1000" +
+                    "/move farmer 0 -1 1 /move farmer 3 0 2 /move farmer 0 1 1 /move farmer 5 0 0 /move Marlon 0 0 2 /move farmer 0 -3 0" +
+                    "/move Gunther 0 0 2 /speak Gunther \"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"" +
+                    "/move Gunther 0 0 0 /pause 500 /jump Gunther 8 /pause 500 /textAboveHead Gunther \"*huff* *puff*\" /pause 2000 /move Gunther 0 0 2"+
+                    "/speak Gunther \"Perhaps the books can wait. What do you need today, @?\"" +
+                    "/question null \"#I found this underground#Can you tell me about this?\"" +
+                    "/speak Gunther \"Let me have a look...\" /pause 1000"+
+                    "/speak Gunther \"Hmm... I'm not quite sure what that is... \""+
+                    "/speak Gunther \"The runes aren't any I recognise either...\""+
+                    "/move Marlon 0 0 3 /speak Marlon \"Ah, well isn't that nostalgic.\""+
+                    "/move Gunther 0 0 1 /speak Gunther \"You're familiar with these?\""+
+                    "/speak Marlon \"Not myself, but an old friend of mine used to be obsessed with them.\""+
+                    "/move Marlon 0 0 2 /speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\""+
+                    "/move farmer 1 0 0 /move Marlon 0 0 2 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000" +
+                    "/speak Marlon \"As I suspected, these are definitely guthixian runestones. Or rather, they contain guthixian runestones.\"" +
+                    "/speak Marlon \"Ol' Ras used to spend hours trying to crack these things open, until I showed up. Turns out a strike with the trusty hammer does the job in seconds.\""+
+                    "/move Marlon 0 1 2 /move Gunther 0 0 2" +
+                    "/speak Marlon \"I'd take these down to the blacksmith, If he's worth his prices, he'll be able to open them.\""+
+                    "/speak Marlon \"If you want to actually use the things, you'll have to pry it out of Rasmodius. He's a secretive old man, but get on his good side and he'll talk your ear off.\""+
+                    "/pause 500 /end"
+                }
+            }
+        }
+    };
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)
     {
         PerkData? perk = perks.FirstOrDefault(x => x.perkName == perkName);

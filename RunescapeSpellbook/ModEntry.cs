@@ -10,10 +10,12 @@ using StardewValley.Buffs;
 using StardewValley.Extensions;
 using StardewValley.GameData;
 using StardewValley.GameData.Objects;
+using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.Tools;
+using Object = StardewValley.Object;
 
 namespace RunescapeSpellbook
 {
@@ -39,7 +41,8 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addammo", "Gives the player ammo.\n\nUsage: rs_addammo", this.GrantAmmo);
             helper.ConsoleCommands.Add("rs_addtreasures", "Gives the player treasures.\n\nUsage: rs_addtreasures", this.GrantTreasures);
             helper.ConsoleCommands.Add("rs_addpacks", "Gives the player packs.\n\nUsage: rs_addpacks", this.GrantPacks);
-            helper.ConsoleCommands.Add("rs_miscDebug", "Runs a command left in for testing. Do not use. \n\nUsage: rs_miscDebug", this.DebugCommand);
+            helper.ConsoleCommands.Add("rs_debug_misc", "Runs a command left in for testing. Do not use. \n\nUsage: rs_debug_misc", this.DebugCommand);
+            helper.ConsoleCommands.Add("rs_debug_position", "Reports the position of the local player \n\nUsage: rs_debug_position", this.DebugPosition);
         }
             
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
@@ -90,60 +93,34 @@ namespace RunescapeSpellbook
                 );
             }
             
-            //Add wizard event for unlocking magic
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/Events/Farm"))
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Shops"))
             {
                 e.Edit(asset =>
                     {
-                        var eventDict = asset.AsDictionary<string, string>().Data;
-                        
-                        //Wizard gives magic book event
-                        eventDict.Add("RS.0/f Wizard 1000/t 600 1200",
-                            "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
-                            "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
-                            "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
-                            "/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"" +
-                            "/stopMusic /itemAboveHead 4290 /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail RSSpellMailGet" +
-                            "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600" +
-                            "/speak Wizard \"Well, that was all. I'll be on my way now.\"" +
-                            "/pause 300/end");
+                        foreach (KeyValuePair<string,List<ShopListings>> addShopData in ModAssets.loadedShops)
+                        {
+                            ShopData shopData = asset.AsDictionary<string, ShopData>().Data[addShopData.Key];
+                            foreach (ShopListings ShopListings in addShopData.Value)
+                            {
+                                shopData.Items.Add(ShopListings.itemData);
+                            }
+                        }
                     }
                 );
             }
-            
-            //Gunther + Marlon event
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/Events/ArchaeologyHouse"))
+
+            if (e.NameWithoutLocale.StartsWith("Data/Events") && ModAssets.loadableEvents.ContainsKey(e.NameWithoutLocale.Name))
             {
                 e.Edit(asset =>
+                {
+                    var eventDict = asset.AsDictionary<string, string>().Data;
+
+                    foreach (KeyValuePair<string, string> eventData in ModAssets.loadableEvents[
+                                 e.NameWithoutLocale.Name])
                     {
-                        var eventDict = asset.AsDictionary<string, string>().Data;
-                        //Wizard gives magic book event
-                        eventDict.Add("RS.1/n RSRunesFound",
-                            "continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3" +
-                            "/skippable /pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"" +
-                            "/speak Marlon \"This is an antique! I've been using this blade for decades now!\"" +
-                            "/warp farmer 3 14 /playSound doorClose /pause 1000" +
-                            "/move farmer 0 -1 1 /move farmer 3 0 2 /move farmer 0 1 1 /move farmer 5 0 0 /move Marlon 0 0 2 /move farmer 0 -3 0" +
-                            "/move Gunther 0 0 2 /speak Gunther \"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"" +
-                            "/move Gunther 0 0 0 /pause 500 /jump Gunther 8 /pause 500 /textAboveHead Gunther \"*huff* *puff*\" /pause 2000 /move Gunther 0 0 2"+
-                            "/speak Gunther \"Perhaps the books can wait. What do you need today, @?\"" +
-                            "/question null \"#I found this underground#Can you tell me about this?\"" +
-                            "/speak Gunther \"Let me have a look...\" /pause 1000"+
-                            "/speak Gunther \"Hmm... I'm not quite sure what that is... \""+
-                            "/speak Gunther \"The runes aren't any I recognise either...\""+
-                            "/move Marlon 0 0 3 /speak Marlon \"Ah, well isn't that nostalgic.\""+
-                            "/move Gunther 0 0 1 /speak Gunther \"You're familiar with these?\""+
-                            "/speak Marlon \"Not myself, but an old friend of mine used to be obsessed with them.\""+
-                            "/move Marlon 0 0 2 /speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\""+
-                            "/move farmer 1 0 0 /move Marlon 0 0 2 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000" +
-                            "/speak Marlon \"As I suspected, these are definitely guthixian runestones. Or rather, they contain guthixian runestones.\"" +
-                            "/speak Marlon \"Ol' Ras used to spend hours trying to crack these things open, until I showed up. Turns out a strike with the trusty hammer does the job in seconds.\""+
-                            "/move Marlon 0 1 2 /move Gunther 0 0 2" +
-                            "/speak Marlon \"I'd take these down to the blacksmith, If he's worth his prices, he'll be able to open them.\""+
-                            "/speak Marlon \"If you want to actually use the things, you'll have to pry it out of Rasmodius. He's a secretive old man, but get on his good side and he'll talk your ear off.\""+
-                            "/pause 500 /end");
+                        eventDict.Add(eventData.Key, eventData.Value);
                     }
-                );
+                });
             }
             
             //Possible mails
@@ -734,6 +711,52 @@ namespace RunescapeSpellbook
             }
         }
         
+        [HarmonyPatch(typeof(Object), "GetCategoryDisplayName")]
+        [HarmonyPatch(new Type[] { typeof(int)})]
+        public class DisplayNamePatcher
+        {
+            public static void Postfix(ref string __result, int category)
+            {
+                switch (category)
+                {
+                    case -429:
+                        __result = "Elemental Rune";
+                        break;
+                    case -430:
+                        __result = "Combat Rune";
+                        break;
+                    case -431:
+                        __result = "Catalytic Rune";
+                        break;
+                    default:
+                        break;
+                } 
+            }
+        }
+        
+        [HarmonyPatch(typeof(Object), "GetCategoryColor")]
+        [HarmonyPatch(new Type[] { typeof(int)})]
+        public class ColourPatcher
+        {
+            public static void Postfix(ref Color __result, int category)
+            {
+                switch (category)
+                {
+                    case -429:
+                        __result = new Color(124,149,101);
+                        break;
+                    case -430:
+                        __result = new Color(135,92,17);
+                        break;
+                    case -431:
+                        __result = new Color(114,34,28);
+                        break;
+                    default:
+                        break;
+                } 
+            }
+        }
+        
         /*
         [HarmonyPatch(typeof(BasicProjectile), "behaviorOnCollisionWithMonster")]
         [HarmonyPatch(new Type[] { typeof(NPC),typeof(GameLocation) })]
@@ -1060,11 +1083,18 @@ namespace RunescapeSpellbook
             
             this.Monitor.Log($"Granted all treasures",LogLevel.Info);
         }
-        
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
-            Game1.warpFarmer("Caldera",24,30,2);
+            Game1.warpFarmer("AdventureGuild",5,13,2);
+        }
+        
+        private void DebugPosition(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+            
+            Farmer player = Game1.player;
+            Monitor.Log($"{player.currentLocation.Name}\n x: {player.Tile.X}\n y: {player.Tile.Y}",LogLevel.Info);
         }
         
         private void GrantPacks(string command, string[] args)

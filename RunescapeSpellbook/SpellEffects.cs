@@ -286,6 +286,30 @@ public class SpellEffects : BaseSpellEffects
     public static KeyValuePair<bool, string> SuperheatItem(ref Item? itemArgs)
     {
         string itemId = itemArgs.QualifiedItemId;
+
+        if (itemId == "(O)388")
+        {
+            if (itemArgs.Stack >= 5)
+            {
+                int postCastStackSize = itemArgs.Stack - 5;
+                StardewValley.Object furnaceItem = ItemRegistry.Create<StardewValley.Object>($"382");
+                
+                Utility.CollectOrDrop(furnaceItem);
+                Game1.player.playNearbySoundAll("furnace", null);
+                itemArgs.ConsumeStack(5);
+
+                if (postCastStackSize == 0)
+                {
+                    itemArgs = null;
+                }
+                return new KeyValuePair<bool, string>(true, "");
+            }
+            else
+            {
+                return new KeyValuePair<bool, string>(false, $"I need atleast 5 {itemArgs.DisplayName}");
+            }
+        }
+        
         MachineOutputRule? furnaceRule = DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules
             .FirstOrDefault(r => r.Triggers.Any(x => x.RequiredItemId == itemId));
 
