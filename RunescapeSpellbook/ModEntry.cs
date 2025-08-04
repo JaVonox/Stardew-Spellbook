@@ -97,12 +97,12 @@ namespace RunescapeSpellbook
             {
                 e.Edit(asset =>
                     {
-                        foreach (KeyValuePair<string,List<ShopListings>> addShopData in ModAssets.loadedShops)
+                        foreach (KeyValuePair<string,List<ShopListings>> addShopData in ModAssets.loadableShops)
                         {
                             ShopData shopData = asset.AsDictionary<string, ShopData>().Data[addShopData.Key];
-                            foreach (ShopListings ShopListings in addShopData.Value)
+                            foreach (ShopListings item in addShopData.Value)
                             {
-                                shopData.Items.Add(ShopListings.itemData);
+                                shopData.Items.Insert(item.insertIndex,item.itemData);
                             }
                         }
                     }
@@ -130,10 +130,10 @@ namespace RunescapeSpellbook
                     {
                         var mailDict = asset.AsDictionary<string, string>().Data;
 
-                        foreach (KeyValuePair<string,string> mail in ModAssets.loadableMail)
+                        foreach (KeyValuePair<string,Tuple<bool,string>> mail in ModAssets.loadableText.Where(x=>x.Value.Item1))
                         {
                             string mailKey = mail.Key;
-                            string mailVal = mail.Value;
+                            string mailVal = mail.Value.Item2;
                             
                             while (true) //Loop until we get a valid assignment for mail
                             {
@@ -168,6 +168,52 @@ namespace RunescapeSpellbook
                     }
                 );
             }
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/SecretNotes"))
+            {
+                e.Edit(asset =>
+                {
+                    var notesDict = asset.AsDictionary<int, string>().Data;
+                    foreach (KeyValuePair<string, Tuple<bool, string>> newNote in ModAssets.loadableText.Where(x =>
+                                 !x.Value.Item1))
+                    {
+                        int noteKey = int.Parse(newNote.Key);
+                        string noteVal = newNote.Value.Item2;
+
+                        while (true) //Loop until we get a valid assignment for mail
+                        {
+                            try
+                            {
+                                //This removes the mail if it overlaps with another mail - such as if a new mail is added on a date the mod uses or if a future update adds the same key
+                                if (notesDict.TryAdd(noteKey, noteVal))
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    Monitor.Log(
+                                        $"Duplicate mail key: {noteKey}. Attempting to access next available ID",
+                                        LogLevel.Warn);
+                                    if (noteKey + 1 > 1000)
+                                    {
+                                        throw new Exception($"Couldn't find a new year for {noteKey} before 1000");
+                                    }
+
+                                    noteKey++;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Monitor.Log(ex.Message,
+                                    LogLevel
+                                        .Error); //reports mail error if the mail delim method failed. this should be rare, and only should occur with non-dated mail
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+            
 
             if (e.NameWithoutLocale.IsEquivalentTo("Data/NPCGiftTastes"))
             {

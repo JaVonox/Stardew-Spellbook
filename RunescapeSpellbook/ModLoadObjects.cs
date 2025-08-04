@@ -233,8 +233,8 @@ public class PerkData
 public class ShopListings
 {
     public readonly ShopItemData itemData;
-
-    public ShopListings(string qualifiedID, int price, int minStack = -1, int maxstack = -1, string condition = "",
+    public readonly int insertIndex;
+    public ShopListings(string tradeID, string qualifiedID, int price,int newInsertIndex = 0, int minStack = -1, int maxstack = -1, string condition = "",
         int toolUpgradeLevel = -1)
     {
         itemData = new ShopItemData();
@@ -245,6 +245,22 @@ public class ShopListings
         itemData.MaxStack = maxstack;
         itemData.Condition = condition == "" ? null : condition;
         itemData.ToolUpgradeLevel = toolUpgradeLevel;
+        insertIndex = newInsertIndex;
+    }
+
+    public ShopListings(string tradeID, string qualifiedID,string tradeItemID, int tradeAmount,int newInsertIndex = 0, int minStack = -1, int maxStack = -1, string condition = "")
+    {
+        itemData = new ShopItemData();
+        itemData.Id = tradeID;
+        itemData.ItemId = qualifiedID;
+        itemData.Price = -1;
+        itemData.MinStack = minStack;
+        itemData.MaxStack = maxStack;
+        itemData.Condition = condition == "" ? null : condition;
+        itemData.ToolUpgradeLevel = -1;
+        itemData.TradeItemId = tradeItemID;
+        itemData.TradeItemAmount = tradeAmount;
+        insertIndex = newInsertIndex;
     }
 }
 
@@ -408,7 +424,7 @@ public static class ModAssets
             new Dictionary<int, int>() { {4295, 1},{4291,3},{4294,3} },10, "BusStop", 19, 23,2),
         
         new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal, or burns wood into coal at a discount",1,
-            new Dictionary<int, int>() { {4296, 1},{4293,4}},15,
+            new Dictionary<int, int>() { {4296, 1},{4293,4}},10,
             (i=>i is Item item && (item.QualifiedItemId == "(O)388" || DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId)))),
             SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost, or smelt wood into coal. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
         
@@ -417,15 +433,15 @@ public static class ModAssets
             SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 150% of the items value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
         new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",1,
-            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.3f,SpellEffects.Humidify, 10,5,"Humidify",
+            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.4f,SpellEffects.Humidify, 10,5,"Humidify",
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
         
         new TilesSpell(5,"Area_Cure","Cure Plant","Replants dead crops",6,
-            new Dictionary<int, int>() { {4298, 1},{4294,8}},0.5f, SpellEffects.CurePlant, 10,6,"Cure",
+            new Dictionary<int, int>() { {4298, 1},{4294,8}},0.6f, SpellEffects.CurePlant, 10,6,"Cure",
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
         
         new BuffSpell(6,"Buff_VileVigour","Vile Vigour","Sacrifices a third of your max health to fill your energy",3,
-            new Dictionary<int, int>() { {4297, 1},{4291,3}},3, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
+            new Dictionary<int, int>() { {4297, 1},{4291,3}},5, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
             7,"Vile","My energy is already full"),
         
         new BuffSpell(7,"Buff_PieMake","Bake Pie","Cooks a random recipe that you know using your held ingredients",3,
@@ -480,7 +496,7 @@ public static class ModAssets
             new Dictionary<int, int>() { {4300, 4},{4297,3}}, 10,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
         
         new InventorySpell(22,"Menu_Plank","Plank Make","Turns wood into hardwood and vice versa and uncrafts wooden items into wood",3,
-            new Dictionary<int, int>() { {4298, 1},{4297,1}},5,
+            new Dictionary<int, int>() { {4298, 1},{4297,1}},10,
             (i => i is Item item && (item.itemId.Value == "388" || item.itemId.Value == "709" || 
                                      (CraftingRecipe.craftingRecipes.ContainsKey(item.Name) 
                                       && CraftingRecipe.craftingRecipes[item.Name].Split(' ').ToList() is List<string> recipes 
@@ -494,7 +510,7 @@ public static class ModAssets
         new PerkData(0,"Sapphire","Sapphire","All teleportation spells are free","Teleportation spells no longer grant experience"),
         new PerkData(1,"Emerald","Emerald","All spells no longer require air runes"),
         new PerkData(2,"Ruby","Ruby","20% chance of non-combat spells taking no runes"),
-        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing three projectiles for free","Does not stack with charge, charge takes prescedent")
+        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing extra projectiles","Does not stack with charge, charge takes prescedent")
     };
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
@@ -668,64 +684,102 @@ public static class ModAssets
     };
 
     //Items to be put in shops
-    public static Dictionary<string, List<ShopListings>> loadedShops = new Dictionary<string, List<ShopListings>>()
+    public static Dictionary<string, List<ShopListings>> loadableShops = new Dictionary<string, List<ShopListings>>()
     {
         {"AdventureShop", new List<ShopListings>()
         {
-            new ShopListings("(W)4351",2000,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("Marlon_Battlestaff","(W)4351",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+        }},
+        {"DesertTrade", new List<ShopListings>()
+        {
+            new ShopListings("Desert_AirRunes","(O)4291","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }}
     };
     
-    //Mail to be loaded into the game
-    public static Dictionary<string, string> loadableMail = new Dictionary<string, string>()
+    /// <summary>
+    /// mail + notes to load into the game
+    /// <remarks>bool: true is mail, false is secret note</remarks>
+    /// </summary>
+    public static Dictionary<string, Tuple<bool,string>> loadableText = new Dictionary<string, Tuple<bool,string>>()
     {
         {
             "RSSpellMailGet",
-            "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
-            "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. " +
-            "^^   -M. Rasmodius, Wizard[letterbg 2]" +
-            "%item object 4351 1 %%" +
-            "[#]Wizard's Battlestaff Gift"
+            new Tuple<bool, string>(true,"Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
+           "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. " +
+           "^^   -M. Rasmodius, Wizard[letterbg 2]" +
+           "%item object 4351 1 %%" +
+           "[#]Wizard's Battlestaff Gift")
         },
         {
             "summer_15_1",
-            "@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
-            "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
-            "^^   -Clint^^P.S I've included some samples with this letter" +
-            "%item object 4364 3 %%" +
-            "[#]Clint's Pack Opening Service"
+            new Tuple<bool, string>(true,"@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
+             "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
+             "^^   -Clint^^P.S I've included some samples with this letter" +
+             "%item object 4364 3 %%" +
+             "[#]Clint's Pack Opening Service")
         },
         {
             "summer_10_2",
-            "Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
-            "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
-            "^^   -Willy" +
-            "%item object 4362 1 %%" +
-            "[#]Willy's Casket"
+            new Tuple<bool, string>(true,"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
+             "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
+             "^^   -Willy" +
+             "%item object 4362 1 %%" +
+             "[#]Willy's Casket")
         },
         {
             "summer_1_3",
-            "@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
-            "^^Maybe you'll get something out of them." +
-            "^^   -Clint" +
-            "%item object 4300 60 %%" +
-            "[#]Clint's Terrible Gift"
+            new Tuple<bool, string>(true,"@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
+             "^^Maybe you'll get something out of them." +
+             "^^   -Clint" +
+             "%item object 4300 60 %%" +
+             "[#]Clint's Terrible Gift")
         },
         {
             "spring_9_2",
-            "@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
-            "^^I hope you'll think of the great outdoors when you use them." +
-            "^^   -Linus" +
-            "%item object 4296 40 %%" +
-            "[#]Linus' Nature Stones"
+            new Tuple<bool, string>(true,"@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
+             "^^I hope you'll think of the great outdoors when you use them." +
+             "^^   -Linus" +
+             "%item object 4296 40 %%" +
+             "[#]Linus' Nature Stones")
         },
         {
             "fall_26_3",
-            "Coco,^^Beef Soup" +
-            "^^   -Tofu" +
-            "%item object 4293 150 %%" +
-            "[#]Letter For Someone Else"
+            new Tuple<bool, string>(true,"Coco,^^Beef Soup" +
+             "^^   -Tofu" +
+             "%item object 4362 2 %%" +
+             "[#]Letter For Someone Else")
+        },
+        {
+            "419", //Hints for catalytic magic
+            new Tuple<bool, string>(false,"In a past life, the men of the desert practiced runic magic." +
+                                          "^^Their Flesh inherited their strength." +
+                                          "^^Their Souls inherited their wisdom." +
+                                          "^^Their Visage, sealed within the crypt of death, inherited the light of the stars." +
+                                          "^^Their Shadows, those who escaped the jaws of the ancient beasts, stole away the secrets of the world.")
+        },
+        {
+            "429", //Hints for elemental magic
+            new Tuple<bool, string>(false,"Once, the great druid brought balance to the world." +
+                                          "^^As he slept, the world splintered, and the spirits became restless." +
+                                          "^^The spirits sought those with those whom they shared affinity." +
+                                          "^^The great snakes of the desert were granted mastery of the winds." +
+                                          "^^The spiders of the sea spread the ocean inland." +
+                                          "^^The men learned to till the soil, in exchange for their dead."+
+                                          "^^The flame spread to the depths and tropics, creating life where there was none."+
+                                          "^^That what remained found refuge in the primordial slurry, which became the slime.")
+        },
+        {
+            "439", //Hints for treasure
+            new Tuple<bool, string>(false,"The ancient men, blessed with the power of creation, made tools of war." +
+                                          "^^When the ancient empires fell, their weapons became scattered." +
+                                          "^^The first casket hid the cornucopia of elements." +
+                                          "^^Stone Golem, Skeleton, Metal Head, Serpent, Pepper Rex, Haunted Skull." + 
+                                          "^^The second casket contained the secrets of the elements and the symbol of their lord."+
+                                          "^^Mummy, Iridium Bat, Haunted Skull."+
+                                          "^^The final casket held the forbidden knowledge of the god slayer, granted to his wights."+
+                                          "^^Hard Casket, Dwarvish Sentry, Magma Duggy.")
         }
+        
     };
 
     public static Dictionary<string, Dictionary<string,string>> loadableEvents = new Dictionary<string, Dictionary<string,string>>()
