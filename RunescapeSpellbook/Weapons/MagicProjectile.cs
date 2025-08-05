@@ -105,4 +105,10 @@ public class MagicProjectile : BasicProjectile
             current_scale = 0.8f * (float)(4 - 4 / (i + 4));
         }
     }
+
+    public override void behaviorOnCollisionWithOther(GameLocation location)
+    {
+        base.behaviorOnCollisionWithOther(location);
+        location.playSound("RunescapeSpellbook.Splash", null, null);
+    }
 }

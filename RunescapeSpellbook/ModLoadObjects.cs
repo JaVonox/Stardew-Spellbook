@@ -354,7 +354,7 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.3),
                 
                 new ItemDrop(4362,1,1,0.05),
-            },500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}})},
+            },200,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}})},
         
         {4362,new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. A blacksmith might be able to open it.",22,
             new List<ItemDrop>()
@@ -368,16 +368,15 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.7),
                 new ItemDrop(4356,1,1,0.5),
                 new ItemDrop(4363,1,1,0.1),
-            },1500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
+            },500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
         
         {4363,new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. A blacksmith might be able to open it.",23,
             new List<ItemDrop>()
             {
-                new ItemDrop(4356,1,1,2),
-                new ItemDrop(4357,1,1,0.4),
-                new ItemDrop(4358,1,1,0.4),
-                new ItemDrop(4360,15,20,1),
-            },2500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
+                new ItemDrop(4356,1,1,1),
+                new ItemDrop(4357,1,1,0.5),
+                new ItemDrop(4358,1,1,0.5),
+            },1000,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
         
         {4364,new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. A blacksmith might be able to open it.",24,4291)},
         {4365,new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. A blacksmith might be able to open it.",25,4292)},
@@ -408,8 +407,8 @@ public static class ModAssets
             1.4f,-1,0,0,0,0.05f),
         new StaffWeaponData(4357, "Staff_Ahrims", "Ahrims Staff", "Ahrim the Blighted's quarterstaff", 30, 45, 17,
             1.6f),
-        new StaffWeaponData(4358, "Staff_Bluemoon", "Blue moon spear",
-            "An ancient battlestaff that doubles as a spear", 60, 80, 18,
+        new StaffWeaponData(4358, "Staff_Bluemoon", "Blue Moon Spear",
+            "An ancient battlestaff that doubles as a spear", 70, 90, 18,
             1.5f)
     };
 
@@ -510,7 +509,7 @@ public static class ModAssets
         new PerkData(0,"Sapphire","Sapphire","All teleportation spells are free","Teleportation spells no longer grant experience"),
         new PerkData(1,"Emerald","Emerald","All spells no longer require air runes"),
         new PerkData(2,"Ruby","Ruby","20% chance of non-combat spells taking no runes"),
-        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing extra projectiles","Does not stack with charge, charge takes prescedent")
+        new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing extra projectiles","Does not stack with charge, charge takes precedent")
     };
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
@@ -743,10 +742,10 @@ public static class ModAssets
              "[#]Linus' Nature Stones")
         },
         {
-            "fall_26_3",
+            "fall_27_2",
             new Tuple<bool, string>(true,"Coco,^^Beef Soup" +
              "^^   -Tofu" +
-             "%item object 4362 2 %%" +
+             "%item object 4362 1 %%" +
              "[#]Letter For Someone Else")
         },
         {

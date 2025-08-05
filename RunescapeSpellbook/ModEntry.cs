@@ -62,7 +62,7 @@ namespace RunescapeSpellbook
                 e.Edit(asset =>
                     {
                         List<string> audioTracks = ModAssets.modSpells.Select(x=>x.audioID).Distinct().ToList();
-                        audioTracks.Add("Preserve"); //Add the sound for hitting
+                        audioTracks.Add("Splash"); //Add the sound for hitting
                         audioTracks.Add("MagicLevel"); //Add the sound for levelling up
                         audioTracks.Add("MultiHit"); //Add the sound for when you fire multiple projectiles
                         
@@ -320,18 +320,19 @@ namespace RunescapeSpellbook
                         __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "exit",
                     Game1.content.LoadString("Strings\\UI:GameMenu_Exit"))
                 {
-                    myID = 12349,
+                    myID = 12350,
                     downNeighborID = 9,
-                    leftNeighborID = 12348,
+                    leftNeighborID = 12349,
                     tryDefaultIfNoDownNeighborExists = true,
                     fullyImmutable = true
                 };
                 
+                //Add spellbook page
                 __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
                 __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 640, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "RSspellbook", "Spellbook")
                 {
-                    myID = 12350,
-                    downNeighborID = 10,
+                    myID = 12349,
+                    downNeighborID = 9,
                     leftNeighborID = 12348,
                     tryDefaultIfNoDownNeighborExists = true,
                     fullyImmutable = true
@@ -347,9 +348,20 @@ namespace RunescapeSpellbook
             {
                 if(!__instance.invisible)
                 {
-                    ClickableComponent c = __instance.tabs.First(x=>x.name == "RSspellbook");
-                    b.Draw(ModAssets.extraTextures, new Vector2(c.bounds.X, c.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)), new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
-                    
+
+                    //this is used to ensure that we dont overlap any big menus like 
+                    if ((__instance.pages[__instance.currentTab] as CollectionsPage)?.letterviewerSubMenu == null)
+                    {
+                        ClickableComponent c = __instance.tabs.First(x=>x.name == "RSspellbook");
+                        
+                        b.Draw(ModAssets.extraTextures,
+                            new Vector2(c.bounds.X,
+                                c.bounds.Y +
+                                ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)),
+                            new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None,
+                            0.0001f);
+                    }
+
                     if (!__instance.hoverText.Equals(""))
                     {
                         IClickableMenu.drawHoverText(b, __instance.hoverText, Game1.smallFont);
@@ -896,7 +908,7 @@ namespace RunescapeSpellbook
                 return;
             }
             Game1.player.eventsSeen.Add("RS.0");
-            Monitor.Log("Added magic");
+            Monitor.Log("Added magic",LogLevel.Info);
             if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
             {
                 reqLevel = Math.Clamp(reqLevel, 0, 10);

@@ -133,11 +133,24 @@ public class TeleportSpell : Spell
     }
     public KeyValuePair<bool,string> Teleport()
     {
-        //Disable teleporting if there is an active festival or event
-        if (Utility.isFestivalDay(Game1.dayOfMonth,Game1.season) || Utility.IsPassiveFestivalDay(Game1.dayOfMonth,Game1.season,null))
+        //return new KeyValuePair<bool, string>(false,$"Location {location} ID {festivalId} {containsKey} loadData {loadData} locationName = {locationName}");
+        
+        //Prevent teleporting out of temporary places - event locations
+        if (GameLocation.IsTemporaryName(Game1.player.currentLocation.Name))
         {
-            return new KeyValuePair<bool, string>(false,"It's dangerous to teleport on special days");
+            return new KeyValuePair<bool, string>(false,$"I should finish the festival before teleporting");
         }
+        
+        //Disable teleporting if there is an active festival or event
+        if (Utility.isFestivalDay(Game1.dayOfMonth,Game1.season))
+        {
+            bool loadData = Event.tryToLoadFestivalData($"{Utility.getSeasonKey(Game1.season)}{Game1.dayOfMonth}", out var _, out var _, out var eventLocationName, out var _, out var _);
+            if (loadData && eventLocationName == location)
+            {
+                return new KeyValuePair<bool, string>(false,$"It would be dangerous to teleport there during a festival");
+            }
+        }
+
         if (extraTeleportReqs != null && !extraTeleportReqs(Game1.player)) //Check the extra conditions (such as teleport being unlocked)
         {
             return new KeyValuePair<bool, string>(false,"I don't know how to teleport there");
@@ -398,7 +411,6 @@ public class CombatSpell : Spell
     private float velocity;
     private bool explode;
     private string firingSound;
-    private string collisionSound;
     private Color projectileColor;
     
     /// <summary>
@@ -417,7 +429,6 @@ public class CombatSpell : Spell
         this.velocity = velocity;
         this.explode = explode;
         this.firingSound = "RunescapeSpellbook." + firingSound;
-        this.collisionSound = "RunescapeSpellbook.Preserve";
         this.projectileColor = projectileColor;
         this.combatEffect = combatEffect;
     }
@@ -543,8 +554,8 @@ public class CombatSpell : Spell
                     critDamage,
                     this.id,
                     firingSound: projectileCount > 1 ? "RunescapeSpellbook.MultiHit" :  firingSound,
-                    collisionSound: collisionSound,
-                    bounceSound: collisionSound,
+                    collisionSound: "",
+                    bounceSound: "",
                     explode: explode,
                     damagesMonsters: true,
                     location: caster.currentLocation,
