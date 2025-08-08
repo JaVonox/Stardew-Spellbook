@@ -299,8 +299,8 @@ public static class ModAssets
         {4300,new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",-430,
             new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
 
-        {4301,new SlingshotItem(4301,"Ammo_Water","Water Orb","Slingshot ammo enchanted with the power of water",30)},
-        {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Slingshot ammo enchanted with the power of earth",31)},
+        {4301,new SlingshotItem(4301,"Ammo_Water","Water Orb","Enchanted ammo that slows and lightly poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",30)},
+        {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Enchanted ammo that explodes and heavily poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",31)},
         
         {4359,new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
             new List<ItemDrop>()
@@ -459,13 +459,13 @@ public static class ModAssets
             new Dictionary<int, int>() { {4295, 1},{4291,5}},10, "Mountain",54,7,0, 
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("landslideDone")))),
         
-        new InventorySpell(11,"Menu_EnchantSapphire","Enchant Sapphire Bolt","Turns blue rocks and gemstones into strong slingshot ammo",4,
+        new InventorySpell(11,"Menu_EnchantSapphire","Enchant Sapphire Bolt","Convert any blue gems or rocks into slowing poisonous ammo",4,
             new Dictionary<int, int>() { {4297, 2},{4292,3}},10,(i => i is Item item && SpellEffects.blueGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantSapphireBolt,
-            "Convert any blue gems or rocks into enchanted ammo for the slingshot",2,"EnchantBolt"),
+            "Convert any blue gems or rocks into slowing poisonous ammo for the slingshot. On hitting an enemy, poison spreads to nearby enemies. Poison cannot finish off enemies.",2,"EnchantBolt"),
         
-        new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Turns green gemstones into stronger slingshot ammo",7,
+        new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Convert any green gems into explosive poisonous ammo",7,
             new Dictionary<int, int>() { {4297, 2},{4294,3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
-            "Convert any green gems into enchanted ammo for the slingshot",2,"EnchantBolt"),
+            "Convert any green gems into explosive poisonous ammo for the slingshot. On hitting an enemy, poison spreads to nearby enemies. Poison cannot finish off enemies.",2,"EnchantBolt"),
         
         new BuffSpell(13,"Buff_DarkLure","Dark Lure","Summons more enemies, and makes them prioritise you over other farmers for 3 minutes",6,
             new Dictionary<int, int>() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
@@ -890,16 +890,14 @@ public static class ModAssets
 
     public static bool HasMagic(Farmer farmer)
     {
-        int hasMagic = 0;
-        int.TryParse(farmer.modData["HasUnlockedMagic"],out hasMagic);
-        if (hasMagic == 1)
+        if (farmer.mailReceived.Contains("TofuHasUnlockedMagic"))
         {
             return true;
         }
         
         if (farmer.eventsSeen.Contains("RS.0"))
         {
-            farmer.modData["HasUnlockedMagic"] = "1";
+            farmer.mailReceived.Add("TofuHasUnlockedMagic");
             return true;
         }
         return false;

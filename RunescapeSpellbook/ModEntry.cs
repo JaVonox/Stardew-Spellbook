@@ -14,6 +14,7 @@ using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
 using StardewValley.Monsters;
+using StardewValley.Projectiles;
 using StardewValley.Tools;
 using Object = StardewValley.Object;
 
@@ -29,6 +30,7 @@ namespace RunescapeSpellbook
             ModAssets.Load(helper);
             
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
             
             helper.ConsoleCommands.Add("rs_grantmagic", "Gives the player magic.\n\nUsage: rs_grantmagic <value>\n\n value: the level to set to", this.GrantMagic);
             helper.ConsoleCommands.Add("rs_setlevel", "Sets the players magic level.\n\nUsage: rs_setlevel <value>\n\n value: the level to set to", this.SetLevel);
@@ -44,7 +46,30 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_debug_misc", "Runs a command left in for testing. Do not use. \n\nUsage: rs_debug_misc", this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", "Reports the position of the local player \n\nUsage: rs_debug_position", this.DebugPosition);
         }
-            
+
+        private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
+        {
+            if (!Context.IsWorldReady)
+            {
+                return;
+            }
+
+            //On J keybutton press we open or close the spell menu
+            if (e.Button == SButton.J)
+            {
+                if (Game1.activeClickableMenu == null && Game1.CanShowPauseMenu())
+                {
+                    Game1.PushUIMode();
+                    Game1.activeClickableMenu = new GameMenu(10);
+                    Game1.PopUIMode();
+                }
+                else if (Game1.activeClickableMenu is GameMenu menu && menu.currentTab == 10)
+                {
+                    Game1.activeClickableMenu.exitThisMenu();
+                }
+            }
+        }
+
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modsprites"))
@@ -65,6 +90,7 @@ namespace RunescapeSpellbook
                         audioTracks.Add("Splash"); //Add the sound for hitting
                         audioTracks.Add("MagicLevel"); //Add the sound for levelling up
                         audioTracks.Add("MultiHit"); //Add the sound for when you fire multiple projectiles
+                        audioTracks.Add("Liquid"); //Add Poison-y sound
                         
                         var data = asset.AsDictionary<string, AudioCueData>().Data;
                         foreach (string audioTrack in audioTracks)
@@ -584,7 +610,6 @@ namespace RunescapeSpellbook
                     __instance.modData.Add("TofuMagicExperience","0");
                     __instance.modData.Add("TofuMagicProfession1","-1");
                     __instance.modData.Add("TofuMagicProfession2","-1");
-                    __instance.modData.Add("HasUnlockedMagic","0");
                 }
                 
                 ModAssets.localFarmerData.Reset();
@@ -815,7 +840,32 @@ namespace RunescapeSpellbook
             }
         }
         
-        /*
+        [HarmonyPatch(typeof(Slingshot), "GetAmmoCollisionBehavior")]
+        [HarmonyPatch(new Type[] { typeof(Object)})]
+        public class SlingshotExplodePatcher
+        {
+            public static void Postfix(Slingshot __instance, ref BasicProjectile.onCollisionBehavior __result, Object ammunition)
+            {
+                if (ammunition.ItemId == "4302")
+                {
+                    __result = BasicProjectile.explodeOnImpact;
+                }
+            }
+        }
+            
+        [HarmonyPatch(typeof(Slingshot), "GetAmmoCollisionSound")]
+        [HarmonyPatch(new Type[] { typeof(Object)})]
+        public class SlingshotSoundPatcher
+        {
+            public static void Postfix(Slingshot __instance, ref string __result, Object ammunition)
+            {
+                if (ammunition.ItemId == "4302")
+                {
+                    __result = "explosion";
+                }
+            }
+        }
+        
         [HarmonyPatch(typeof(BasicProjectile), "behaviorOnCollisionWithMonster")]
         [HarmonyPatch(new Type[] { typeof(NPC),typeof(GameLocation) })]
         public class SlingshotProjectileMonsterHit
@@ -825,46 +875,46 @@ namespace RunescapeSpellbook
                 if (__instance.itemId != null && (__instance.damagesMonsters.Value && n is Monster))
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);
-                    Monster monster = n as Monster;
-                    if (__instance.itemId.ToString() == "(O)4301") //Water Ammo - significantly cuts monster speed
+                    if (__instance.itemId.ToString() == "(O)4301") //Water Ammo
                     {
-                        HitMonster(__instance,monster,location,player,1);
+                        HitMonster(__instance,n as Monster,location,player,2);
+                        n.currentLocation.playSound("slosh", n.Tile, null);
                         return false;
                     }
-                    else if (__instance.itemId.ToString() == "(O)4302") //Earth Ammo - significantly cuts monster defence
+                    if (__instance.itemId.ToString() == "(O)4302") //Earth Ammo
                     {
-                        HitMonster(__instance,monster,location,player,0);
+                        n.currentLocation.explode(new Vector2(n.Tile.X, n.Tile.Y), 2, player);
+                        n.currentLocation.playSound("explosion", n.Tile, null);
+                        HitMonster(__instance,n as Monster,location,player,1);
                         return false;
                     }
                 }
                 return true; 
             }
 
+            //These monsters do not allow for glowing effects, so it isn't possible to show the player the fact they're debuffed. Its easier to give them immunity
             private static void HitMonster(BasicProjectile __instance, Monster n, GameLocation location, Farmer player, int debuffType)
             {
                 location.damageMonster(n.GetBoundingBox(), __instance.damageToFarmer.Value, __instance.damageToFarmer.Value + 1, isBomb: false, player, isProjectile: true);
-
-                foreach (NPC npcEffected in location.characters)
+                
+                foreach (NPC npcEffected in location.characters.Where(x=> x is Monster mon && Vector2.Distance(n.Tile,x.Tile) < 5))
                 {
-                    if(!(npcEffected is Monster)) {continue;}
-                    
                     Monster monsterEffected = npcEffected as Monster;
                     
                     if (monsterEffected.mineMonster.Value)
                     {
-                        //Apply Debuff
-                        switch (debuffType)
+                        ModAssets.BroadcastSprite(monsterEffected.currentLocation,
+                            new TemporaryAnimatedSprite(362, Game1.random.Next(15, 50), 6, 1, monsterEffected.Position - new Vector2(32 + Game1.random.Next(-21, 21) - 32, 32 + Game1.random.Next(-21, 21)), flicker: false, Game1.random.NextBool())
                         {
-                            case 0:
-                                monsterEffected.resilience.Value = 1;
-                                monsterEffected.doEmote(12);
-                                break;
-                            case 1:
-                                monsterEffected.speed = 1;
-                                monsterEffected.doEmote(28);
-                                break;
-                        }
-                    }
+                            scale = 0.5f,
+                            delayBeforeAnimationStart = 100,
+                            alpha = 0.5f
+                        });
+                        
+                        //Apply Debuff
+                        //Manners value is unused on monsters so we use it to assign debuffs
+                        monsterEffected.Speed = debuffType == 2 ? 1 : monsterEffected.Speed;
+                        monsterEffected.Manners = -1800 * debuffType;
                 }
 
                 if (!n.IsInvisible)
@@ -873,7 +923,58 @@ namespace RunescapeSpellbook
                 }
             }
         }
-        */
+        
+        [HarmonyPatch(typeof(Monster), "update")]
+        [HarmonyPatch(new Type[] { typeof(GameTime),typeof(GameLocation)})]
+        public class MonsterUpdatePatcher
+        {
+            public static void Prefix(Monster __instance, GameTime time, GameLocation location)
+            {
+                if (__instance.Manners < 0)
+                {
+                    __instance.Manners++;
+                    if(__instance.Manners % 4 == 0) return;
+                    
+                    int hitDamage = __instance.Manners <= -1801 ? 30 : 50;
+                    int bound = __instance.Manners <= -1801 ? -1801 : -1;
+                    
+                    if (__instance.Manners == bound || __instance.Health == 1)
+                    {
+                        __instance.stopGlowing();
+                        __instance.Manners = 0;
+                        return;
+                    }
+                    else if (__instance.invincibleCountdown > 0)
+                    {
+                        __instance.Manners = 0;
+                        return;
+                    }
+                    else
+                    {
+                        if (__instance.Manners % 90 == 0) //Every 90 frames we do damage
+                        {
+                            int realDamage = __instance.Health - hitDamage <= 0 ? __instance.Health - 1 : hitDamage;
+                            if (!__instance.isInvincible())
+                            {
+                                Rectangle monsterBox = __instance.GetBoundingBox();
+                                __instance.currentLocation.playSound("RunescapeSpellbook.Liquid", __instance.Tile,
+                                    null);
+                                __instance.currentLocation.debris.Add(new Debris(realDamage,
+                                    new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y), Color.Purple,
+                                    1.25f, __instance));
+                                __instance.Health -= realDamage;
+                            }
+                        }
+
+                        if (!__instance.isGlowing)
+                        {
+                            __instance.startGlowing(Color.Green, false, 0.05f);
+                        }
+                    }
+                }
+                }
+            }
+        }
         
         //Console Commands
         private bool HasNoMagic()
@@ -1141,10 +1242,18 @@ namespace RunescapeSpellbook
             
             this.Monitor.Log($"Granted all treasures",LogLevel.Info);
         }
+        
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
-            Game1.warpFarmer("AdventureGuild",5,13,2);
+            
+            ModAssets.BroadcastSprite(Game1.player.currentLocation,
+                new TemporaryAnimatedSprite(362, Game1.random.Next(15, 50), 6, 1, Game1.player.Position - new Vector2(32 + Game1.random.Next(-21, 21) - 32, 32 + Game1.random.Next(-21, 21)), flicker: false, Game1.random.NextBool())
+                {
+                    scale = 0.5f,
+                    delayBeforeAnimationStart = 100,
+                    alpha = 0.5f
+                });
         }
         
         private void DebugPosition(string command, string[] args)

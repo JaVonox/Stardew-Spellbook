@@ -427,7 +427,6 @@ public class CombatSpell : Spell
         this.damage = damage;
         this.projectileSpriteID = projectileSpriteID;
         this.velocity = velocity;
-        this.explode = explode;
         this.firingSound = "RunescapeSpellbook." + firingSound;
         this.projectileColor = projectileColor;
         this.combatEffect = combatEffect;
