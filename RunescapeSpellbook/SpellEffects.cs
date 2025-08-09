@@ -137,25 +137,28 @@ public class SpellEffects : BaseSpellEffects
         return new KeyValuePair<bool, string>(true, "");
     }
     
-    public static Dictionary<string,int> blueGemsEnchants = new Dictionary<string,int>()
+    public static Dictionary<string,int> redGemsEnchants = new Dictionary<string,int>()
     {
-        {"62",10}, //Aquamarine
-        {"72",30}, //Diamond
+        {"64",20}, //Ruby
+        {"82",10}, //Fire Quartz
         {"74",50}, //Prismatic Shard
-        {"550",15}, //Kyanite
-        {"541",15}, //Aerinite
-        {"564",15}, //Opal
-        {"561",15}, //Ghost Crystal
-        {"536",5}, //Frozen Geode
+        {"547",15}, //Helvite
+        {"563",15}, //Jasper
+        {"562",5}, //Tigerseye
+        {"540",5}, //Baryte
+        {"554",5}, //Lemon Stone
+        {"556",5}, //Orpiment
+        {"537",5}, //Magma Geode
         {"749",10}, //Omni Geode
+        {"848",15}, //Cinder Shard
     };
-    public static KeyValuePair<bool, string> EnchantSapphireBolt(ref Item? itemArgs)
+    public static KeyValuePair<bool, string> EnchantRubyBolts(ref Item? itemArgs)
     {
-        if (blueGemsEnchants.ContainsKey(itemArgs.ItemId))
+        if (redGemsEnchants.ContainsKey(itemArgs.ItemId))
         {
             int postCastStackSize = itemArgs.Stack - 1;
             StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"4301");
-            returnItem.Stack = blueGemsEnchants[itemArgs.ItemId];
+            returnItem.Stack = redGemsEnchants[itemArgs.ItemId];
             Utility.CollectOrDrop(returnItem);
 
             itemArgs.ConsumeStack(1);

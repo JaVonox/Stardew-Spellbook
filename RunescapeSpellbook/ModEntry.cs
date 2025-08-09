@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Buffs;
 using StardewValley.Extensions;
 using StardewValley.GameData;
+using StardewValley.GameData.FishPonds;
+using StardewValley.GameData.Locations;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
@@ -43,6 +45,7 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addammo", "Gives the player ammo.\n\nUsage: rs_addammo", this.GrantAmmo);
             helper.ConsoleCommands.Add("rs_addtreasures", "Gives the player treasures.\n\nUsage: rs_addtreasures", this.GrantTreasures);
             helper.ConsoleCommands.Add("rs_addpacks", "Gives the player packs.\n\nUsage: rs_addpacks", this.GrantPacks);
+            helper.ConsoleCommands.Add("rs_addfish", "Gives the player fish.\n\nUsage: rs_addfish", this.GrantFish);
             helper.ConsoleCommands.Add("rs_debug_misc", "Runs a command left in for testing. Do not use. \n\nUsage: rs_debug_misc", this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", "Reports the position of the local player \n\nUsage: rs_debug_position", this.DebugPosition);
         }
@@ -91,6 +94,7 @@ namespace RunescapeSpellbook
                         audioTracks.Add("MagicLevel"); //Add the sound for levelling up
                         audioTracks.Add("MultiHit"); //Add the sound for when you fire multiple projectiles
                         audioTracks.Add("Liquid"); //Add Poison-y sound
+                        audioTracks.Add("FireBurn"); //Add flame sound
                         
                         var data = asset.AsDictionary<string, AudioCueData>().Data;
                         foreach (string audioTrack in audioTracks)
@@ -130,6 +134,47 @@ namespace RunescapeSpellbook
                             {
                                 shopData.Items.Insert(item.insertIndex,item.itemData);
                             }
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Fish"))
+            {
+                e.Edit(asset =>
+                    {
+                        var fishDict = asset.AsDictionary<string, string>().Data;
+                        foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value).ToList())
+                        {
+                            ((FishObject)newObject).AppendFishData(fishDict);
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/FishPondData"))
+            {
+                e.Edit(asset =>
+                    {
+                        IList<FishPondData> pondList = (IList<FishPondData>)(asset.GetData<object>());
+                        
+                        foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value).ToList())
+                        {
+                            ((FishObject)newObject).AppendPondData(pondList);
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Locations"))
+            {
+                e.Edit(asset =>
+                    {
+                        var locationDict = asset.AsDictionary<string, LocationData>().Data;
+                        
+                        foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value).ToList())
+                        {
+                            ((FishObject)newObject).AppendLocationData(locationDict);
                         }
                     }
                 );
@@ -875,10 +920,10 @@ namespace RunescapeSpellbook
                 if (__instance.itemId != null && (__instance.damagesMonsters.Value && n is Monster))
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);
-                    if (__instance.itemId.ToString() == "(O)4301") //Water Ammo
+                    if (__instance.itemId.ToString() == "(O)4301") //Fire Ammo
                     {
                         HitMonster(__instance,n as Monster,location,player,2);
-                        n.currentLocation.playSound("slosh", n.Tile, null);
+                        n.currentLocation.playSound("explosion", n.Tile, null);
                         return false;
                     }
                     if (__instance.itemId.ToString() == "(O)4302") //Earth Ammo
@@ -911,10 +956,17 @@ namespace RunescapeSpellbook
                             alpha = 0.5f
                         });
                         
+                        //TODO check if all these calculations actually work with the % 4 check. its possible we might skip things.
+                        
                         //Apply Debuff
                         //Manners value is unused on monsters so we use it to assign debuffs
-                        monsterEffected.Speed = debuffType == 2 ? 1 : monsterEffected.Speed;
-                        monsterEffected.Manners = -1800 * debuffType;
+                        int newDebuffValue = -1800 * debuffType;
+                        
+                        if (monsterEffected.Manners <= (newDebuffValue - 1)) //If we already have this debuff, reapply the timer with the amount of time til next fire tick unchanged
+                        {
+                            newDebuffValue += (monsterEffected.Manners % 90);
+                        }
+                        monsterEffected.Manners = newDebuffValue;
                 }
 
                 if (!n.IsInvisible)
@@ -934,12 +986,15 @@ namespace RunescapeSpellbook
                 {
                     __instance.Manners++;
                     if(__instance.Manners % 4 == 0) return;
+
+                    bool isFire = __instance.Manners <= -1801;
                     
-                    int hitDamage = __instance.Manners <= -1801 ? 30 : 50;
-                    int bound = __instance.Manners <= -1801 ? -1801 : -1;
+                    int hitDamage = isFire ? 30 : 50;
+                    int bound = isFire ? -1801 : -1;
                     
                     if (__instance.Manners == bound || __instance.Health == 1)
                     {
+                        __instance.Speed = 1;
                         __instance.stopGlowing();
                         __instance.Manners = 0;
                         return;
@@ -957,7 +1012,7 @@ namespace RunescapeSpellbook
                             if (!__instance.isInvincible())
                             {
                                 Rectangle monsterBox = __instance.GetBoundingBox();
-                                __instance.currentLocation.playSound("RunescapeSpellbook.Liquid", __instance.Tile,
+                                __instance.currentLocation.playSound(isFire ? "RunescapeSpellbook.FireBurn" : "RunescapeSpellbook.Liquid", __instance.Tile,
                                     null);
                                 __instance.currentLocation.debris.Add(new Debris(realDamage,
                                     new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y), Color.Purple,
@@ -968,7 +1023,7 @@ namespace RunescapeSpellbook
 
                         if (!__instance.isGlowing)
                         {
-                            __instance.startGlowing(Color.Green, false, 0.05f);
+                            __instance.startGlowing(isFire ? Color.Red : Color.Green, false, 0.05f);
                         }
                     }
                 }
@@ -1246,14 +1301,18 @@ namespace RunescapeSpellbook
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
-            
-            ModAssets.BroadcastSprite(Game1.player.currentLocation,
-                new TemporaryAnimatedSprite(362, Game1.random.Next(15, 50), 6, 1, Game1.player.Position - new Vector2(32 + Game1.random.Next(-21, 21) - 32, 32 + Game1.random.Next(-21, 21)), flicker: false, Game1.random.NextBool())
-                {
-                    scale = 0.5f,
-                    delayBeforeAnimationStart = 100,
-                    alpha = 0.5f
-                });
+
+            List<SpawnFishData> fishDatas = Game1.player.currentLocation.GetData().Fish;
+            foreach (SpawnFishData fish in fishDatas)
+            {
+                Monitor.Log($"{fish.ItemId} {fish.Chance}",LogLevel.Alert);
+            }
+
+            foreach (var x in Game1.player.fishCaught)
+            {
+                Monitor.Log($"{x}",LogLevel.Alert);
+            }
+            Monitor.Log($"{Game1.player.fishCaught.Length}",LogLevel.Alert);
         }
         
         private void DebugPosition(string command, string[] args)
@@ -1276,6 +1335,20 @@ namespace RunescapeSpellbook
             }
             
             this.Monitor.Log($"Granted all packs",LogLevel.Info);
+        }
+        
+        private void GrantFish(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+            
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value))
+            {
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
+            }
+            
+            this.Monitor.Log($"Granted all fish",LogLevel.Info);
         }
     }
 }

@@ -1,9 +1,5 @@
-﻿using System.Security.AccessControl;
-using Force.DeepCloner;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewValley;
-using StardewValley.Extensions;
-using StardewValley.GameData.Weapons;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
@@ -122,7 +118,7 @@ public class TeleportSpell : Spell
     /// <returns>True if the requirements for the teleport are met</returns>
     private Predicate<Farmer>? extraTeleportReqs;
     public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
-        string location, int xPos, int yPos, int dir, Predicate<Farmer>? extraTeleportReqs = null):
+        string location, int xPos = 0, int yPos = 0, int dir = 2, Predicate<Farmer>? extraTeleportReqs = null):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,4,"Teleport")
     {
         this.location = location;
@@ -131,6 +127,7 @@ public class TeleportSpell : Spell
         this.dir = dir;
         this.extraTeleportReqs = extraTeleportReqs;
     }
+    
     public KeyValuePair<bool,string> Teleport()
     {
         //return new KeyValuePair<bool, string>(false,$"Location {location} ID {festivalId} {containsKey} loadData {loadData} locationName = {locationName}");
@@ -156,10 +153,25 @@ public class TeleportSpell : Spell
             return new KeyValuePair<bool, string>(false,"I don't know how to teleport there");
         }
 
+        string newLoc = location;
+        int newXpos = xPos;
+        int newYpos = yPos;
+        int newDir = dir;
+        
+        if (location == "FarmHouse")
+        {
+            Farm mainFarm = Game1.getFarm();
+            newLoc = mainFarm.Name;
+            Point doorSpot = mainFarm.GetMainFarmHouseEntry();
+            newXpos = doorSpot.X;
+            newYpos = doorSpot.Y;
+            newDir = 2;
+        }
+
         //Warp once the animation ends
         BaseSpellEffects.PlayAnimation(() =>
         {
-            Game1.warpFarmer(location, xPos, yPos, dir);
+            Game1.warpFarmer(newLoc, newXpos, newYpos, newDir);
             Game1.player.temporarilyInvincible = false;
             Game1.player.temporaryInvincibilityTimer = 0;
             Game1.player.freezePause = 0;

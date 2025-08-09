@@ -70,7 +70,7 @@ public class InventorySpellMenu : MenuWithInventory
         cannotCast = inputSpot.item == null || !targetSpell.CanCastSpell().Key;
     }
 
-    private const int MAX_FLUFF_SPRITES = 50;
+    private const int MAX_FLUFF_SPRITES = 10;
     public override void update(GameTime time)
     {
         bool operationFrame = currentFrame % 30 == 0;

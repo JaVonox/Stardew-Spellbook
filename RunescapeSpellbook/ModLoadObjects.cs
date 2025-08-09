@@ -1,9 +1,15 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Buildings;
+using StardewValley.GameData.FishPonds;
+using StardewValley.GameData.Locations;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Shops;
+using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
@@ -206,7 +212,110 @@ public class PackObject : TreasureObjects
         base.GeodeDropsDefaultItems = false;
         base.GeodeDrops = objects;
     }
+}
+public class FishObject : ModLoadObjects
+{
+    private int dartChance;
+    private int minDayTime;
+    private int maxDayTime;
+    private List<Season> seasons;
+    private string weather;
+    private List<string> locations;
+    private int catchChance;
+    private int minFishingLevel;
+    private Color fishTypeWaterColour;
+    private Dictionary<int, List<string>> populationGates;
+    private Dictionary<int, ItemDrop> rewards;
+    private int spawnTime;
     
+    public FishObject(int id, string name,string displayName, string description, int spriteID, int dartChance, int minDayTime, 
+        int maxDayTime, List<Season> seasons, string weather, List<string> locations, int catchChance, int minFishingLevel, int price, int edibility, int spawnTime,
+        Color waterColour, string roeColour, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards)
+        : base(id, name, displayName, description,null,"Basic",-4)
+    {
+        this.dartChance = dartChance;
+        this.minDayTime = minDayTime;
+        this.maxDayTime = maxDayTime;
+        this.seasons = seasons;
+        this.weather = weather;
+        this.locations = locations;
+        this.catchChance = catchChance;
+        this.minFishingLevel = minFishingLevel;
+        base.Price = price;
+        base.SpriteIndex = spriteID;
+        base.ExcludeFromFishingCollection = true;
+        base.Edibility = edibility;
+        base.ContextTags = new List<string>() {$"item_{name}",roeColour};
+        
+        this.fishTypeWaterColour = waterColour;
+        this.populationGates = populationGates;
+        this.rewards = rewards;
+        this.spawnTime = spawnTime;
+    }
+
+    public void AppendFishData(IDictionary<string,string> fishDict)
+    {
+        string seasonsText = "";
+        foreach (Season season in seasons)
+        {
+            if (seasonsText != "") { seasonsText += " ";}
+            seasonsText += season.ToString();
+        }
+
+        fishDict.Add($"{this.id}", $"{this.Name}/{this.dartChance}/dart/1/36/{this.minDayTime} {this.maxDayTime}/{seasonsText}/{this.weather}/690 .4 685 .1/2/.{this.catchChance}/.5/{this.minFishingLevel}/false");
+    }
+
+    public void AppendPondData(IList<FishPondData> pondData)
+    {
+        FishPondData newPondData = new FishPondData();
+        newPondData.Id = this.Name.ToString();
+        newPondData.RequiredTags = new List<string>(){$"item_{base.Name}"};
+        newPondData.PopulationGates = this.populationGates;
+        newPondData.ProducedItems = new List<FishPondReward>();
+        newPondData.SpawnTime = spawnTime;
+            
+        foreach (KeyValuePair<int,ItemDrop> pondDrop in rewards)
+        {
+            FishPondReward pondReward = new FishPondReward();
+            pondReward.RequiredPopulation = pondDrop.Key;
+            pondReward.Chance = (float)pondDrop.Value.chance;
+            pondReward.MinStack = pondDrop.Value.minAmount;
+            pondReward.MaxStack = pondDrop.Value.maxAmount;
+            pondReward.ItemId = $"{pondDrop.Value.itemID}";
+            newPondData.ProducedItems.Add(pondReward);
+        }
+        
+        FishPondWaterColor waterColour = new FishPondWaterColor();
+        waterColour.Color = $"{fishTypeWaterColour.R} {fishTypeWaterColour.G} {fishTypeWaterColour.B}";
+        waterColour.MinPopulation = 0;
+        waterColour.MinUnlockedPopulationGate = 0;
+        
+        newPondData.WaterColor = new List<FishPondWaterColor>() { waterColour };
+        pondData.Add(newPondData);
+    }
+    public void AppendLocationData(IDictionary<string, LocationData> locationSet)
+    {
+        foreach (string loc in this.locations)
+        {
+            SpawnFishData fishData = new SpawnFishData();
+            fishData.ItemId = $"(O){base.id}";
+            fishData.Chance = float.Parse($"0.{this.catchChance}"); 
+            fishData.MinFishingLevel = this.minFishingLevel;
+            fishData.MinDistanceFromShore = 2;
+            fishData.MaxDistanceFromShore = -1;
+            
+            string seasonsText = "";
+            foreach (Season season in seasons)
+            {
+                if (seasonsText != "") { seasonsText += " ";}
+                seasonsText += season.ToString();
+            }
+            
+            fishData.Condition = $"SEASON {seasonsText}";
+            
+            locationSet[loc].Fish.Add(fishData);
+        }
+    }
 }
 public class PerkData
 {
@@ -299,8 +408,8 @@ public static class ModAssets
         {4300,new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",-430,
             new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
 
-        {4301,new SlingshotItem(4301,"Ammo_Water","Water Orb","Enchanted ammo that slows and lightly poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",30)},
-        {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Enchanted ammo that explodes and heavily poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",31)},
+        {4301,new SlingshotItem(4301,"Ammo_Fire","Fire Orb","Enchanted ammo that burns enemies in a radius around a hit enemy. Fire cannot finish off enemies.",30)},
+        {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Enchanted ammo that explodes and poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",31)},
         
         {4359,new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
             new List<ItemDrop>()
@@ -384,6 +493,83 @@ public static class ModAssets
         {4367,new PackObject(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. A blacksmith might be able to open it.",27,4294)},
         {4368,new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. A blacksmith might be able to open it.",28,4299)},
         {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. A blacksmith might be able to open it.",29,4300)},
+        
+        {4370,new FishObject(4370,"Fish_Karam","Karambwanji","A small brightly coloured tropical fish. Likes elemental runes",32,35,600,1800,new List<Season>{Season.Spring,Season.Summer},"sunny",new List<string>()
+            { "Beach" },8,3,20,3,2,Color.Cyan,"color_jade",
+            new Dictionary<int, List<string>>()
+            {
+                {5,
+                    new List<string>()
+                    {
+                        "152 5 10","395","684 10 20","766 10 20"
+                    }
+                },
+                {8,
+                    new List<string>()
+                    {
+                        "88 3 5","62 1 3"
+                    }
+                    
+                }
+            }, new Dictionary<int, ItemDrop>()
+            {
+                {9,new ItemDrop(4361,1,1,0.1)},
+                {7,new ItemDrop(4365,3,5,0.3)},
+                {1,new ItemDrop(4359,1,3,0.5)},
+                {0,new ItemDrop(812,1,1,1.0)}
+            }
+            )},
+        {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Likes combat runes",33,60,1900,2300,new List<Season>{Season.Fall,Season.Winter,Season.Spring},"rainy",new List<string>()
+            { "Beach" },5,5,60,50,3,Color.Azure,"color_sand",
+            new Dictionary<int, List<string>>()
+            {
+                {5,
+                    new List<string>()
+                    {
+                        "198","227","228"
+                    }
+                },
+                {8,
+                    new List<string>()
+                    {
+                        "213","242","728","4361"
+                    }
+                    
+                }
+            }, new Dictionary<int, ItemDrop>()
+            {
+                {9,new ItemDrop(4362,1,1,0.1)},
+                {7,new ItemDrop(4300,10,30,0.4)},
+                {3,new ItemDrop(4299,10,30,0.5)},
+                {0,new ItemDrop(812,1,1,1.0)}
+            }
+        )},
+        {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Likes catalytic runes",34,75,1200,1800,new List<Season>{Season.Summer},"sunny",new List<string>()
+                { "Beach" },3,6,100,80,4,Color.Violet,"color_dark_purple",
+            new Dictionary<int, List<string>>()
+            {
+                {5,
+                    new List<string>()
+                    {
+                        "346 10","456"
+                    }
+                },
+                {8,
+                    new List<string>()
+                    {
+                        "458","832","4362"
+                    }
+                    
+                }
+            }, new Dictionary<int, ItemDrop>()
+            {
+                {5,new ItemDrop(4295,3,5,0.4)},
+                {7,new ItemDrop(4297,3,5,0.3)},
+                {6,new ItemDrop(4298,3,5,0.3)},
+                {4,new ItemDrop(4296,3,5,0.5)},
+                {0,new ItemDrop(812,1,1,1.0)}
+            }
+        )}
     };
     
     //These are custom melee weapons that use 
@@ -419,8 +605,8 @@ public static class ModAssets
         new TeleportSpell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",0,
             new Dictionary<int, int>() { {4295, 1},{4291,3},{4292,2} },8,"Town", 43, 60,0),
         
-        new TeleportSpell(1,"Teleport_Home","Farm Teleport","Teleports you outside your Farm",4,
-            new Dictionary<int, int>() { {4295, 1},{4291,3},{4294,3} },10, "BusStop", 19, 23,2),
+        new TeleportSpell(1,"Teleport_Home","Farm Teleport","Teleports you outside the main house on your farm",4,
+            new Dictionary<int, int>() { {4295, 1},{4291,3},{4294,3} },10, "FarmHouse"),
         
         new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal, or burns wood into coal at a discount",1,
             new Dictionary<int, int>() { {4296, 1},{4293,4}},10,
@@ -459,11 +645,11 @@ public static class ModAssets
             new Dictionary<int, int>() { {4295, 1},{4291,5}},10, "Mountain",54,7,0, 
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("landslideDone")))),
         
-        new InventorySpell(11,"Menu_EnchantSapphire","Enchant Sapphire Bolt","Convert any blue gems or rocks into slowing poisonous ammo",4,
-            new Dictionary<int, int>() { {4297, 2},{4292,3}},10,(i => i is Item item && SpellEffects.blueGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantSapphireBolt,
-            "Convert any blue gems or rocks into slowing poisonous ammo for the slingshot. On hitting an enemy, poison spreads to nearby enemies. Poison cannot finish off enemies.",2,"EnchantBolt"),
+        new InventorySpell(11,"Menu_EnchantRuby","Enchant Ruby Bolt","Convert any red or orange stones into fiery ammo",4,
+            new Dictionary<int, int>() { {4297, 1},{4293,3}},10,(i => i is Item item && SpellEffects.redGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantRubyBolts,
+            "Convert any red gems or rocks into fiery ammo for the slingshot. On hitting an enemy, fire spreads to nearby enemies. Fire cannot finish off enemies.",2,"EnchantBolt"),
         
-        new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Convert any green gems into explosive poisonous ammo",7,
+        new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Convert any green stones into explosive poisonous ammo",8,
             new Dictionary<int, int>() { {4297, 2},{4294,3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
             "Convert any green gems into explosive poisonous ammo for the slingshot. On hitting an enemy, poison spreads to nearby enemies. Poison cannot finish off enemies.",2,"EnchantBolt"),
         
