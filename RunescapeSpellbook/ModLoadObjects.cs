@@ -494,8 +494,8 @@ public static class ModAssets
         {4368,new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. A blacksmith might be able to open it.",28,4299)},
         {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. A blacksmith might be able to open it.",29,4300)},
         
-        {4370,new FishObject(4370,"Fish_Karam","Karambwanji","A small brightly coloured tropical fish. Likes elemental runes",32,35,600,1800,new List<Season>{Season.Spring,Season.Summer},"sunny",new List<string>()
-            { "Beach" },8,3,20,3,2,Color.Cyan,"color_jade",
+        {4370,new FishObject(4370,"Fish_Karam","Karambwanji","A small brightly coloured tropical fish. Traditionally associated with elemental magic",32,45,600,1800,new List<Season>{Season.Spring,Season.Summer},"sunny",new List<string>()
+            { "Beach" },6,2,20,5,2,Color.Cyan,"color_sea_green",
             new Dictionary<int, List<string>>()
             {
                 {5,
@@ -507,20 +507,22 @@ public static class ModAssets
                 {8,
                     new List<string>()
                     {
-                        "88 3 5","62 1 3"
+                        "88 3 5","62 1 3","787"
                     }
                     
                 }
             }, new Dictionary<int, ItemDrop>()
             {
-                {9,new ItemDrop(4361,1,1,0.1)},
-                {7,new ItemDrop(4365,3,5,0.3)},
-                {1,new ItemDrop(4359,1,3,0.5)},
+                {9,new ItemDrop(4361,1,1,0.05)},
+                {1,new ItemDrop(4292,10,16,0.5)},
+                {2,new ItemDrop(4291,10,16,0.3)},
+                {5,new ItemDrop(4294,10,15,0.3)},
+                {6,new ItemDrop(4293,10,15,0.2)},
                 {0,new ItemDrop(812,1,1,1.0)}
             }
             )},
-        {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Likes combat runes",33,60,1900,2300,new List<Season>{Season.Fall,Season.Winter,Season.Spring},"rainy",new List<string>()
-            { "Beach" },5,5,60,50,3,Color.Azure,"color_sand",
+        {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Traditionally associated with combat magic",33,60,1600,2300,new List<Season>{Season.Fall,Season.Winter,Season.Spring},"rainy",new List<string>()
+            { "Beach" },4,5,60,50,3,Color.NavajoWhite,"color_sand",
             new Dictionary<int, List<string>>()
             {
                 {5,
@@ -532,20 +534,20 @@ public static class ModAssets
                 {8,
                     new List<string>()
                     {
-                        "213","242","728","4361"
+                        "213","242","728","787","4361"
                     }
                     
                 }
             }, new Dictionary<int, ItemDrop>()
             {
-                {9,new ItemDrop(4362,1,1,0.1)},
+                {9,new ItemDrop(4362,1,1,0.05)},
                 {7,new ItemDrop(4300,10,30,0.4)},
                 {3,new ItemDrop(4299,10,30,0.5)},
                 {0,new ItemDrop(812,1,1,1.0)}
             }
         )},
-        {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Likes catalytic runes",34,75,1200,1800,new List<Season>{Season.Summer},"sunny",new List<string>()
-                { "Beach" },3,6,100,80,4,Color.Violet,"color_dark_purple",
+        {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Traditionally associated with catalytic magic",34,75,1200,1800,new List<Season>{Season.Summer},"sunny",new List<string>()
+                { "Beach" },6,6,100,70,4,Color.RoyalBlue,"color_black",
             new Dictionary<int, List<string>>()
             {
                 {5,
@@ -557,17 +559,16 @@ public static class ModAssets
                 {8,
                     new List<string>()
                     {
-                        "458","832","4362"
+                        "4359 10","832","4361"
                     }
                     
                 }
             }, new Dictionary<int, ItemDrop>()
             {
-                {5,new ItemDrop(4295,3,5,0.4)},
-                {7,new ItemDrop(4297,3,5,0.3)},
-                {6,new ItemDrop(4298,3,5,0.3)},
-                {4,new ItemDrop(4296,3,5,0.5)},
-                {0,new ItemDrop(812,1,1,1.0)}
+                {2,new ItemDrop(4295,3,5,0.5)},
+                {6,new ItemDrop(4297,3,5,0.3)},
+                {5,new ItemDrop(4298,3,5,0.3)},
+                {0,new ItemDrop(4296,3,5,1.0)},
             }
         )}
     };
