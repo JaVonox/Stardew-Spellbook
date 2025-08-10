@@ -227,10 +227,12 @@ public class FishObject : ModLoadObjects
     private Dictionary<int, List<string>> populationGates;
     private Dictionary<int, ItemDrop> rewards;
     private int spawnTime;
+    private int minLength;
+    private int maxLength;
     
     public FishObject(int id, string name,string displayName, string description, int spriteID, int dartChance, int minDayTime, 
         int maxDayTime, List<Season> seasons, string weather, List<string> locations, int catchChance, int minFishingLevel, int price, int edibility, int spawnTime,
-        Color waterColour, string roeColour, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards)
+        Color waterColour, string roeColour, int minLength, int maxLength, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards)
         : base(id, name, displayName, description,null,"Basic",-4)
     {
         this.dartChance = dartChance;
@@ -251,6 +253,8 @@ public class FishObject : ModLoadObjects
         this.populationGates = populationGates;
         this.rewards = rewards;
         this.spawnTime = spawnTime;
+        this.minLength = minLength;
+        this.maxLength = maxLength;
     }
 
     public void AppendFishData(IDictionary<string,string> fishDict)
@@ -262,7 +266,7 @@ public class FishObject : ModLoadObjects
             seasonsText += season.ToString();
         }
 
-        fishDict.Add($"{this.id}", $"{this.Name}/{this.dartChance}/dart/1/36/{this.minDayTime} {this.maxDayTime}/{seasonsText}/{this.weather}/690 .4 685 .1/2/.{this.catchChance}/.5/{this.minFishingLevel}/false");
+        fishDict.Add($"{this.id}", $"{this.Name}/{this.dartChance}/dart/{this.minLength}/{this.maxLength}/{this.minDayTime} {this.maxDayTime}/{seasonsText}/{this.weather}/690 .4 685 .1/2/.{this.catchChance}/.5/{this.minFishingLevel}/false");
     }
 
     public void AppendPondData(IList<FishPondData> pondData)
@@ -316,6 +320,79 @@ public class FishObject : ModLoadObjects
             locationSet[loc].Fish.Add(fishData);
         }
     }
+}
+
+public abstract class LoadableText
+{
+    public string id;
+    public List<string> contents;
+    public LoadableText()
+    {
+    }
+
+    public LoadableText(string id, List<string> contents)
+    {
+        this.id = id;
+        this.contents = contents;
+    }
+    
+    public LoadableText(string id, string contents)
+    {
+        this.id = id;
+        this.contents = new List<string>(){contents};
+    }
+}
+
+public class LoadableMail : LoadableText
+{
+    public LoadableMail(int day, Season season, int reqYear, string contents) : base(
+        $"{season.ToString().ToLower()}_{day}_{reqYear}",contents) { }
+    public LoadableMail(string mailID, string contents) : base(mailID, contents) { }
+}
+
+public class LoadableSecret : LoadableText
+{
+    public LoadableSecret(int id, string contents) : base(id.ToString(), contents){}
+}
+
+public abstract class LoadableTV : LoadableText
+{
+    protected abstract string introText { get; }
+    public abstract string channelName { get; }
+    
+    public int day;
+    public Season season;
+    public int firstYear;
+
+    public LoadableTV(int channelID, int day, Season season, int firstYear, List<string> contents)
+    {
+        base.id = $"{channelID}";
+        base.contents = CreateContentsWithIntro(contents);
+        this.day = day;
+        this.season = season;
+        this.firstYear = firstYear;
+    }
+
+    protected List<string> CreateContentsWithIntro(List<string> contents)
+    {
+        List<string> result = new List<string> { introText };
+        result.AddRange(contents);
+        return result;
+    }
+}
+
+public class Gobcast : LoadableTV
+{
+    private static readonly string staticIntroText = "Hello! This My Goblin My Goblin and also Grubfoot. Me General Bentnoze. Me joined by General Warface and also Grubfoot. "+
+                                                     "We solve goblin problems. You send us problems. Grubfoot! Get problem for today."; 
+    protected override string introText => staticIntroText;
+    
+    private static readonly string staticChannelName = "My Goblin My Goblin and also Grubfoot"; 
+    public override string channelName => staticChannelName;
+    
+    private static int channelID = 429;
+    public Gobcast(int day, Season season, int firstYear, List<string> contents) :
+        base(channelID,day, season, firstYear, contents) { }
 }
 public class PerkData
 {
@@ -495,7 +572,7 @@ public static class ModAssets
         {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. A blacksmith might be able to open it.",29,4300)},
         
         {4370,new FishObject(4370,"Fish_Karam","Karambwanji","A small brightly coloured tropical fish. Traditionally associated with elemental magic",32,45,600,1800,new List<Season>{Season.Spring,Season.Summer},"sunny",new List<string>()
-            { "Beach" },6,2,20,5,2,Color.Cyan,"color_sea_green",
+            { "Beach" },6,2,20,5,2,Color.Cyan,"color_sea_green",1,7,
             new Dictionary<int, List<string>>()
             {
                 {5,
@@ -507,7 +584,7 @@ public static class ModAssets
                 {8,
                     new List<string>()
                     {
-                        "88 3 5","62 1 3","787"
+                        "88 3 5","306 2 4","206 2 4"
                     }
                     
                 }
@@ -522,7 +599,7 @@ public static class ModAssets
             }
             )},
         {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Traditionally associated with combat magic",33,60,1600,2300,new List<Season>{Season.Fall,Season.Winter,Season.Spring},"rainy",new List<string>()
-            { "Beach" },4,5,60,50,3,Color.NavajoWhite,"color_sand",
+            { "Beach" },4,5,60,50,3,Color.NavajoWhite,"color_sand",25,40,
             new Dictionary<int, List<string>>()
             {
                 {5,
@@ -547,7 +624,7 @@ public static class ModAssets
             }
         )},
         {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Traditionally associated with catalytic magic",34,75,1200,1800,new List<Season>{Season.Summer},"sunny",new List<string>()
-                { "Beach" },6,6,100,70,4,Color.RoyalBlue,"color_black",
+                { "Beach" },6,6,100,70,4,Color.RoyalBlue,"color_red",118,216,
             new Dictionary<int, List<string>>()
             {
                 {5,
@@ -615,7 +692,7 @@ public static class ModAssets
             SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost, or smelt wood into coal. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
         
         new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into 1.5x its sell price",5,
-            new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0),
+            new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
             SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 150% of the items value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
         new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",1,
@@ -886,84 +963,124 @@ public static class ModAssets
     /// mail + notes to load into the game
     /// <remarks>bool: true is mail, false is secret note</remarks>
     /// </summary>
-    public static Dictionary<string, Tuple<bool,string>> loadableText = new Dictionary<string, Tuple<bool,string>>()
+    public static List<LoadableText> loadableText = new List<LoadableText>()
     {
         {
-            "RSSpellMailGet",
-            new Tuple<bool, string>(true,"Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
-           "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. " +
-           "^^   -M. Rasmodius, Wizard[letterbg 2]" +
-           "%item object 4351 1 %%" +
-           "[#]Wizard's Battlestaff Gift")
+            new LoadableMail("RSSpellMailGet","Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
+              "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. " +
+              "^^   -M. Rasmodius, Wizard[letterbg 2]" +
+              "%item object 4351 1 %%" +
+              "[#]Wizard's Battlestaff Gift")
         },
         {
-            "summer_15_1",
-            new Tuple<bool, string>(true,"@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
-             "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
-             "^^   -Clint^^P.S I've included some samples with this letter" +
-             "%item object 4364 3 %%" +
-             "[#]Clint's Pack Opening Service")
+            new LoadableMail(15,Season.Summer,1,"@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
+                "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
+                "^^   -Clint^^P.S I've included some samples with this letter" +
+                "%item object 4364 3 %%" +
+                "[#]Clint's Pack Opening Service")
         },
         {
-            "summer_10_2",
-            new Tuple<bool, string>(true,"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
-             "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
-             "^^   -Willy" +
-             "%item object 4362 1 %%" +
-             "[#]Willy's Casket")
+            new LoadableMail(10,Season.Summer,2,"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
+            "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
+            "^^   -Willy" +
+            "%item object 4362 1 %%" +
+            "[#]Willy's Casket")
         },
         {
-            "summer_1_3",
-            new Tuple<bool, string>(true,"@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
+            new LoadableMail(1,Season.Summer,3,"@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
              "^^Maybe you'll get something out of them." +
              "^^   -Clint" +
              "%item object 4300 60 %%" +
              "[#]Clint's Terrible Gift")
         },
         {
-            "spring_9_2",
-            new Tuple<bool, string>(true,"@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
+            new LoadableMail(9,Season.Spring,2,"@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
              "^^I hope you'll think of the great outdoors when you use them." +
              "^^   -Linus" +
              "%item object 4296 40 %%" +
              "[#]Linus' Nature Stones")
         },
         {
-            "fall_27_2",
-            new Tuple<bool, string>(true,"Coco,^^Beef Soup" +
+            new LoadableMail(27,Season.Fall,2,"Coco,^^Beef Soup" +
              "^^   -Tofu" +
              "%item object 4362 1 %%" +
              "[#]Letter For Someone Else")
         },
         {
-            "419", //Hints for catalytic magic
-            new Tuple<bool, string>(false,"In a past life, the men of the desert practiced runic magic." +
-                                          "^^Their Flesh inherited their strength." +
-                                          "^^Their Souls inherited their wisdom." +
-                                          "^^Their Visage, sealed within the crypt of death, inherited the light of the stars." +
-                                          "^^Their Shadows, those who escaped the jaws of the ancient beasts, stole away the secrets of the world.")
+            new LoadableSecret(419,"In a past life, the men of the desert practiced runic magic." +
+              "^^Their Flesh inherited their strength." +
+              "^^Their Souls inherited their wisdom." +
+              "^^Their Visage, sealed within the crypt of death, inherited the light of the stars." +
+              "^^Their Shadows, those who escaped the jaws of the ancient beasts, stole away the secrets of the world.")
         },
         {
-            "429", //Hints for elemental magic
-            new Tuple<bool, string>(false,"Once, the great druid brought balance to the world." +
-                                          "^^As he slept, the world splintered, and the spirits became restless." +
-                                          "^^The spirits sought those with those whom they shared affinity." +
-                                          "^^The great snakes of the desert were granted mastery of the winds." +
-                                          "^^The spiders of the sea spread the ocean inland." +
-                                          "^^The men learned to till the soil, in exchange for their dead."+
-                                          "^^The flame spread to the depths and tropics, creating life where there was none."+
-                                          "^^That what remained found refuge in the primordial slurry, which became the slime.")
+            new LoadableSecret(429,"Once, the great druid brought balance to the world." +
+              "^^As he slept, the world splintered, and the spirits became restless." +
+              "^^The spirits sought those with those whom they shared affinity." +
+              "^^The great snakes of the desert were granted mastery of the winds." +
+              "^^The spiders of the sea spread the ocean inland." +
+              "^^The men learned to till the soil, in exchange for their dead."+
+              "^^The flame spread to the depths and tropics, creating life where there was none."+
+              "^^That what remained found refuge in the primordial slurry, which became the slime.")
         },
         {
-            "439", //Hints for treasure
-            new Tuple<bool, string>(false,"The ancient men, blessed with the power of creation, made tools of war." +
-                                          "^^When the ancient empires fell, their weapons became scattered." +
-                                          "^^The first casket hid the cornucopia of elements." +
-                                          "^^Stone Golem, Skeleton, Metal Head, Serpent, Pepper Rex, Haunted Skull." + 
-                                          "^^The second casket contained the secrets of the elements and the symbol of their lord."+
-                                          "^^Mummy, Iridium Bat, Haunted Skull."+
-                                          "^^The final casket held the forbidden knowledge of the god slayer, granted to his wights."+
-                                          "^^Hard Casket, Dwarvish Sentry, Magma Duggy.")
+            new LoadableSecret(438,"The ancient men, blessed with the power of creation, made tools of war." +
+              "^^When the ancient empires fell, their weapons became scattered." +
+              "^^The first casket hid the cornucopia of elements." +
+              "^^Stone Golem, Skeleton, Metal Head, Serpent, Pepper Rex, Haunted Skull." + 
+              "^^The second casket contained the secrets of the elements and the symbol of their lord."+
+              "^^Mummy, Iridium Bat, Haunted Skull."+
+              "^^The final casket held the forbidden knowledge of the god slayer, granted to his wights."+
+              "^^Hard Casket, Dwarvish Sentry, Magma Duggy.")
+        },
+        {
+            new Gobcast(21,Season.Spring,1, new List<string>()
+            {
+                "This question from Mudknuckles in Goblin Village. He say 'Generals and also Grubfoot, what fish is best?' " +
+                "This bad question. Best fish is whatever man-fishers have on them when you hit them with large rock. " +
+                "This season many man-fishers carry around Karambwanji. Delicious tropical fish that come out in sunny daytime at beach during spring and summer.",
+                "Goblin legend say once, ancient goblin tribe collect pretty rocks from Karambwanji. Then Big High War God " +
+                "kill them with hammers for weakness. This all for today. Your question terrible. Do not send in question again."
+            })
+        },
+        {  
+            new Gobcast(7,Season.Fall,1,new List<string>()
+            {
+                "This question from Goutbones at wherever. He say 'What scariest creature?'. This is a bad question. Goblin should not fear " +
+                "because fear is weakness. Me never feel fear. Me once find big-tooth fish on shore at beach. It rainy autumn or winter or spring me forget. " +
+                "Me start shouting 'Me strong! You weak, big-tooth!'. Nearby man-fisher tell me it dead and called Monkfish. He say old humans collect them " +
+                "for strong magic rocks. Me then kill him with hammers. ",
+                "This all for today. Your question terrible. Do not send in question again."
+            })
+        },
+        {  
+            new Gobcast(4,Season.Summer,2,new List<string>()
+            {
+                "This question from Clothears at big beach. He say 'Me catch long fish, big as two goblin! What me do?'. First, stop fishing. " +
+                "Fishing terrible hobby for coward goblins. Big High War God Give goblin hammers to crush creatures. Not flimsy stick with worm. " +
+                "Second, creature you find very rare fish from summer midday at beach man-fishers call 'Manta Ray' but me call it 'What-that-thing'.",
+                "Manta Ray is strange fish that think it is bird, but it not bird. This make Manta Ray sad so it start collecting stupid rock thing. " +
+                "One day, Me find Manta Ray with pretty purple star on it. Me look at purple star and feel peaceful. This bad, so me run into water and kill Manta Ray with hammers. " +
+                "This all for today. Your question terrible. Do not send in question again."
+            })
+        },
+        {  
+            new Gobcast(24,Season.Fall,1,new List<string>()
+            {
+                "This question from Wormbrain in human prison. He say 'Who is best to steal from?'. Me recommend everyone, as long as you kill them with hammers. " +
+                " Stealing without murder is like beetle pie without beetle. Me would say, avoid desert traders. They surprisingly strong and fast. One time me manage to get " +
+                "lootbag but trader run away and bag full of stupid rocks with air pattern. Why bother carry rock through desert?",
+                "This all for today. Your question terrible. Do not send in question again."
+            })
+        },
+        {  
+            new Gobcast(2,Season.Winter,1,new List<string>()
+            {
+                "This question from Mistag in stupid cave. He say 'Hello, I recently came across this strange battlestaff. I managed to sell it at an adventurer's guild for 100 gold," +
+                " but then I saw them selling it the next day for 1000 gold! Should I have asked for more money?'. First of all, me don't care who buy or sell stupid stick. Not enough " +
+                "sharp edges or smashy bits. If you had big hammer, adventurers guild would give you as much money as you ask for. Then you kill them anyway.",
+                "This all for today. Your question terrible. Do not send in question again."
+            })
         }
         
     };

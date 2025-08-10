@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
@@ -16,6 +17,7 @@ using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
 using StardewValley.Monsters;
+using StardewValley.Objects;
 using StardewValley.Projectiles;
 using StardewValley.Tools;
 using Object = StardewValley.Object;
@@ -201,10 +203,10 @@ namespace RunescapeSpellbook
                     {
                         var mailDict = asset.AsDictionary<string, string>().Data;
 
-                        foreach (KeyValuePair<string,Tuple<bool,string>> mail in ModAssets.loadableText.Where(x=>x.Value.Item1))
+                        foreach (LoadableMail mail in ModAssets.loadableText.Where(x=>x is LoadableMail))
                         {
-                            string mailKey = mail.Key;
-                            string mailVal = mail.Value.Item2;
+                            string mailKey = mail.id;
+                            string mailVal = mail.contents[0];
                             
                             while (true) //Loop until we get a valid assignment for mail
                             {
@@ -245,11 +247,10 @@ namespace RunescapeSpellbook
                 e.Edit(asset =>
                 {
                     var notesDict = asset.AsDictionary<int, string>().Data;
-                    foreach (KeyValuePair<string, Tuple<bool, string>> newNote in ModAssets.loadableText.Where(x =>
-                                 !x.Value.Item1))
+                    foreach (LoadableSecret newNote in ModAssets.loadableText.Where(x => x is LoadableSecret))
                     {
-                        int noteKey = int.Parse(newNote.Key);
-                        string noteVal = newNote.Value.Item2;
+                        int noteKey = int.Parse(newNote.id);
+                        string noteVal = newNote.contents[0];
 
                         while (true) //Loop until we get a valid assignment for mail
                         {
@@ -1030,7 +1031,133 @@ namespace RunescapeSpellbook
                 }
             }
         }
-        
+
+        [HarmonyPatch(typeof(TV), "checkForAction")]
+        public class TVChannelTranspiler
+        {
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                try
+                {
+                    var codes = new List<CodeInstruction>(instructions);
+
+                    var toArrayMethod = AccessTools.Method(typeof(List<Response>), "ToArray");
+                    var modifyChannelsMethod = AccessTools.Method(typeof(TVChannelTranspiler), "ModifyChannelsList");
+
+                    if (toArrayMethod == null)
+                    {
+                        return instructions;
+                    }
+
+                    for (int i = 0; i < codes.Count; i++)
+                    {
+                        var current = codes[i];
+                        var next = codes[i + 1];
+
+                        if (next.opcode == OpCodes.Callvirt &&
+                            next.operand is MethodInfo method &&
+                            method == toArrayMethod &&
+                            (current.opcode == OpCodes.Ldloc_S ||
+                             current.opcode == OpCodes.Ldloc_0 ||
+                             current.opcode == OpCodes.Ldloc_1 ||
+                             current.opcode == OpCodes.Ldloc_2 ||
+                             current.opcode == OpCodes.Ldloc_3 ||
+                             current.opcode == OpCodes.Ldloc))
+                        {
+                            var insertPoint = i + 1;
+                            
+                            var dupInstruction = new CodeInstruction(OpCodes.Dup);
+                            var callInstruction = new CodeInstruction(OpCodes.Call, modifyChannelsMethod);
+                            
+                            if (codes[insertPoint].labels.Count > 0)
+                            {
+                                dupInstruction.labels.AddRange(codes[insertPoint].labels);
+                                codes[insertPoint].labels.Clear();
+                            }
+                            
+                            codes.Insert(insertPoint, dupInstruction);
+                            codes.Insert(insertPoint + 1, callInstruction);
+                            break;
+                        }
+                    }
+                    
+                    return codes;
+
+                }
+                catch (Exception e)
+                {
+                    return instructions;
+                }
+                
+            }
+
+            public static void ModifyChannelsList(List<Response> channels)
+            {
+                foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
+                             x is LoadableTV tvChannel && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season && Game1.year >= tvChannel.firstYear))
+                {
+                    string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : " (Rerun)");
+                    channels.Insert(channels.Count - 1, new Response($"RS_{addChannel.id}", channelName));
+                }
+            }
+
+            [HarmonyPatch(typeof(TV), "selectChannel")]
+            [HarmonyPatch(new Type[] { typeof(Farmer), typeof(string)})]
+            public class ChannelSelectPatcher
+            {
+                public static void Postfix(TV __instance, Farmer who, string answer)
+                {
+                    var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
+                    var currentChannelValue = currentChannelTraverse.GetValue<int>();
+                    
+                    if (currentChannelValue == 0)
+                    {
+                        LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && $"RS_{x.id}" == answer && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
+
+                        if (modChannel != null)
+                        {
+                            currentChannelTraverse.SetValue(int.Parse(modChannel.id));
+                            
+                            var screenTraverse = Traverse.Create(__instance).Field("screen");
+                            screenTraverse.SetValue(new TemporaryAnimatedSprite("Mods.RunescapeSpellbook.Assets.spellanimations", new Rectangle(64, 0, 42, 28), 3000f, 2, 999999, __instance.getScreenPosition(), flicker: false, flipped: false, (float)(__instance.boundingBox.Bottom - 1) / 10000f + 1E-05f, 0f, Color.White, __instance.getScreenSizeModifier(), 0f, 0f, 0f));
+                            Game1.drawObjectDialogue(modChannel.contents[0]);
+                            Game1.afterDialogues = __instance.proceedToNextScene;
+                        }
+
+                    }
+                }
+            }
+
+            [HarmonyPatch(typeof(TV), "proceedToNextScene")]
+            public class ChannelNextDialoguePatcher
+            {
+                private static int lastIndex = 0;
+                public static void Postfix(TV __instance)
+                {
+                    var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
+                    var currentChannelValue = currentChannelTraverse.GetValue<int>();
+                    
+                    LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && int.Parse(x.id) == currentChannelValue && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
+                    if (modChannel != null)
+                    {
+                        int maxDialogue = modChannel.contents.Count - 1;
+
+                        if (maxDialogue == lastIndex)
+                        {
+                            __instance.turnOffTV();
+                            lastIndex = 0;
+                        }
+                        else
+                        {
+                            lastIndex++;
+                            Game1.drawObjectDialogue(modChannel.contents[lastIndex]);
+                            Game1.afterDialogues = __instance.proceedToNextScene;
+                        }
+                    }
+                }
+            }
+        }
+
         //Console Commands
         private bool HasNoMagic()
         {
@@ -1302,17 +1429,11 @@ namespace RunescapeSpellbook
         {
             if (HasNoWorldContextReady()){return;}
 
-            List<SpawnFishData> fishDatas = Game1.player.currentLocation.GetData().Fish;
-            foreach (SpawnFishData fish in fishDatas)
+            LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && $"RS_{x.id}" == "RS_429" && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
+            foreach (string line in modChannel.contents)
             {
-                Monitor.Log($"{fish.ItemId} {fish.Chance}",LogLevel.Alert);
+                Monitor.Log($"{line}");
             }
-
-            foreach (var x in Game1.player.fishCaught)
-            {
-                Monitor.Log($"{x}",LogLevel.Alert);
-            }
-            Monitor.Log($"{Game1.player.fishCaught.Length}",LogLevel.Alert);
         }
         
         private void DebugPosition(string command, string[] args)
