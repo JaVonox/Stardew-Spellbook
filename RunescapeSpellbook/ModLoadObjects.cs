@@ -383,7 +383,7 @@ public abstract class LoadableTV : LoadableText
 
 public class Gobcast : LoadableTV
 {
-    private static readonly string staticIntroText = "Hello! This My Goblin My Goblin and also Grubfoot. Me General Bentnoze. Me joined by General Warface and also Grubfoot. "+
+    private static readonly string staticIntroText = "Hello! This My Goblin My Goblin and also Grubfoot. Me General Bentnoze. Me joined by General Wartface and also Grubfoot. "+
                                                      "We solve goblin problems. You send us problems. Grubfoot! Get problem for today."; 
     protected override string introText => staticIntroText;
     
@@ -646,6 +646,31 @@ public static class ModAssets
                 {6,new ItemDrop(4297,3,5,0.3)},
                 {5,new ItemDrop(4298,3,5,0.3)},
                 {0,new ItemDrop(4296,3,5,1.0)},
+            }
+        )},
+        {4373,new FishObject(4373,"Fish_Sword","Swordfish","A predatory fish with a flat sword-like pointed bill",35,95,2000,2600,new List<Season>{Season.Summer},"both",new List<string>()
+                { "Beach" },3,8,280,30,4,Color.HotPink,"color_pink",100,130,
+            new Dictionary<int, List<string>>()
+            {
+                {4,
+                    new List<string>()
+                    {
+                        "874 4 7","225"
+                    }
+                },
+                {8,
+                    new List<string>()
+                    {
+                        "852 3 5","904"
+                    }
+                    
+                }
+            }, new Dictionary<int, ItemDrop>()
+            {
+                {9,new ItemDrop(74,1,1,0.01)},
+                {4,new ItemDrop(4300,10,15,0.6)},
+                {2,new ItemDrop(773,1,3,0.5)},
+                {0,new ItemDrop(812,1,1,1.0)},
             }
         )}
     };
@@ -980,10 +1005,10 @@ public static class ModAssets
                 "[#]Clint's Pack Opening Service")
         },
         {
-            new LoadableMail(10,Season.Summer,2,"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
+            new LoadableMail(3,Season.Spring,2,"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
             "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
             "^^   -Willy" +
-            "%item object 4362 1 %%" +
+            "%item object 4361 1 %%" +
             "[#]Willy's Casket")
         },
         {
@@ -1031,24 +1056,25 @@ public static class ModAssets
               "^^The second casket contained the secrets of the elements and the symbol of their lord."+
               "^^Mummy, Iridium Bat, Haunted Skull."+
               "^^The final casket held the forbidden knowledge of the god slayer, granted to his wights."+
-              "^^Hard Casket, Dwarvish Sentry, Magma Duggy.")
+              "^^High Level Casket, Dwarvish Sentry, Magma Duggy.")
         },
         {
             new Gobcast(21,Season.Spring,1, new List<string>()
             {
                 "This question from Mudknuckles in Goblin Village. He say 'Generals and also Grubfoot, what fish is best?' " +
-                "This bad question. Best fish is whatever man-fishers have on them when you hit them with large rock. " +
+                "This bad question. Best fish is whatever fishingman have on them when you hit them with large rock. " +
                 "This season many man-fishers carry around Karambwanji. Delicious tropical fish that come out in sunny daytime at beach during spring and summer.",
                 "Goblin legend say once, ancient goblin tribe collect pretty rocks from Karambwanji. Then Big High War God " +
-                "kill them with hammers for weakness. This all for today. Your question terrible. Do not send in question again."
+                "kill them with hammers for weakness.",
+                "This all for today. Your question terrible. Do not send in question again."
             })
         },
         {  
             new Gobcast(7,Season.Fall,1,new List<string>()
             {
-                "This question from Goutbones at wherever. He say 'What scariest creature?'. This is a bad question. Goblin should not fear " +
-                "because fear is weakness. Me never feel fear. Me once find big-tooth fish on shore at beach. It rainy autumn or winter or spring me forget. " +
-                "Me start shouting 'Me strong! You weak, big-tooth!'. Nearby man-fisher tell me it dead and called Monkfish. He say old humans collect them " +
+                "This question from Goutbones at wherever. He say 'Generals and also Grubfoot, what scariest creature?'. This is a bad question. Goblin should not fear " +
+                "because fear is weakness. Me never feel fear. Me once find big-tooth fish on shore at beach. It rainy autumn or winter or spring me forget.",
+                "Me start shouting 'Me strong! You weak, big-tooth!'. Nearby fishingman tell me it dead and called Monkfish. He say old humans collect them " +
                 "for strong magic rocks. Me then kill him with hammers. ",
                 "This all for today. Your question terrible. Do not send in question again."
             })
@@ -1056,18 +1082,18 @@ public static class ModAssets
         {  
             new Gobcast(4,Season.Summer,2,new List<string>()
             {
-                "This question from Clothears at big beach. He say 'Me catch long fish, big as two goblin! What me do?'. First, stop fishing. " +
+                "This question from Clothears at big beach. He say 'Generals and also Grubfoot! Me catch long fish, big as two goblin! What me do?'. First, stop fishing. " +
                 "Fishing terrible hobby for coward goblins. Big High War God Give goblin hammers to crush creatures. Not flimsy stick with worm. " +
-                "Second, creature you find very rare fish from summer midday at beach man-fishers call 'Manta Ray' but me call it 'What-that-thing'.",
+                "Second, creature you find very rare fish from summer midday at beach fishingman call 'Manta Ray' but me call it 'What-that-thing'.",
                 "Manta Ray is strange fish that think it is bird, but it not bird. This make Manta Ray sad so it start collecting stupid rock thing. " +
-                "One day, Me find Manta Ray with pretty purple star on it. Me look at purple star and feel peaceful. This bad, so me run into water and kill Manta Ray with hammers. " +
+                "One day, Me find Manta Ray with pretty purple star on it. Me look at purple star and feel peaceful. This bad, so me run into water and kill Manta Ray. " +
                 "This all for today. Your question terrible. Do not send in question again."
             })
         },
         {  
             new Gobcast(24,Season.Fall,1,new List<string>()
             {
-                "This question from Wormbrain in human prison. He say 'Who is best to steal from?'. Me recommend everyone, as long as you kill them with hammers. " +
+                "This question from Wormbrain in human prison. He say 'Generals and also Grubfoot, Help! Who is best to steal from?'. Me recommend everyone, as long as you kill them. " +
                 " Stealing without murder is like beetle pie without beetle. Me would say, avoid desert traders. They surprisingly strong and fast. One time me manage to get " +
                 "lootbag but trader run away and bag full of stupid rocks with air pattern. Why bother carry rock through desert?",
                 "This all for today. Your question terrible. Do not send in question again."
@@ -1076,9 +1102,29 @@ public static class ModAssets
         {  
             new Gobcast(2,Season.Winter,1,new List<string>()
             {
-                "This question from Mistag in stupid cave. He say 'Hello, I recently came across this strange battlestaff. I managed to sell it at an adventurer's guild for 100 gold," +
+                "This question from Mistag in stupid cave. He say 'Greetings Generals and Grubfoot! I recently came across this strange battlestaff. I managed to sell it at an adventurer's guild for 100 gold," +
                 " but then I saw them selling it the next day for 1000 gold! Should I have asked for more money?'. First of all, me don't care who buy or sell stupid stick. Not enough " +
                 "sharp edges or smashy bits. If you had big hammer, adventurers guild would give you as much money as you ask for. Then you kill them anyway.",
+                "This all for today. Your question terrible. Do not send in question again."
+            })
+        },
+        {  
+            new Gobcast(3,Season.Spring,2,new List<string>()
+            {
+                "This question from Goblin Champion. Me hate this guy. He say 'Generals and also Grubfoot! Other champions at guild make fun of me. They say Goblin too stupid for magic! " +
+                "How me prove them wrong?' Magic for coward Goblins who too weak to carry hammer. My reccomendation is learn to use hammer instead.",
+                "If champion insist on using silly rocks, bandage man in desert place carry around lot of rock with scary pictures. Me recommend learning to throw " +
+                "rock hard instead of using prissy magic stick.",
+                "This all for today. Your question terrible. Do not send in question again."
+            })
+        },
+        {  
+            new Gobcast(11,Season.Winter,1,new List<string>()
+            {
+                "This question from Zanik. Grubfoot must stop allowing cave cowards to send in questions. She say something about finding treasure. Question was too long, me not read. ",
+                "Goblin is not greedy human. 'Treasure' only good if heavy enough to bludgeon. Once, me find some heavy boxes in sandy cave. Snake that fly carry around big box with green lock. Not too heavy. Maybe good for crush weak creature, like you cave cowards",
+                "Bandage man carry some box with purple lock, much better for smashing. Sergeant Mossfists drop on leg and need to go to medicine Goblin." +
+                "Very funny. Once, elder goblin tell me about red lock chest. He stupid and senile though. Red colour for proud goblin, not stupid box thing.",
                 "This all for today. Your question terrible. Do not send in question again."
             })
         }

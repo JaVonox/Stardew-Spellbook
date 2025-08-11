@@ -961,12 +961,9 @@ namespace RunescapeSpellbook
                         
                         //Apply Debuff
                         //Manners value is unused on monsters so we use it to assign debuffs
+                        //TODO fix 
+                        //int newDebuffValue = -1800 * debuffType + (monsterEffected.Manners == 0 ? 0 : monsterEffected.Manners % 90);
                         int newDebuffValue = -1800 * debuffType;
-                        
-                        if (monsterEffected.Manners <= (newDebuffValue - 1)) //If we already have this debuff, reapply the timer with the amount of time til next fire tick unchanged
-                        {
-                            newDebuffValue += (monsterEffected.Manners % 90);
-                        }
                         monsterEffected.Manners = newDebuffValue;
                 }
 
@@ -986,7 +983,7 @@ namespace RunescapeSpellbook
                 if (__instance.Manners < 0)
                 {
                     __instance.Manners++;
-                    if(__instance.Manners % 4 == 0) return;
+                    if(__instance.Manners % 4 == 0 && __instance.Manners % 90 != 0) return;
 
                     bool isFire = __instance.Manners <= -1801;
                     
@@ -1016,7 +1013,7 @@ namespace RunescapeSpellbook
                                 __instance.currentLocation.playSound(isFire ? "RunescapeSpellbook.FireBurn" : "RunescapeSpellbook.Liquid", __instance.Tile,
                                     null);
                                 __instance.currentLocation.debris.Add(new Debris(realDamage,
-                                    new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y), Color.Purple,
+                                    new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y), isFire ? Color.Orange : Color.Purple,
                                     1.25f, __instance));
                                 __instance.Health -= realDamage;
                             }
