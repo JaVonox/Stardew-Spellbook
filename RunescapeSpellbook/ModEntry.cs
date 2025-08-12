@@ -104,7 +104,7 @@ namespace RunescapeSpellbook
                             data.Add($"{audioTrack}", new AudioCueData() {
                                 Id = $"RunescapeSpellbook.{audioTrack}",
                                 Category = "Sound",
-                                FilePaths = new List<string>() { Path.Combine(Helper.DirectoryPath, "Assets/Audio", $"{audioTrack}.ogg") },
+                                FilePaths = new() { Path.Combine(Helper.DirectoryPath, "Assets/Audio", $"{audioTrack}.ogg") },
                             });
                         }
                     }
@@ -385,23 +385,22 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(GameMenu __instance, bool playOpeningSound = true)
             {
-                //Replace the exit table position so it is at the end of the list
-                //^1 is the same as length-1, apparently. neat
-                __instance.tabs[^1] = new ClickableComponent(
-                    new Rectangle(__instance.xPositionOnScreen + 704,
-                        __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "exit",
-                    Game1.content.LoadString("Strings\\UI:GameMenu_Exit"))
-                {
-                    myID = 12350,
-                    downNeighborID = 9,
-                    leftNeighborID = 12349,
-                    tryDefaultIfNoDownNeighborExists = true,
-                    fullyImmutable = true
-                };
+                //Move the options and exit tags right two to fit in spellbook page
+                //exit tab
+                __instance.tabs[^1].bounds = new Rectangle(__instance.xPositionOnScreen + 704,
+                    __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
+                __instance.tabs[^1].myID = 12351;
+                __instance.tabs[^1].leftNeighborID = 12350;
                 
-                //Add spellbook page
+                //options tab
+                __instance.tabs[^2].bounds = new Rectangle(__instance.xPositionOnScreen + 640,
+                    __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
+                __instance.tabs[^2].myID = 12350;
+                __instance.tabs[^2].leftNeighborID = 12349;
+
+                //spellbook tab
                 __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
-                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 640, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "RSspellbook", "Spellbook")
+                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 576, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "RSspellbook", "Spellbook")
                 {
                     myID = 12349,
                     downNeighborID = 9,
@@ -657,8 +656,11 @@ namespace RunescapeSpellbook
                     __instance.modData.Add("TofuMagicProfession1","-1");
                     __instance.modData.Add("TofuMagicProfession2","-1");
                 }
-                
-                ModAssets.localFarmerData.Reset();
+
+                if (!Context.IsMultiplayer || (Context.IsMultiplayer && __instance.IsLocalPlayer))
+                {
+                    ModAssets.localFarmerData.Reset();
+                }
             }
         }
         
@@ -956,14 +958,7 @@ namespace RunescapeSpellbook
                             delayBeforeAnimationStart = 100,
                             alpha = 0.5f
                         });
-                        
-                        //TODO check if all these calculations actually work with the % 4 check. its possible we might skip things.
-                        
-                        //Apply Debuff
-                        //Manners value is unused on monsters so we use it to assign debuffs
-                        //TODO fix 
-                        //int newDebuffValue = -1800 * debuffType + (monsterEffected.Manners == 0 ? 0 : monsterEffected.Manners % 90);
-                        int newDebuffValue = -1800 * debuffType;
+                        int newDebuffValue = (-1800 * debuffType) + (monsterEffected.Manners == 0 ? 0 : monsterEffected.Manners % 90);
                         monsterEffected.Manners = newDebuffValue;
                 }
 

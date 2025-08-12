@@ -235,7 +235,7 @@ public class TilesSpell : Spell
     public List<TerrainFeature> GetTiles(Vector2 playerTile, GameLocation currentLoc, int size)
     {
         //Gets all tiles in a size area around the player and then outputs the set to have effects applied to
-        List<TerrainFeature> tileLocations = new List<TerrainFeature>();
+        List<TerrainFeature> tileLocations = new();
 
         for (int y = -(size/2); y < (size/2); y++)
         {
@@ -524,7 +524,7 @@ public class CombatSpell : Spell
             
             int projectileCount = caster.hasBuff("429") || (ModAssets.CheckHasPerkByName(Game1.player, "Dragonstone") && Game1.random.NextDouble() <= 0.2) ? 3 : 1;
             
-            List<MagicProjectile> generatedProjectiles = new List<MagicProjectile>();
+            List<MagicProjectile> generatedProjectiles = new();
             for(int i = 0; i < projectileCount; i++)
             {
                 //The angle to offset projectiles from (first projectile is offset by 0, extras are +/- extraProjectileOffsets)

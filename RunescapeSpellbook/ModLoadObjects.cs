@@ -63,7 +63,7 @@ public class ModLoadObjects : ObjectData
         base.SpriteIndex = id - 4290;
         base.Category = category;
         base.ExcludeFromRandomSale = true;
-        this.characterPreferences = characterPreferences ?? new Dictionary<string, PrefType>();
+        this.characterPreferences = characterPreferences ?? new();
         base.Price = 1;
     }
 
@@ -99,7 +99,7 @@ public class TreasureObjects : ModLoadObjects
         base(id, name, displayName, description,characterPreferences, "Basic", -28)
     {
         base.SpriteIndex = spriteID;
-        List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
+        List<ObjectGeodeDropData> objects = new();
 
         double totalWeight = itemDrops.Sum(itemDrop => itemDrop.chance);
 
@@ -129,7 +129,7 @@ public class TreasureObjects : ModLoadObjects
         base(id,name,displayName,description,characterPreferences,"Basic",-28)
     {
         base.SpriteIndex = spriteID;
-        List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
+        List<ObjectGeodeDropData> objects = new();
         
         ObjectGeodeDropData geodeItem = new ObjectGeodeDropData();
         geodeItem.Id = "0";
@@ -177,19 +177,19 @@ public class TreasureObjects : ModLoadObjects
 public class PackObject : TreasureObjects
 {
     public int packItem;
-    public PackObject(int id, string name, string displayName, string description, int spriteID, int packItem) :
+    public PackObject(int id, string name, string displayName, string description, int spriteID, int packItem, int packBaseIncrease = 0) :
         base(id, name, displayName, description, spriteID,null)
     {
         this.packItem = packItem;
-        List<ItemDrop> itemDrops = new List<ItemDrop>()
+        List<ItemDrop> itemDrops = new()
         {
-            new ItemDrop(packItem, 7, 12, 1.5),
-            new ItemDrop(packItem, 13, 23, 0.5),
-            new ItemDrop(packItem, 25, 35, 0.25),
+            new ItemDrop(packItem, 7 + packBaseIncrease , 12 + packBaseIncrease, 1.5),
+            new ItemDrop(packItem, 13 + packBaseIncrease, 23 + packBaseIncrease, 0.5),
+            new ItemDrop(packItem, 25 + packBaseIncrease, 35 + packBaseIncrease, 0.25),
         };
         
         base.SpriteIndex = spriteID;
-        List<ObjectGeodeDropData> objects = new List<ObjectGeodeDropData>();
+        List<ObjectGeodeDropData> objects = new();
 
         double totalWeight = itemDrops.Sum(itemDrop => itemDrop.chance);
 
@@ -247,7 +247,7 @@ public class FishObject : ModLoadObjects
         base.SpriteIndex = spriteID;
         base.ExcludeFromFishingCollection = true;
         base.Edibility = edibility;
-        base.ContextTags = new List<string>() {$"item_{name}",roeColour};
+        base.ContextTags = new() {$"item_{name}",roeColour};
         
         this.fishTypeWaterColour = waterColour;
         this.populationGates = populationGates;
@@ -273,9 +273,9 @@ public class FishObject : ModLoadObjects
     {
         FishPondData newPondData = new FishPondData();
         newPondData.Id = this.Name.ToString();
-        newPondData.RequiredTags = new List<string>(){$"item_{base.Name}"};
+        newPondData.RequiredTags = new(){$"item_{base.Name}"};
         newPondData.PopulationGates = this.populationGates;
-        newPondData.ProducedItems = new List<FishPondReward>();
+        newPondData.ProducedItems = new();
         newPondData.SpawnTime = spawnTime;
             
         foreach (KeyValuePair<int,ItemDrop> pondDrop in rewards)
@@ -294,7 +294,7 @@ public class FishObject : ModLoadObjects
         waterColour.MinPopulation = 0;
         waterColour.MinUnlockedPopulationGate = 0;
         
-        newPondData.WaterColor = new List<FishPondWaterColor>() { waterColour };
+        newPondData.WaterColor = new() { waterColour };
         pondData.Add(newPondData);
     }
     public void AppendLocationData(IDictionary<string, LocationData> locationSet)
@@ -339,7 +339,7 @@ public abstract class LoadableText
     public LoadableText(string id, string contents)
     {
         this.id = id;
-        this.contents = new List<string>(){contents};
+        this.contents = new(){contents};
     }
 }
 
@@ -375,7 +375,7 @@ public abstract class LoadableTV : LoadableText
 
     protected List<string> CreateContentsWithIntro(List<string> contents)
     {
-        List<string> result = new List<string> { introText };
+        List<string> result = new() { introText };
         result.AddRange(contents);
         return result;
     }
@@ -463,33 +463,33 @@ public static class ModAssets
     
     public const int animFrames = 4; 
     
-    public static Dictionary<int,ModLoadObjects> modItems = new Dictionary<int,ModLoadObjects>{
+    public static Dictionary<int,ModLoadObjects> modItems = new(){
         {4290,new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object.",-999)},
         {4291,new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes",-429)},
         {4292,new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",-429,
-            new Dictionary<string, PrefType>(){{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
+            new(){{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
         {4293,new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",-429,
-            new Dictionary<string, PrefType>(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
+            new(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
         {4294,new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",-429,
-            new Dictionary<string, PrefType>(){{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
+            new(){{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
         {4295,new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",-431,
-            new Dictionary<string, PrefType>(){{"Wizard",PrefType.Like}})},
+            new(){{"Wizard",PrefType.Like}})},
         {4296,new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",-431,
-            new Dictionary<string, PrefType>(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
+            new(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
         {4297,new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",-431,
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
+            new(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
         {4298,new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",-431,
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
+            new(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
         {4299,new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",-430,
-            new Dictionary<string, PrefType>(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
+            new(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
         {4300,new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",-430,
-            new Dictionary<string, PrefType>(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
+            new(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
 
         {4301,new SlingshotItem(4301,"Ammo_Fire","Fire Orb","Enchanted ammo that burns enemies in a radius around a hit enemy. Fire cannot finish off enemies.",30)},
         {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Enchanted ammo that explodes and poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",31)},
         
         {4359,new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
-            new List<ItemDrop>()
+            new()
             {
                 new ItemDrop(4291, 10, 12, 1),
                 new ItemDrop(4291, 13, 23, 0.6),
@@ -509,7 +509,7 @@ public static class ModAssets
             },40)},
         
         {4360,new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. A blacksmith might be able to open it.",20,
-            new List<ItemDrop>()
+            new()
             {
                 new ItemDrop(4295, 5, 12, 1),
                 
@@ -529,7 +529,7 @@ public static class ModAssets
             },70)},
         
         {4361, new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. A blacksmith might be able to open it.",21,
-            new List<ItemDrop>()
+            new()
             {
                 new ItemDrop(4359,5,10,0.5),
                 new ItemDrop(4360,5,10,0.5),
@@ -540,10 +540,10 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.3),
                 
                 new ItemDrop(4362,1,1,0.05),
-            },200,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Like}})},
+            },200,new(){{"Abigail",PrefType.Like}})},
         
         {4362,new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. A blacksmith might be able to open it.",22,
-            new List<ItemDrop>()
+            new()
             {
                 new ItemDrop(4359,10,15,0.5),
                 new ItemDrop(4360,10,15,0.5),
@@ -554,41 +554,41 @@ public static class ModAssets
                 new ItemDrop(4355,1,1,0.7),
                 new ItemDrop(4356,1,1,0.5),
                 new ItemDrop(4363,1,1,0.1),
-            },500,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
+            },500,new(){{"Abigail",PrefType.Love}})},
         
         {4363,new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. A blacksmith might be able to open it.",23,
-            new List<ItemDrop>()
+            new()
             {
                 new ItemDrop(4356,1,1,1),
                 new ItemDrop(4357,1,1,0.5),
                 new ItemDrop(4358,1,1,0.5),
-            },1000,new Dictionary<string, PrefType>(){{"Abigail",PrefType.Love}})},
+            },1000,new(){{"Abigail",PrefType.Love}})},
         
-        {4364,new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. A blacksmith might be able to open it.",24,4291)},
-        {4365,new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. A blacksmith might be able to open it.",25,4292)},
+        {4364,new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. A blacksmith might be able to open it.",24,4291,3)},
+        {4365,new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. A blacksmith might be able to open it.",25,4292,1)},
         {4366,new PackObject(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes. A blacksmith might be able to open it.",26,4293)},
         {4367,new PackObject(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. A blacksmith might be able to open it.",27,4294)},
         {4368,new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. A blacksmith might be able to open it.",28,4299)},
         {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. A blacksmith might be able to open it.",29,4300)},
         
-        {4370,new FishObject(4370,"Fish_Karam","Karambwanji","A small brightly coloured tropical fish. Traditionally associated with elemental magic",32,45,600,1800,new List<Season>{Season.Spring,Season.Summer},"sunny",new List<string>()
+        {4370,new FishObject(4370,"Fish_Karam","Karambwanji","A small brightly coloured tropical fish. Traditionally associated with elemental magic",32,45,600,1800,new(){Season.Spring,Season.Summer},"sunny",new()
             { "Beach" },6,2,20,5,2,Color.Cyan,"color_sea_green",1,7,
-            new Dictionary<int, List<string>>()
+            new()
             {
                 {5,
-                    new List<string>()
+                    new()
                     {
                         "152 5 10","395","684 10 20","766 10 20"
                     }
                 },
                 {8,
-                    new List<string>()
+                    new()
                     {
                         "88 3 5","306 2 4","206 2 4"
                     }
                     
                 }
-            }, new Dictionary<int, ItemDrop>()
+            }, new()
             {
                 {9,new ItemDrop(4361,1,1,0.05)},
                 {1,new ItemDrop(4292,10,16,0.5)},
@@ -598,24 +598,24 @@ public static class ModAssets
                 {0,new ItemDrop(812,1,1,1.0)}
             }
             )},
-        {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Traditionally associated with combat magic",33,60,1600,2300,new List<Season>{Season.Fall,Season.Winter,Season.Spring},"rainy",new List<string>()
+        {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Traditionally associated with combat magic",33,60,1600,2300,new(){Season.Fall,Season.Winter,Season.Spring},"rainy",new()
             { "Beach" },4,5,60,50,3,Color.NavajoWhite,"color_sand",25,40,
-            new Dictionary<int, List<string>>()
+            new()
             {
                 {5,
-                    new List<string>()
+                    new()
                     {
                         "198","227","228"
                     }
                 },
                 {8,
-                    new List<string>()
+                    new()
                     {
                         "213","242","728","787","4361"
                     }
                     
                 }
-            }, new Dictionary<int, ItemDrop>()
+            }, new()
             {
                 {9,new ItemDrop(4362,1,1,0.05)},
                 {7,new ItemDrop(4300,10,30,0.4)},
@@ -623,24 +623,24 @@ public static class ModAssets
                 {0,new ItemDrop(812,1,1,1.0)}
             }
         )},
-        {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Traditionally associated with catalytic magic",34,75,1200,1800,new List<Season>{Season.Summer},"sunny",new List<string>()
+        {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Traditionally associated with catalytic magic",34,75,1200,1800,new(){Season.Summer},"sunny",new()
                 { "Beach" },6,6,100,70,4,Color.RoyalBlue,"color_red",118,216,
-            new Dictionary<int, List<string>>()
+            new()
             {
                 {5,
-                    new List<string>()
+                    new()
                     {
                         "346 10","456"
                     }
                 },
                 {8,
-                    new List<string>()
+                    new()
                     {
                         "4359 10","832","4361"
                     }
                     
                 }
-            }, new Dictionary<int, ItemDrop>()
+            }, new()
             {
                 {2,new ItemDrop(4295,3,5,0.5)},
                 {6,new ItemDrop(4297,3,5,0.3)},
@@ -648,24 +648,24 @@ public static class ModAssets
                 {0,new ItemDrop(4296,3,5,1.0)},
             }
         )},
-        {4373,new FishObject(4373,"Fish_Sword","Swordfish","A predatory fish with a flat sword-like pointed bill",35,95,2000,2600,new List<Season>{Season.Summer},"both",new List<string>()
-                { "Beach" },3,8,280,30,4,Color.HotPink,"color_pink",100,130,
-            new Dictionary<int, List<string>>()
+        {4373,new FishObject(4373,"Fish_Sword","Swordfish","A predatory fish with a flat sword-like pointed bill",35,95,2000,2600,new(){Season.Spring,Season.Summer,Season.Fall,Season.Winter},"both",new()
+                { "IslandSouth","IslandWest","IslandSouthEast" },3,8,280,30,4,Color.HotPink,"color_pink",100,130,
+            new()
             {
                 {4,
-                    new List<string>()
+                    new()
                     {
                         "874 4 7","225"
                     }
                 },
                 {8,
-                    new List<string>()
+                    new()
                     {
                         "852 3 5","904"
                     }
                     
                 }
-            }, new Dictionary<int, ItemDrop>()
+            }, new()
             {
                 {9,new ItemDrop(74,1,1,0.01)},
                 {4,new ItemDrop(4300,10,15,0.6)},
@@ -706,85 +706,85 @@ public static class ModAssets
     
     public static readonly Spell[] modSpells = {
         new TeleportSpell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",0,
-            new Dictionary<int, int>() { {4295, 1},{4291,3},{4292,2} },8,"Town", 43, 60,0),
+            new() { {4295, 1},{4291,3},{4292,2} },8,"Town", 43, 60,0),
         
         new TeleportSpell(1,"Teleport_Home","Farm Teleport","Teleports you outside the main house on your farm",4,
-            new Dictionary<int, int>() { {4295, 1},{4291,3},{4294,3} },10, "FarmHouse"),
+            new() { {4295, 1},{4291,3},{4294,3} },10, "FarmHouse"),
         
         new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal, or burns wood into coal at a discount",1,
-            new Dictionary<int, int>() { {4296, 1},{4293,4}},10,
+            new() { {4296, 1},{4293,4}},10,
             (i=>i is Item item && (item.QualifiedItemId == "(O)388" || DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId)))),
             SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost, or smelt wood into coal. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
         
         new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into 1.5x its sell price",5,
-            new Dictionary<int, int>() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
+            new() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
             SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 150% of the items value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
         new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",1,
-            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,3}}, 0.4f,SpellEffects.Humidify, 10,5,"Humidify",
+            new() { {4298, 1},{4293,1},{4292,3}}, 0.4f,SpellEffects.Humidify, 10,5,"Humidify",
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
         
         new TilesSpell(5,"Area_Cure","Cure Plant","Replants dead crops",6,
-            new Dictionary<int, int>() { {4298, 1},{4294,8}},0.6f, SpellEffects.CurePlant, 10,6,"Cure",
+            new() { {4298, 1},{4294,8}},0.6f, SpellEffects.CurePlant, 10,6,"Cure",
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
         
         new BuffSpell(6,"Buff_VileVigour","Vile Vigour","Sacrifices a third of your max health to fill your energy",3,
-            new Dictionary<int, int>() { {4297, 1},{4291,3}},5, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
+            new() { {4297, 1},{4291,3}},5, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
             7,"Vile","My energy is already full"),
         
         new BuffSpell(7,"Buff_PieMake","Bake Pie","Cooks a random recipe that you know using your held ingredients",3,
-            new Dictionary<int, int>() { {4298, 1},{4293,1},{4292,1}}, 15,
+            new() { {4298, 1},{4293,1},{4292,1}}, 15,
             (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0), SpellEffects.BakePie, 8,"BakePie","I don't know enough recipes"),
         
         new TeleportSpell(8,"Teleport_Desert","Desert Teleport","Teleports you to the desert, if you have access to it",5,
-            new Dictionary<int, int>() { {4295, 2},{4294,5},{4293,5}}, 15,"Desert", 19, 34,2,
+            new() { {4295, 2},{4294,5},{4293,5}}, 15,"Desert", 19, 34,2,
             ((farmer => Game1.MasterPlayer.mailReceived.Contains("ccVault")))),
         
         new TeleportSpell(9,"Teleport_Ginger","Ginger Island Teleport","Teleports you to ginger island, if you have access to it",7,
-            new Dictionary<int, int>() { {4295, 2},{4292,5},{4293,5}},15, "IslandSouth",21,37,0,
+            new() { {4295, 2},{4292,5},{4293,5}},15, "IslandSouth",21,37,0,
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("willyBoatFixed")))),
         
         new TeleportSpell(10,"Teleport_Caves","Caves Teleport","Teleports you to the pelican town mines",2,
-            new Dictionary<int, int>() { {4295, 1},{4291,5}},10, "Mountain",54,7,0, 
+            new() { {4295, 1},{4291,5}},10, "Mountain",54,7,0, 
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("landslideDone")))),
         
         new InventorySpell(11,"Menu_EnchantRuby","Enchant Ruby Bolt","Convert any red or orange stones into fiery ammo",4,
-            new Dictionary<int, int>() { {4297, 1},{4293,3}},10,(i => i is Item item && SpellEffects.redGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantRubyBolts,
+            new() { {4297, 1},{4293,3}},10,(i => i is Item item && SpellEffects.redGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantRubyBolts,
             "Convert any red gems or rocks into fiery ammo for the slingshot. On hitting an enemy, fire spreads to nearby enemies. Fire cannot finish off enemies.",2,"EnchantBolt"),
         
         new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Convert any green stones into explosive poisonous ammo",8,
-            new Dictionary<int, int>() { {4297, 2},{4294,3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
+            new() { {4297, 2},{4294,3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
             "Convert any green gems into explosive poisonous ammo for the slingshot. On hitting an enemy, poison spreads to nearby enemies. Poison cannot finish off enemies.",2,"EnchantBolt"),
         
         new BuffSpell(13,"Buff_DarkLure","Dark Lure","Summons more enemies, and makes them prioritise you over other farmers for 3 minutes",6,
-            new Dictionary<int, int>() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
+            new() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
         
         new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",0,
-            new Dictionary<int, int>() { {4299, 1},{4291,1}}, 1,40,15,0,Color.White,"WindStrike"),
+            new() { {4299, 1},{4291,1}}, 1,40,15,0,Color.White,"WindStrike"),
        
         new CombatSpell(15,"Combat_Water","Water Bolt","A low level water missile",2,
-            new Dictionary<int, int>() { {4299, 2},{4291,2},{4292,2}},2, 70,16,1,Color.DarkCyan,"WaterBolt"),
+            new() { {4299, 2},{4291,2},{4292,2}},2, 70,16,1,Color.DarkCyan,"WaterBolt"),
         
         new CombatSpell(16,"Combat_Undead","Crumble Undead","Hits undead monsters for extra damage",4,
-            new Dictionary<int, int>() { {4299, 2},{4291,2},{4294,2}},4, 60,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
+            new() { {4299, 2},{4291,2},{4294,2}},4, 60,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
         
         new CombatSpell(17,"Combat_Earth","Earth Blast","A medium level earth missile",6,
-            new Dictionary<int, int>() { {4300, 1},{4291,3},{4294,3}},4, 90,16,1,Color.DarkGreen,"EarthBlast"),
+            new() { {4300, 1},{4291,3},{4294,3}},4, 90,16,1,Color.DarkGreen,"EarthBlast"),
         
         new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
-            new Dictionary<int, int>() { {4300, 2},{4291,3},{4293,4}},5, 120,15,2,Color.OrangeRed,"FireWave"),
+            new() { {4300, 2},{4291,3},{4293,4}},5, 120,15,2,Color.OrangeRed,"FireWave"),
         
         new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 60 seconds",7,
-            new Dictionary<int, int>() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
+            new() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
-            new Dictionary<int, int>() { {4300, 2},{4298,2},{4293,4}},6, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
+            new() { {4300, 2},{4298,2},{4293,4}},6, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
         
         new CombatSpell(21,"Combat_Blood","Blood Barrage","Fires a strong vampiric blood missile",10,
-            new Dictionary<int, int>() { {4300, 4},{4297,3}}, 10,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
+            new() { {4300, 4},{4297,3}}, 10,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
         
         new InventorySpell(22,"Menu_Plank","Plank Make","Turns wood into hardwood and vice versa and uncrafts wooden items into wood",3,
-            new Dictionary<int, int>() { {4298, 1},{4297,1}},10,
+            new() { {4298, 1},{4297,1}},10,
             (i => i is Item item && (item.itemId.Value == "388" || item.itemId.Value == "709" || 
                                      (CraftingRecipe.craftingRecipes.ContainsKey(item.Name) 
                                       && CraftingRecipe.craftingRecipes[item.Name].Split(' ').ToList() is List<string> recipes 
@@ -793,7 +793,7 @@ public static class ModAssets
             "Breaks down wooden items into wood, and converts 15 wood into 1 hardwood and vice versa. For recipes that require more than wood, it will only return the wood.",3,"Degrime"),
     };
     
-    public static readonly List<PerkData> perks = new List<PerkData>()
+    public static readonly List<PerkData> perks = new()
     {
         new PerkData(0,"Sapphire","Sapphire","All teleportation spells are free","Teleportation spells no longer grant experience"),
         new PerkData(1,"Emerald","Emerald","All spells no longer require air runes"),
@@ -801,184 +801,184 @@ public static class ModAssets
         new PerkData(3,"Dragonstone","Dragonstone","20% chance of combat spells firing extra projectiles","Does not stack with charge, charge takes precedent")
     };
 
-    public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new Dictionary<string, List<ItemDrop>>()
+    public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new()
     {
         //Caves (Basic)
-        { "Big Slime", new List<ItemDrop>(){ 
+        { "Big Slime", new(){ 
             new ItemDrop(4295,2,0.08f),
             new ItemDrop(4296,2,0.1f),
             new ItemDrop(4359,1,0.02f),
         } },
-        { "Prismatic Slime", new List<ItemDrop>(){
+        { "Prismatic Slime", new(){
             new ItemDrop(4295,4,0.9f),
             new ItemDrop(4298,5,0.9f),
         } },
-        { "Green Slime", new List<ItemDrop>(){
+        { "Green Slime", new(){
             new ItemDrop(4295,2,0.08f),
             new ItemDrop(4359,1,0.02f),
         } },
-        { "Fly", new List<ItemDrop>(){
+        { "Fly", new(){
             new ItemDrop(4364,1,0.2f),
             new ItemDrop(4368,1,0.05f),
         } },
-        { "Rock Crab", new List<ItemDrop>(){
+        { "Rock Crab", new(){
             new ItemDrop(4359,1,0.3f),
         } },
-        { "Grub", new List<ItemDrop>(){
+        { "Grub", new(){
             new ItemDrop(4296,2,0.1f),
         } },
-        { "Bug", new List<ItemDrop>(){
+        { "Bug", new(){
             new ItemDrop(4368,1,0.08f),
             new ItemDrop(4359,1,0.2f),
         } },
-        { "Bat", new List<ItemDrop>(){
+        { "Bat", new(){
             new ItemDrop(4364,1,0.15f),
             new ItemDrop(4368,1,0.25f),
         } },
-        { "Stone Golem", new List<ItemDrop>(){
+        { "Stone Golem", new(){
             new ItemDrop(4367,1,0.2f),
             new ItemDrop(4360,1,0.1f),
             new ItemDrop(4361,1,0.04f),
         } },
-        { "Dust Spirit", new List<ItemDrop>(){
+        { "Dust Spirit", new(){
             new ItemDrop(4364,1,0.04f),
             new ItemDrop(4296,1,0.02f),
         } },
-        { "Frost Bat", new List<ItemDrop>(){
+        { "Frost Bat", new(){
             new ItemDrop(4364,1,0.05f),
             new ItemDrop(4365,1,0.15f),
             new ItemDrop(4368,1,0.3f),
         } },
-        { "Ghost", new List<ItemDrop>(){
+        { "Ghost", new(){
             new ItemDrop(4295,3,0.1f),
             new ItemDrop(4297,2,0.05f),
             new ItemDrop(4360,1,0.15f),
         } },
-        { "Frost Jelly", new List<ItemDrop>(){
+        { "Frost Jelly", new(){
             new ItemDrop(4365,1,0.1f),
             new ItemDrop(4359,1,0.2f),
         } },
-        { "Skeleton", new List<ItemDrop>(){
+        { "Skeleton", new(){
             new ItemDrop(4368,2,0.3f),
             new ItemDrop(4369,1,0.02f),
             new ItemDrop(4360,1,0.05f),
             new ItemDrop(4361,1,0.08f),
         } },
-        { "Lava Bat", new List<ItemDrop>(){
+        { "Lava Bat", new(){
             new ItemDrop(4364,2,0.15f),
             new ItemDrop(4366,2,0.15f),
         } },
-        { "Lava Crab", new List<ItemDrop>(){
+        { "Lava Crab", new(){
             new ItemDrop(4365,1,0.15f),
             new ItemDrop(4366,1,0.3f),
             new ItemDrop(4359,2,0.3f),
         } },
-        { "Shadow Shaman", new List<ItemDrop>(){
+        { "Shadow Shaman", new(){
             new ItemDrop(4296,3,0.2f),
             new ItemDrop(4298,2,0.2f),
             new ItemDrop(4360,2,0.2f),
         } },
-        { "Metal Head", new List<ItemDrop>(){
+        { "Metal Head", new(){
             new ItemDrop(4367,2,0.3f),
             new ItemDrop(4361,1,0.1f),
         } },
-        { "Shadow Brute", new List<ItemDrop>(){
+        { "Shadow Brute", new(){
             new ItemDrop(4364,2,0.1f),
             new ItemDrop(4368,2,0.3f),
             new ItemDrop(4360,1,0.1f),
         } },
-        { "Squid Kid", new List<ItemDrop>(){
+        { "Squid Kid", new(){
             new ItemDrop(4364,3,0.2f),
             new ItemDrop(4297,2,0.2f),
             new ItemDrop(4359,2,0.2f),
         } }, //Skull Cavern 
-        { "Sludge", new List<ItemDrop>(){
+        { "Sludge", new(){
             new ItemDrop(4295,2,0.2f),
             new ItemDrop(4359,1,0.2f),
         } },
-        { "Serpent", new List<ItemDrop>(){
+        { "Serpent", new(){
             new ItemDrop(4364,2,0.25f),
             new ItemDrop(4297,6,0.1f),
             new ItemDrop(4361,1,0.1f),
             new ItemDrop(4368,2,0.1f),
         } },
-        { "Carbon Ghost", new List<ItemDrop>(){
+        { "Carbon Ghost", new(){
             new ItemDrop(4295,4,0.3f),
             new ItemDrop(4298,4,0.2f),
             new ItemDrop(4369,2,0.1f),
         } },
-        { "Iridium Crab", new List<ItemDrop>(){
+        { "Iridium Crab", new(){
             new ItemDrop(4365,5,0.6f),
             new ItemDrop(4359,6,0.6f),
             new ItemDrop(4360,3,0.4f),
         } },
-        { "Pepper Rex", new List<ItemDrop>(){
+        { "Pepper Rex", new(){
             new ItemDrop(4366,3,1f),
             new ItemDrop(4296,3,0.5f),
             new ItemDrop(4361,1,0.5f),
         } },
-        { "Mummy", new List<ItemDrop>(){
+        { "Mummy", new(){
             new ItemDrop(4367,2,0.2f),
             new ItemDrop(4295,3,0.3f),
             new ItemDrop(4368,3,0.3f),
             new ItemDrop(4369,1,0.2f),
             new ItemDrop(4362,1,0.1f),
         } },
-        { "Iridium Bat", new List<ItemDrop>(){
+        { "Iridium Bat", new(){
             new ItemDrop(4364,3,0.5f),
             new ItemDrop(4369,2,0.2f),
             new ItemDrop(4362,1,0.2f),
         } },
-        { "Haunted Skull", new List<ItemDrop>(){ //Quarry Mine
+        { "Haunted Skull", new(){ //Quarry Mine
             new ItemDrop(4297,3,0.4f),
             new ItemDrop(4298,3,0.3f),
             new ItemDrop(4361,1,0.05f),
             new ItemDrop(4362,1,0.02f),
         } },
-        { "Hot Head", new List<ItemDrop>(){ //Ginger Island/Volcano
+        { "Hot Head", new(){ //Ginger Island/Volcano
             new ItemDrop(4366,2,0.3f),
             new ItemDrop(4369,3,0.2f),
             new ItemDrop(4360,2,0.2f),
         } },
-        { "Tiger Slime", new List<ItemDrop>(){
+        { "Tiger Slime", new(){
             new ItemDrop(4365,2,0.1f),
             new ItemDrop(4367,1,0.2f),
             new ItemDrop(4296,5,0.3f),
             new ItemDrop(4368,3,0.3f),
             new ItemDrop(4369,2,0.1f),
         } },
-        { "Magma Sprite", new List<ItemDrop>(){
+        { "Magma Sprite", new(){
             new ItemDrop(4364,3,0.2f),
             new ItemDrop(4366,2,0.3f),
         } },
-        { "Dwarvish Sentry", new List<ItemDrop>(){
+        { "Dwarvish Sentry", new(){
             new ItemDrop(4295,4,0.24f),
             new ItemDrop(4297,10,0.2f),
             new ItemDrop(4369,3,0.3f),
             new ItemDrop(4363,1,0.05f),
         } },
-        { "Magma Duggy", new List<ItemDrop>(){
+        { "Magma Duggy", new(){
             new ItemDrop(4366,2,0.3f),
             new ItemDrop(4359,5,0.3f),
             new ItemDrop(4363,1,0.05f),
         } },
-        { "Magma Sparker", new List<ItemDrop>(){
+        { "Magma Sparker", new(){
             new ItemDrop(4366,2,0.3f),
         } },
-        { "False Magma Cap", new List<ItemDrop>(){
+        { "False Magma Cap", new(){
             new ItemDrop(4367,1,0.2f),
             new ItemDrop(4297,10,0.2f),
         } },
     };
 
     //Items to be put in shops
-    public static Dictionary<string, List<ShopListings>> loadableShops = new Dictionary<string, List<ShopListings>>()
+    public static Dictionary<string, List<ShopListings>> loadableShops = new()
     {
-        {"AdventureShop", new List<ShopListings>()
+        {"AdventureShop", new()
         {
             new ShopListings("Marlon_Battlestaff","(W)4351",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }},
-        {"DesertTrade", new List<ShopListings>()
+        {"DesertTrade", new()
         {
             new ShopListings("Desert_AirRunes","(O)4291","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }}
@@ -988,7 +988,7 @@ public static class ModAssets
     /// mail + notes to load into the game
     /// <remarks>bool: true is mail, false is secret note</remarks>
     /// </summary>
-    public static List<LoadableText> loadableText = new List<LoadableText>()
+    public static List<LoadableText> loadableText = new()
     {
         {
             new LoadableMail("RSSpellMailGet","Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
@@ -1059,7 +1059,7 @@ public static class ModAssets
               "^^High Level Casket, Dwarvish Sentry, Magma Duggy.")
         },
         {
-            new Gobcast(21,Season.Spring,1, new List<string>()
+            new Gobcast(21,Season.Spring,1, new()
             {
                 "This question from Mudknuckles in Goblin Village. He say 'Generals and also Grubfoot, what fish is best?' " +
                 "This bad question. Best fish is whatever fishingman have on them when you hit them with large rock. " +
@@ -1070,7 +1070,7 @@ public static class ModAssets
             })
         },
         {  
-            new Gobcast(7,Season.Fall,1,new List<string>()
+            new Gobcast(7,Season.Fall,1,new()
             {
                 "This question from Goutbones at wherever. He say 'Generals and also Grubfoot, what scariest creature?'. This is a bad question. Goblin should not fear " +
                 "because fear is weakness. Me never feel fear. Me once find big-tooth fish on shore at beach. It rainy autumn or winter or spring me forget.",
@@ -1080,7 +1080,7 @@ public static class ModAssets
             })
         },
         {  
-            new Gobcast(4,Season.Summer,2,new List<string>()
+            new Gobcast(4,Season.Summer,2,new()
             {
                 "This question from Clothears at big beach. He say 'Generals and also Grubfoot! Me catch long fish, big as two goblin! What me do?'. First, stop fishing. " +
                 "Fishing terrible hobby for coward goblins. Big High War God Give goblin hammers to crush creatures. Not flimsy stick with worm. " +
@@ -1091,7 +1091,7 @@ public static class ModAssets
             })
         },
         {  
-            new Gobcast(24,Season.Fall,1,new List<string>()
+            new Gobcast(24,Season.Fall,1,new()
             {
                 "This question from Wormbrain in human prison. He say 'Generals and also Grubfoot, Help! Who is best to steal from?'. Me recommend everyone, as long as you kill them. " +
                 " Stealing without murder is like beetle pie without beetle. Me would say, avoid desert traders. They surprisingly strong and fast. One time me manage to get " +
@@ -1100,7 +1100,7 @@ public static class ModAssets
             })
         },
         {  
-            new Gobcast(2,Season.Winter,1,new List<string>()
+            new Gobcast(2,Season.Winter,1,new()
             {
                 "This question from Mistag in stupid cave. He say 'Greetings Generals and Grubfoot! I recently came across this strange battlestaff. I managed to sell it at an adventurer's guild for 100 gold," +
                 " but then I saw them selling it the next day for 1000 gold! Should I have asked for more money?'. First of all, me don't care who buy or sell stupid stick. Not enough " +
@@ -1109,7 +1109,7 @@ public static class ModAssets
             })
         },
         {  
-            new Gobcast(3,Season.Spring,2,new List<string>()
+            new Gobcast(3,Season.Spring,2,new()
             {
                 "This question from Goblin Champion. Me hate this guy. He say 'Generals and also Grubfoot! Other champions at guild make fun of me. They say Goblin too stupid for magic! " +
                 "How me prove them wrong?' Magic for coward Goblins who too weak to carry hammer. My reccomendation is learn to use hammer instead.",
@@ -1119,7 +1119,7 @@ public static class ModAssets
             })
         },
         {  
-            new Gobcast(11,Season.Winter,1,new List<string>()
+            new Gobcast(11,Season.Winter,1,new()
             {
                 "This question from Zanik. Grubfoot must stop allowing cave cowards to send in questions. She say something about finding treasure. Question was too long, me not read. ",
                 "Goblin is not greedy human. 'Treasure' only good if heavy enough to bludgeon. Once, me find some heavy boxes in sandy cave. Snake that fly carry around big box with green lock. Not too heavy. Maybe good for crush weak creature, like you cave cowards",
@@ -1131,10 +1131,10 @@ public static class ModAssets
         
     };
 
-    public static Dictionary<string, Dictionary<string,string>> loadableEvents = new Dictionary<string, Dictionary<string,string>>()
+    public static Dictionary<string, Dictionary<string,string>> loadableEvents = new()
     {
         {
-            "Data/Events/Farm", new Dictionary<string,string>()
+            "Data/Events/Farm", new()
             {
                 {
                     "RS.0/f Wizard 1000/t 600 1200",
@@ -1150,7 +1150,7 @@ public static class ModAssets
             }
         },
         {
-            "Data/Events/ArchaeologyHouse", new Dictionary<string,string>()
+            "Data/Events/ArchaeologyHouse", new()
             {
                 {
                     "RS.1/n RSRunesFound",
@@ -1193,13 +1193,13 @@ public static class ModAssets
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
         localFarmerData = new PlayerLocalData();
 
-        infiniteRuneReferences = new Dictionary<int, List<string>>();
+        infiniteRuneReferences = new();
         //Generate the lookup dictionary for determining what weapons give infinite values for each rune
         foreach (StaffWeaponData weapon in staffWeapons.Where(x=>x.providesRune != -1))
         {
             if (!infiniteRuneReferences.ContainsKey(weapon.providesRune))
             {
-                infiniteRuneReferences.Add(weapon.providesRune,new List<string>(){weapon.id.ToString()});
+                infiniteRuneReferences.Add(weapon.providesRune,new(){weapon.id.ToString()});
             }
             else
             {
@@ -1228,7 +1228,7 @@ public static class ModAssets
 
     public static List<Farmer> GetFarmers()
     {
-        List<Farmer> farmers = new List<Farmer>();
+        List<Farmer> farmers = new();
         farmers.Add(Game1.player);
         foreach (Farmer value in Game1.otherFarmers.Values)
         {
@@ -1312,7 +1312,7 @@ public static class ModAssets
     }
     public static List<int> PerksAssigned(Farmer farmer)
     {
-        List<int> perkIDs = new List<int>();
+        List<int> perkIDs = new();
         int id1 = -1;
         int.TryParse(farmer.modData["TofuMagicProfession1"],out id1);
         if (id1 != -1)

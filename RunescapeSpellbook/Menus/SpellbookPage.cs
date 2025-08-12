@@ -7,7 +7,7 @@ namespace RunescapeSpellbook;
 
 public class SpellbookPage : IClickableMenu
 {
-    private List<ClickableComponent> spellIcons = new List<ClickableComponent>();
+    private List<ClickableComponent> spellIcons = new();
     
     private int hoverSpellID = -1;
     private int hoverPerkID = -1;
@@ -19,8 +19,8 @@ public class SpellbookPage : IClickableMenu
     private const int spellsPerRow = 6;
 
     private ClickableTextureComponent magicIcon;
-    List<ClickableTextureComponent> perkIcons = new List<ClickableTextureComponent>();
-    private List<int> perksAssigned = new List<int>();
+    List<ClickableTextureComponent> perkIcons = new();
+    private List<int> perksAssigned = new();
     
     private bool hasMagic = false;
     public SpellbookPage(int x, int y, int width, int height)

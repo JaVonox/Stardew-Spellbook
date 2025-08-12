@@ -110,5 +110,7 @@ public class MagicProjectile : BasicProjectile
     {
         base.behaviorOnCollisionWithOther(location);
         location.playSound("RunescapeSpellbook.Splash", null, null);
+        base.alpha.Value = 0;
+        base.destroyMe = true;
     }
 }

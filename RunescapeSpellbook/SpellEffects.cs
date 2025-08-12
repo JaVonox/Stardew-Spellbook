@@ -137,7 +137,7 @@ public class SpellEffects : BaseSpellEffects
         return new KeyValuePair<bool, string>(true, "");
     }
     
-    public static Dictionary<string,int> redGemsEnchants = new Dictionary<string,int>()
+    public static Dictionary<string,int> redGemsEnchants = new()
     {
         {"64",20}, //Ruby
         {"82",10}, //Fire Quartz
@@ -175,7 +175,7 @@ public class SpellEffects : BaseSpellEffects
         return new KeyValuePair<bool, string>(true, "");
     }
     
-    public static Dictionary<string,int> greenGemsEnchants = new Dictionary<string,int>()
+    public static Dictionary<string,int> greenGemsEnchants = new()
     {
         {"60",10}, //Emerald
         {"70",20}, //Jade
@@ -374,7 +374,7 @@ public class SpellEffects : BaseSpellEffects
         PlayAnimation(() =>
         {
             Item crafted = selectedRecipe.createItem();
-            selectedRecipe.consumeIngredients(new List<IInventory>() { Game1.player.Items });
+            selectedRecipe.consumeIngredients(new() { Game1.player.Items });
             Utility.CollectOrDrop(crafted);
 
         }, "RunescapeSpellbook.BakePie", 800,animOffset);
