@@ -1,15 +1,11 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Buildings;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Shops;
-using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
@@ -67,7 +63,7 @@ public class ModLoadObjects : ObjectData
         base.Price = 1;
     }
 
-    public void AppendObject(string CustomTextureKey, IDictionary<string,ObjectData> ObjectsSet)
+    public void AppendObject(IDictionary<string,ObjectData> ObjectsSet)
     {
         ObjectsSet[$"{id}"] = this;
     }
@@ -1064,7 +1060,7 @@ public static class ModAssets
                 "This question from Mudknuckles in Goblin Village. He say 'Generals and also Grubfoot, what fish is best?' " +
                 "This bad question. Best fish is whatever fishingman have on them when you hit them with large rock. " +
                 "This season many man-fishers carry around Karambwanji. Delicious tropical fish that come out in sunny daytime at beach during spring and summer.",
-                "Goblin legend say once, ancient goblin tribe collect pretty rocks from Karambwanji. Then Big High War God " +
+                "Goblin legend say once, ancient Goblin tribe collect pretty rocks from Karambwanji. Then Big High War God " +
                 "kill them with hammers for weakness.",
                 "This all for today. Your question terrible. Do not send in question again."
             })
@@ -1082,8 +1078,8 @@ public static class ModAssets
         {  
             new Gobcast(4,Season.Summer,2,new()
             {
-                "This question from Clothears at big beach. He say 'Generals and also Grubfoot! Me catch long fish, big as two goblin! What me do?'. First, stop fishing. " +
-                "Fishing terrible hobby for coward goblins. Big High War God Give goblin hammers to crush creatures. Not flimsy stick with worm. " +
+                "This question from Clothears at big beach. He say 'Generals and also Grubfoot! Me catch long fish, big as two Goblin! What me do?'. First, stop fishing. " +
+                "Fishing terrible hobby for coward Goblins. Big High War God Give Goblin hammers to crush creatures. Not flimsy stick with worm. " +
                 "Second, creature you find very rare fish from summer midday at beach fishingman call 'Manta Ray' but me call it 'What-that-thing'.",
                 "Manta Ray is strange fish that think it is bird, but it not bird. This make Manta Ray sad so it start collecting stupid rock thing. " +
                 "One day, Me find Manta Ray with pretty purple star on it. Me look at purple star and feel peaceful. This bad, so me run into water and kill Manta Ray. " +
@@ -1102,8 +1098,8 @@ public static class ModAssets
         {  
             new Gobcast(2,Season.Winter,1,new()
             {
-                "This question from Mistag in stupid cave. He say 'Greetings Generals and Grubfoot! I recently came across this strange battlestaff. I managed to sell it at an adventurer's guild for 100 gold," +
-                " but then I saw them selling it the next day for 1000 gold! Should I have asked for more money?'. First of all, me don't care who buy or sell stupid stick. Not enough " +
+                "This question from Mistag in stupid cave. He say 'Greetings Generals and Grubfoot! I recently came across this strange battlestaff. I managed to sell it at an adventurer's guild for 100 gold, " +
+                "but then I saw them selling it the next day for 1000 gold! Should I have asked for more money?'. First of all, me don't care who buy or sell stupid stick. Not enough " +
                 "sharp edges or smashy bits. If you had big hammer, adventurers guild would give you as much money as you ask for. Then you kill them anyway.",
                 "This all for today. Your question terrible. Do not send in question again."
             })
@@ -1127,7 +1123,29 @@ public static class ModAssets
                 "Very funny. Once, elder goblin tell me about red lock chest. He stupid and senile though. Red colour for proud goblin, not stupid box thing.",
                 "This all for today. Your question terrible. Do not send in question again."
             })
+        },
+        {  
+            new Gobcast(2,Season.Summer,3,new()
+            {
+                "This question from Goblin Guard 1. He say 'Generals and also Grubfoot! Idiot Guard 2 get fancy sword. He say that sword better than spear. How me tell him spear is best?' " +
+                "First, you wrong and stupid. Hammer is best. Sword is least best. Maybe even worse than Axe. ",
+                "Me once see idiot fish shaped like sword on island vacation. Me relaxing in water at night-time, planning how me crush enemies. " +
+                "Then stupid fish come up and poke me in leg. If me not strong as ten Goblins, maybe would have hurt! Tell Guard 2 if he want to use fish weapon, maybe he belong better " +
+                "in ocean than in glorious goblin army.",
+                "This all for today. Your question terrible. Do not send in question again."
+            })
+        },
+        {  
+            new Gobcast(22,Season.Winter,3,new()
+            {
+                "Ah, right. No General Wartface or Grubfoot. General Wartface figured out me unplug his microphone entire time and say he not want to do show anymore. " +
+                "He say 'Show making not real Goblin job anyway, should be crushing the weak instead.'. He wrong and stupid but me start to think, show making actually really boring. ",
+                "This last episode, network say they do thing called 'rerun'. Me not understand how they get Goblin that look and talk like me but me not really care. Maybe one day me find " +
+                "imposter and crush him. Have not decided yet.",
+                "This all for today. You all terrible. Do not send in questions."
+            })
         }
+        
         
     };
 

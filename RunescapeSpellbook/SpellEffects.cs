@@ -2,7 +2,6 @@
 using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.GameData.Machines;
-using StardewValley.Inventories;
 using StardewValley.Locations;
 using StardewValley.Monsters;
 using StardewValley.TerrainFeatures;

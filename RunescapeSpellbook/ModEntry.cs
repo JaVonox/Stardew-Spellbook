@@ -119,7 +119,7 @@ namespace RunescapeSpellbook
 
                         foreach (ModLoadObjects newObject in ModAssets.modItems.Values)
                         {
-                            newObject.AppendObject("Mods.RunescapeSpellbook.Assets.modsprites", objectDict);
+                            newObject.AppendObject(objectDict);
                         }
                     }
                 );
@@ -502,7 +502,6 @@ namespace RunescapeSpellbook
             }
         }
         
-        //TODO add Custom forge enchants to replace existing forge enchants 
         [HarmonyPatch(typeof(MeleeWeapon), "FireProjectile")]
         [HarmonyPatch(new Type[] { typeof(Farmer) })]
         public class FireProjectilePatcher
@@ -649,16 +648,16 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(Farmer __instance)
             {
-                if (!__instance.modData.ContainsKey("TofuMagicLevel"))
-                {
-                    __instance.modData.Add("TofuMagicLevel","0");
-                    __instance.modData.Add("TofuMagicExperience","0");
-                    __instance.modData.Add("TofuMagicProfession1","-1");
-                    __instance.modData.Add("TofuMagicProfession2","-1");
-                }
-
                 if (!Context.IsMultiplayer || (Context.IsMultiplayer && __instance.IsLocalPlayer))
                 {
+                    if (!__instance.modData.ContainsKey("TofuMagicLevel"))
+                    {
+                        __instance.modData.Add("TofuMagicLevel","0");
+                        __instance.modData.Add("TofuMagicExperience","0");
+                        __instance.modData.Add("TofuMagicProfession1","-1");
+                        __instance.modData.Add("TofuMagicProfession2","-1");
+                    }
+                    
                     ModAssets.localFarmerData.Reset();
                 }
             }
