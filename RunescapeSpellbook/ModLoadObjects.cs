@@ -321,9 +321,10 @@ public class FishObject : ModLoadObjects
 
 public class SeedObject : ModLoadObjects
 {
-    public SeedObject(int id, string name, string displayName, string description, int spriteIndex, Dictionary<string, PrefType>? characterPreferences = null) : base(id,name,displayName,description,characterPreferences,"Basic",-74)
+    public SeedObject(int id, string name, string displayName, string description, int spriteIndex, int price, Dictionary<string, PrefType>? characterPreferences = null) : base(id,name,displayName,description,characterPreferences,"Basic",-74)
     {
         this.SpriteIndex = spriteIndex;
+        base.Price = price;
     }
 }
 public class CropObject : ModLoadObjects
@@ -721,10 +722,10 @@ public static class ModAssets
             }
         )},
         //TODO add these and finish descriptions + pricing
-        {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. to grow Harralander herbs",36)},
+        {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. Takes 12 days to mature.",36,50)},
         {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature. May be used for potion crafting in a future update.",
             "4374",new(){Season.Fall},3,0,37,140,-50,"color_brown",-75,3,0.4f) },
-        {4376, new SeedObject(4376,"Golovanova Seed","Golovanova Seed","An springtime seed used to grow the Golovanova plant",38)},
+        {4376, new SeedObject(4376,"Golovanova Seed","Golovanova Seed","An springtime seed used to grow the Golovanova plant",38,10)},
         {4377,new CropObject(4377,"Golovanova","Golovanova Fruit","A strange fruit picked from the fast-growing Golovanova plant. Filled with vitamins usually only found in dairy and meat products.",
             "4376",new(){Season.Spring},1,2,39,40,20,"color_salmon",-79) }
     };
@@ -1035,13 +1036,11 @@ public static class ModAssets
         {"DesertTrade", new()
         {
             new ShopListings("Desert_AirRunes","(O)4291","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
-        }}
-        /*
-        {"SeedShop", new()
+        }},
+        {"Sandy", new()
         {
-            new ShopListings("Seed_Harralander","(O)4374",100,6,-1,-1,"YEAR 2, SEASON fall") //PLAYER_HAS_SEEN_EVENT Current RS.0
+            new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"YEAR 2, PLAYER_HAS_SEEN_EVENT Current RS.0")
         }}
-        */
     };
     
     /// <summary>
