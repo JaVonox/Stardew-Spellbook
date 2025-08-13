@@ -347,7 +347,7 @@ public class CropObject : ModLoadObjects
         this.daysPerPhase = daysPerPhase;
         this.harvestIncPerFarmLevel = harvestIncPerFarmLevel;
         this.harvestMethod = harvestMethod;
-        this.growthSpriteRow = growthSpriteRow;
+        this.growthSpriteRow = growthSpriteRow + (growthSpriteRow % 2);
         
         base.ContextTags = new() {colour};
         this.harvestAmount = harvestAmount;
@@ -721,13 +721,12 @@ public static class ModAssets
                 {0,new ItemDrop(812,1,1,1.0)},
             }
         )},
-        //TODO add these and finish descriptions + pricing
         {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. Takes 12 days to mature.",36,50)},
-        {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature. May be used for potion crafting in a future update.",
-            "4374",new(){Season.Fall},3,0,37,140,-50,"color_brown",-75,3,0.4f) },
-        {4376, new SeedObject(4376,"Golovanova Seed","Golovanova Seed","An springtime seed used to grow the Golovanova plant",38,10)},
-        {4377,new CropObject(4377,"Golovanova","Golovanova Fruit","A strange fruit picked from the fast-growing Golovanova plant. Filled with vitamins usually only found in dairy and meat products.",
-            "4376",new(){Season.Spring},1,2,39,40,20,"color_salmon",-79) }
+        {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature.",
+            "4374",new(){Season.Fall},3,0,37,150,-50,"color_brown",-75,1,0.25f) },
+        {4376, new SeedObject(4376,"Lantadyme Seed","Lantadyme Seed","Plant these in the winter. Takes 12 days to mature.",38,50)},
+        {4377,new CropObject(4377,"Lantadyme","Lantadyme","A herb that is said to resemble eyes when in bloom",
+            "4376",new(){Season.Winter},3,1,39,350,-50,"color_blue",-75,1,0.25f) },
     };
     
     //These are custom melee weapons that use 
@@ -1039,7 +1038,8 @@ public static class ModAssets
         }},
         {"Sandy", new()
         {
-            new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"YEAR 2, PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"YEAR 2"),
+            new ShopListings("Seed_Lantadyme","(O)4376",300,5,-1,-1,"YEAR 2"), //, PLAYER_HAS_SEEN_EVENT Current RS.0
         }}
     };
     
