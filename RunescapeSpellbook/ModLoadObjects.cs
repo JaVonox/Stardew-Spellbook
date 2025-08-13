@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
 using StardewValley.GameData.Objects;
@@ -315,6 +316,56 @@ public class FishObject : ModLoadObjects
             
             locationSet[loc].Fish.Add(fishData);
         }
+    }
+}
+
+public class SeedObject : ModLoadObjects
+{
+    public SeedObject(int id, string name, string displayName, string description, int spriteIndex, Dictionary<string, PrefType>? characterPreferences = null) : base(id,name,displayName,description,characterPreferences,"Basic",-74)
+    {
+        this.SpriteIndex = spriteIndex;
+    }
+}
+public class CropObject : ModLoadObjects
+{
+    private List<Season> growableSeasons;
+    private int phases;
+    private int daysPerPhase;
+    private string seedID;
+    private int growthSpriteRow;
+    private float harvestIncPerFarmLevel;
+    private int harvestAmount;
+    private HarvestMethod harvestMethod;
+    public CropObject(int harvestItemId, string name, string displayName, string description, string seedId, List<Season> growableSeasons, int daysPerPhase, int growthSpriteRow,
+        int spriteID, int price, int edibility, string colour, int category = -75, int harvestAmount = 1, float harvestIncPerFarmLevel = 0, Dictionary<string,PrefType>? characterPreferences = null, HarvestMethod harvestMethod = HarvestMethod.Grab)
+    : base(harvestItemId,name,displayName,description,characterPreferences,"Basic",category)
+    {
+        this.SpriteIndex = spriteID;
+        this.seedID = seedId;
+        this.growableSeasons = growableSeasons;
+        this.daysPerPhase = daysPerPhase;
+        this.harvestIncPerFarmLevel = harvestIncPerFarmLevel;
+        this.harvestMethod = harvestMethod;
+        this.growthSpriteRow = growthSpriteRow;
+        
+        base.ContextTags = new() {colour};
+        this.harvestAmount = harvestAmount;
+        base.Price = price;
+        base.Edibility = edibility;
+    }
+
+    public void AppendCropData(IDictionary<string,CropData> cropDict)
+    {
+        CropData cropInfo = new CropData();
+        cropInfo.Texture = "Mods.RunescapeSpellbook.Assets.modplants";
+        cropInfo.SpriteIndex = growthSpriteRow;
+        cropInfo.Seasons = growableSeasons;
+        cropInfo.DaysInPhase = new() { daysPerPhase, daysPerPhase, daysPerPhase, daysPerPhase};
+        cropInfo.HarvestItemId = $"(O){base.id}";
+        cropInfo.HarvestMaxIncreasePerFarmingLevel = harvestIncPerFarmLevel;
+        cropInfo.HarvestMethod = this.harvestMethod;
+        cropInfo.HarvestMinStack = harvestAmount;
+        cropDict[this.seedID] = cropInfo;
     }
 }
 
@@ -668,7 +719,14 @@ public static class ModAssets
                 {2,new ItemDrop(773,1,3,0.5)},
                 {0,new ItemDrop(812,1,1,1.0)},
             }
-        )}
+        )},
+        //TODO add these and finish descriptions + pricing
+        {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. to grow Harralander herbs",36)},
+        {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature. May be used for potion crafting in a future update.",
+            "4374",new(){Season.Fall},3,0,37,140,-50,"color_brown",-75,3,0.4f) },
+        {4376, new SeedObject(4376,"Golovanova Seed","Golovanova Seed","An springtime seed used to grow the Golovanova plant",38)},
+        {4377,new CropObject(4377,"Golovanova","Golovanova Fruit","A strange fruit picked from the fast-growing Golovanova plant. Filled with vitamins usually only found in dairy and meat products.",
+            "4376",new(){Season.Spring},1,2,39,40,20,"color_salmon",-79) }
     };
     
     //These are custom melee weapons that use 
@@ -978,6 +1036,12 @@ public static class ModAssets
         {
             new ShopListings("Desert_AirRunes","(O)4291","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }}
+        /*
+        {"SeedShop", new()
+        {
+            new ShopListings("Seed_Harralander","(O)4374",100,6,-1,-1,"YEAR 2, SEASON fall") //PLAYER_HAS_SEEN_EVENT Current RS.0
+        }}
+        */
     };
     
     /// <summary>

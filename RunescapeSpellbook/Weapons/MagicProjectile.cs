@@ -81,7 +81,7 @@ public class MagicProjectile : BasicProjectile
         }
     }
     
-    //TODO check how this works
+    //TODO check how well this works
     //This is very experimental. Having all collisions checked locally for magic projectiles means there might be some extra processing, but its hard to tell if that matters
     //It might also make collisions with monsters a bit more janky, but it fixes the issue where projectiles were going through walls on non-local devices.
     //Basically, could be good, could be terrible. Need to test more. 

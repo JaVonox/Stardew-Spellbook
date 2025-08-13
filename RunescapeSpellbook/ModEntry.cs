@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Buffs;
 using StardewValley.Extensions;
 using StardewValley.GameData;
+using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
 using StardewValley.GameData.Objects;
@@ -87,6 +88,11 @@ namespace RunescapeSpellbook
                 e.LoadFromModFile<Texture2D>("Assets/spellanimations", AssetLoadPriority.Medium);
             }
             
+            if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modplants"))
+            {
+                e.LoadFromModFile<Texture2D>("Assets/modplants", AssetLoadPriority.Medium);
+            }
+            
             if (e.NameWithoutLocale.IsEquivalentTo("Data/AudioChanges"))
             {
                 e.Edit(asset =>
@@ -149,6 +155,19 @@ namespace RunescapeSpellbook
                         foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value).ToList())
                         {
                             ((FishObject)newObject).AppendFishData(fishDict);
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Crops"))
+            {
+                e.Edit(asset =>
+                    {
+                        var cropDict = asset.AsDictionary<string, CropData>().Data;
+                        foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is CropObject).Select(y=>y.Value).ToList())
+                        {
+                            ((CropObject)newObject).AppendCropData(cropDict);
                         }
                     }
                 );
@@ -1418,13 +1437,11 @@ namespace RunescapeSpellbook
         
         private void DebugCommand(string command, string[] args)
         {
-            if (HasNoWorldContextReady()){return;}
+            //if (HasNoWorldContextReady()){return;}
 
-            LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && $"RS_{x.id}" == "RS_429" && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
-            foreach (string line in modChannel.contents)
-            {
-                Monitor.Log($"{line}");
-            }
+            Crop x = new Crop();
+            Rectangle y = x.getSourceRect(2);
+            Monitor.Log($"x {y.X} y {y.Y} extx: {y.Width}, exty: {y.Height}");
         }
         
         private void DebugPosition(string command, string[] args)
