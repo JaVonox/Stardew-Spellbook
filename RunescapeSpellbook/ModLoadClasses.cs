@@ -409,7 +409,7 @@ public class PotionObject : ModLoadObjects
     }
     
     //Cooking (Usable)
-    public PotionObject(int id, string name, string displayName, string description, int spriteIndex, int price, string cookingRecipe, Dictionary<string, PrefType>? characterPreferences = null) :
+    public PotionObject(int id, string name, string displayName, string description, int spriteIndex, int price, string cookingRecipe, List<string> buffs, int duration, Dictionary<string, PrefType>? characterPreferences = null) :
         base(id,name,displayName,description,characterPreferences,"Basic",-7)
     {
         this.craftType = 0;
@@ -418,6 +418,21 @@ public class PotionObject : ModLoadObjects
         this.Price = price;
         base.Edibility = 0;
         base.IsDrink = true;
+
+        if (buffs.Count > 0)
+        {
+            base.Buffs = new List<ObjectBuffData>(); 
+            foreach (string buff in buffs)
+            {
+                ObjectBuffData newBuff = new ObjectBuffData();
+                newBuff.Id = "Food";
+                newBuff.BuffId = buff;
+                newBuff.Duration = duration;
+                newBuff.IconTexture = "Mods.RunescapeSpellbook.Assets.modsprites";
+                newBuff.IconSpriteIndex = spriteIndex;
+                base.Buffs.Add(newBuff);
+            }
+        }
     }
 
     public void AddMachineOutput(IDictionary<string,MachineData> machineDict)

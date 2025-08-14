@@ -568,6 +568,11 @@ namespace RunescapeSpellbook
                             }
                         }
                         
+                        foreach (Buff buff in consumed.GetFoodOrDrinkBuffs())
+                        {
+                            __instance.applyBuff(buff);
+                        }
+                        
                         return false;
                     }
                 }
@@ -585,6 +590,76 @@ namespace RunescapeSpellbook
                 ModAssets.localFarmerData.bonusHealth = 0;
             }
         }
+        
+        /*
+        [HarmonyPatch(typeof(BobberBar), "update")]
+        [HarmonyPatch(new Type[] { typeof(GameTime)})]
+        public class BobberUpdatePatcher
+        {
+            public static void Postfix(ref BobberBar __instance, GameTime time)
+            {
+                float middleZoneStart = __instance.bobberBarPos + (__instance.bobberBarHeight * 0.35f);
+                float middleZoneEnd = __instance.bobberBarPos + (__instance.bobberBarHeight * 0.65f);
+            
+                bool bobberInMiddleZone = (__instance.bobberPosition + 12f) >= (middleZoneStart - 32f) && 
+                                          (__instance.bobberPosition - 16f) <= (middleZoneEnd - 32f);
+            
+                if (bobberInMiddleZone)
+                {
+                    __instance.distanceFromCatching += 0.001f;
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(BobberBar), "draw")]
+        [HarmonyPatch(new Type[] { typeof(SpriteBatch)})]
+        public class BobberDrawPatcher
+        {
+            public static void Postfix(ref BobberBar __instance, SpriteBatch b)
+            {
+                if (__instance.scale == 1f && Game1.player.hasBuff("431"))
+                {
+                    Game1.StartWorldDrawInUI(b);
+            
+                    int middleZoneHeight = (int)(__instance.bobberBarHeight * 0.3f);
+                    int middleZoneStart = (int)(__instance.bobberBarHeight * 0.35f); 
+
+                    Color middleZoneColor = Color.Red;
+            
+                    // Calculate scale to match middle zone height
+                    float scaleMultiplier = (float)middleZoneHeight / (9 * 4f);
+                    float finalScale = 4f * scaleMultiplier;
+            
+                    // Position at the top-left of where we want the bar to start
+                    // When rotated -90 degrees, the bar will extend downward from this point
+                    Vector2 targetPosition = new Vector2(
+                        __instance.xPositionOnScreen + 64 - 20, // Left of the middle zone
+                        __instance.yPositionOnScreen + 12 + (int)__instance.bobberBarPos + middleZoneStart // Top of middle zone
+                    ) + __instance.barShake + __instance.everythingShake;
+            
+                    // Set origin to top-right (9, 0) so when rotated -90 degrees, 
+                    // the top-right becomes the top-left of the vertical bar
+                    Vector2 origin = new Vector2(9, 0);
+            
+                    // Rotate 90 degrees counter-clockwise
+                    float rotation = -(float)Math.PI / 2f;
+                
+                    b.Draw(Game1.mouseCursors, 
+                        targetPosition,
+                        new Rectangle(682, 2078, 9, 2), 
+                        middleZoneColor, 
+                        rotation,
+                        origin, 
+                        finalScale, 
+                        SpriteEffects.None, 
+                        0.1f);
+            
+                    Game1.EndWorldDrawInUI(b);
+                }
+            }
+        }
+        */
+
         
         [HarmonyPatch(typeof(Game1), "drawHUD")]
         public class FarmerHealthImage
@@ -855,6 +930,8 @@ namespace RunescapeSpellbook
                 }
             }
         }
+        
+        //TODO we can replace this with modifications to Data/Buffs
         
         [HarmonyPatch(typeof(Buff), MethodType.Constructor)]
         [HarmonyPatch(new Type[] { typeof(string),typeof(string),typeof(string),typeof(int),typeof(Texture2D),typeof(int),typeof(BuffEffects),typeof(bool),typeof(string),typeof(string) })]

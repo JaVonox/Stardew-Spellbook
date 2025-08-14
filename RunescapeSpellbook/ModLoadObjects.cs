@@ -239,9 +239,9 @@ public static class ModAssets
         {4380, new PotionObject(4380,"Harralander Dye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"4375",60,"colour_green")},
         {4381, new PotionObject(4381,"Lantadyme Dye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"4377",60,"color_dark_blue")},
         //{4382, new PotionObject(4382,"Compost Potion","Compost Potion","UNUSED",42,80,"4375 1 382 3")},
-        {4383, new PotionObject(4383,"Hunter Potion","Hunter Potion","Increases Fishing Prowess",43,80,"4375 1 881 3")},
-        {4384, new PotionObject(4384,"Battlemage Potion","Battlemage Potion","Increases Magical Damage",46,160,"4377 1 90 3")},
-        {4385, new PotionObject(4385,"Super Restore","Super Restore","Increases Max Energy Significantly",47,160,"4377 1 -5 3")},
+        //{4383, new PotionObject(4383,"Hunter Potion","Hunter Potion","Increases Fishing Prowess",43,80,"4375 1 881 3",new(){"431"},100)},
+        //{4384, new PotionObject(4384,"Battlemage Potion","Battlemage Potion","Increases Magical Damage",46,160,"4377 1 90 3",new(){"431"},100)},
+        //{4385, new PotionObject(4385,"Super Restore","Super Restore","Increases Max Energy Significantly",47,160,"4377 1 -5 3",new(){"431"},100)},
     };
     
     //These are custom melee weapons that use 
@@ -555,9 +555,9 @@ public static class ModAssets
         {
             new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
             new ShopListings("Seed_Lantadyme","(O)4376",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
-            new ShopListings("Recipe_Hunter","(O)4383",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
-            new ShopListings("Recipe_Battlemage","(O)4384",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
-            new ShopListings("Recipe_SuperRestore","(O)4385",6000,8,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+            //new ShopListings("Recipe_Hunter","(O)4383",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
+            //new ShopListings("Recipe_Battlemage","(O)4384",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+            //new ShopListings("Recipe_SuperRestore","(O)4385",6000,8,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
         }}
     };
     
