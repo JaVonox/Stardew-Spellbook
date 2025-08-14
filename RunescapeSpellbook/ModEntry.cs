@@ -13,6 +13,7 @@ using StardewValley.GameData;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
+using StardewValley.GameData.Machines;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
@@ -127,6 +128,7 @@ namespace RunescapeSpellbook
                         {
                             newObject.AppendObject(objectDict);
                         }
+                        
                     }
                 );
             }
@@ -147,19 +149,6 @@ namespace RunescapeSpellbook
                 );
             }
             
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/Fish"))
-            {
-                e.Edit(asset =>
-                    {
-                        var fishDict = asset.AsDictionary<string, string>().Data;
-                        foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value).ToList())
-                        {
-                            ((FishObject)newObject).AppendFishData(fishDict);
-                        }
-                    }
-                );
-            }
-            
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Crops"))
             {
                 e.Edit(asset =>
@@ -168,6 +157,47 @@ namespace RunescapeSpellbook
                         foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is CropObject).Select(y=>y.Value).ToList())
                         {
                             ((CropObject)newObject).AppendCropData(cropDict);
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Machines"))
+            {
+                e.Edit(asset =>
+                    {
+                        var machineDict = asset.AsDictionary<string, MachineData>().Data;
+                        
+                        foreach (PotionObject newKegItem in ModAssets.modItems.Where(x=>x.Value is PotionObject pot && pot.craftType != 0).Select(y=>y.Value).ToList())
+                        {
+                            newKegItem.AddMachineOutput(machineDict);
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/CookingRecipes"))
+            {
+                e.Edit(asset =>
+                    {
+                        var cookingDict = asset.AsDictionary<string, String>().Data;
+                        
+                        foreach (PotionObject newKegItem in ModAssets.modItems.Where(x=>x.Value is PotionObject pot && pot.craftType == 0).Select(y=>y.Value).ToList())
+                        {
+                            newKegItem.AddCookingOutput(cookingDict);
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Fish"))
+            {
+                e.Edit(asset =>
+                    {
+                        var fishDict = asset.AsDictionary<string, string>().Data;
+                        foreach (ModLoadObjects newObject in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value).ToList())
+                        {
+                            ((FishObject)newObject).AppendFishData(fishDict);
                         }
                     }
                 );
@@ -480,6 +510,127 @@ namespace RunescapeSpellbook
                 }
 
                 return true;
+            }
+        }
+        
+        [HarmonyPatch(typeof(Farmer), "Update")]
+        [HarmonyPatch(new Type[] { typeof(GameTime),typeof(GameLocation)})]
+        public class FarmerBonusHealthPatcher
+        {
+            public static void Prefix(ref Farmer __instance, GameTime time, GameLocation location)
+            {
+                //Handle Bonus Health
+                if (__instance.health > __instance.maxHealth)
+                {
+                    ModAssets.localFarmerData.bonusHealth += __instance.health - __instance.maxHealth;
+                    __instance.health = __instance.maxHealth;
+                }
+                else if (ModAssets.localFarmerData.bonusHealth > 0)
+                {
+                    ModAssets.localFarmerData.bonusHealth -= __instance.maxHealth - __instance.health;
+                    __instance.health = __instance.maxHealth;
+                    
+                    if (ModAssets.localFarmerData.bonusHealth < 0)
+                    {
+                        __instance.health -= Math.Abs(ModAssets.localFarmerData.bonusHealth);
+                        ModAssets.localFarmerData.bonusHealth = 0;
+                    }
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Farmer), "doneEating")]
+        public class FarmerEatingPatch
+        {
+            public static bool Prefix(ref Farmer __instance)
+            {
+                if (__instance.mostRecentlyGrabbedItem != null && __instance.IsLocalPlayer)
+                {
+                    Object consumed = __instance.itemToEat as Object;
+                    string consumedID = consumed.QualifiedItemId;
+                    if (ModAssets.modItems.Any(x=> x.Value is PotionObject && consumedID == $"(O){x.Key}"))
+                    {
+                        PotionObject pot = (PotionObject)ModAssets.modItems[int.Parse(consumed.ItemId)];
+                        __instance.isEating = false;
+                        __instance.tempFoodItemTextureName.Value = null;
+                        __instance.completelyStopAnimatingOrDoingAction();
+                        __instance.forceCanMove();
+
+                        if (consumedID == "(O)4378" || consumedID == "(O)4379")
+                        {
+                            int addAmount = (int)Math.Floor((float)__instance.maxHealth * (pot.healPercent + ((float)__instance.itemToEat.Quality * pot.extraHealthPerQuality)));
+                            int newTotal = __instance.health + addAmount;
+                            
+                            if (__instance.health + ModAssets.localFarmerData.bonusHealth < newTotal)
+                            {
+                                ModAssets.localFarmerData.bonusHealth = newTotal <= __instance.maxHealth ? 0 : newTotal - __instance.maxHealth;
+                                __instance.health = Math.Min(newTotal, __instance.maxHealth);
+                            }
+                        }
+                        
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+        }
+        
+        [HarmonyPatch(typeof(Farmer), "dayupdate")]
+        [HarmonyPatch(new Type[] { typeof(int)})]
+        public class FarmerSleepPatcher
+        {
+            public static void Prefix(ref Farmer __instance, int timeWentToSleep)
+            {
+                ModAssets.localFarmerData.bonusHealth = 0;
+            }
+        }
+        
+        [HarmonyPatch(typeof(Game1), "drawHUD")]
+        public class FarmerHealthImage
+        {
+            private static readonly List<Color> healthTiers = new()
+            {
+                new Color(0,255,0),
+                new Color(0,128,255),
+                new Color(255,0,255),
+                new Color(255,128,0),
+                new Color(0,0,255),
+                new Color(0,255,127),
+                new Color(255,0,128),
+                new Color(128,0,255),
+            };
+
+            public static void Prefix(ref Game1 __instance)
+            {
+                if (Game1.hitShakeTimer > 0 && ModAssets.localFarmerData.bonusHealth > 0)
+                {
+                    Game1.hitShakeTimer = 0;
+                }
+            }
+
+            public static void Postfix(ref Game1 __instance)
+            {
+                if (Game1.showingHealthBar && ModAssets.localFarmerData.bonusHealth > 0)
+                {
+                    //Get how many times we go over the healthbar
+                    int healthDepth = (1 + ModAssets.localFarmerData.bonusHealth / Game1.player.maxHealth);
+                    
+                    DrawBonusHealthBar(healthDepth - 1,Game1.player.maxHealth);
+                    DrawBonusHealthBar(healthDepth,ModAssets.localFarmerData.bonusHealth % Game1.player.maxHealth);
+                }
+            }
+
+            private static void DrawBonusHealthBar(int colorIndex, int healthAmount)
+            {
+                Vector2 topOfBar = new Vector2(Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Right - 48 - 8, Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (int)((float)(Game1.player.MaxStamina - 270) * 0.625f));
+                topOfBar.X -= 56;
+                topOfBar.Y = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (Game1.player.maxHealth - 100);
+                int bar_full_height = 168 + (Game1.player.maxHealth - 100);
+                int height = (int)((float)healthAmount / (float)Game1.player.maxHealth * (float)bar_full_height);
+                    
+                Rectangle health_bar_rect = new Microsoft.Xna.Framework.Rectangle((int)topOfBar.X + 12, (int)topOfBar.Y + 16 + 32 + bar_full_height - height, 24, height);
+                Game1.spriteBatch.Draw(Game1.staminaRect, health_bar_rect, Game1.staminaRect.Bounds, healthTiers[colorIndex % healthTiers.Count], 0f, Vector2.Zero, SpriteEffects.None, 0f);
             }
         }
 

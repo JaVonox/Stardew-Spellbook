@@ -2,502 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.GameData.Crops;
-using StardewValley.GameData.FishPonds;
-using StardewValley.GameData.Locations;
-using StardewValley.GameData.Objects;
-using StardewValley.GameData.Shops;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
-public struct ItemDrop
-{
-    public int itemID;
-    public int amount;
-    public double chance;
-
-    public int minAmount;
-    public int maxAmount;
-    public ItemDrop(int itemID, int amount, double chance = 1.0)
-    {
-        this.itemID = itemID;
-        this.amount = amount;
-        this.chance = chance;
-        
-        this.minAmount = amount;
-        this.maxAmount = amount;
-    }
-    public ItemDrop(int itemID, int minAmount, int maxAmount, double weight = 1.0) 
-    {
-        this.itemID = itemID;
-        this.amount = minAmount;
-        this.minAmount = minAmount;
-        this.maxAmount = maxAmount;
-        this.chance = weight;
-    }
-}
-
-public enum PrefType
-{
-    Hate,
-    Dislike,
-    Neutral,
-    Like,
-    Love
-}
-public class ModLoadObjects : ObjectData
-{
-    public int id;
-    public Dictionary<string, PrefType>? characterPreferences;
-    public ModLoadObjects(int id, string name, string displayName, string description, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
-    {
-        this.id = id;
-        base.Name = name;
-        base.DisplayName = displayName;
-        base.Description = description;
-        base.Type = type;
-        base.Texture = "Mods.RunescapeSpellbook.Assets.modsprites";
-        base.SpriteIndex = id - 4290;
-        base.Category = category;
-        base.ExcludeFromRandomSale = true;
-        this.characterPreferences = characterPreferences ?? new();
-        base.Price = 1;
-    }
-
-    public void AppendObject(IDictionary<string,ObjectData> ObjectsSet)
-    {
-        ObjectsSet[$"{id}"] = this;
-    }
-}
-
-public class RunesObjects : ModLoadObjects
-{
-    public RunesObjects(int id, string name, string displayName, string description,int category,Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",category)
-    {
-        base.Price = 2;
-    }
-    
-}
-
-public class SlingshotItem : ModLoadObjects
-{
-    public SlingshotItem(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",-2)
-    {
-        base.SpriteIndex = spriteID;
-    }
-}
-
-public class TreasureObjects : ModLoadObjects
-{
-    public TreasureObjects(int id, string name, string displayName, string description, int spriteID,
-        List<ItemDrop> itemDrops, int sellprice = 35, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id, name, displayName, description,characterPreferences, "Basic", -28)
-    {
-        base.SpriteIndex = spriteID;
-        List<ObjectGeodeDropData> objects = new();
-
-        double totalWeight = itemDrops.Sum(itemDrop => itemDrop.chance);
-
-        int dropID = 0;
-        foreach (ItemDrop item in itemDrops)
-        {
-            ObjectGeodeDropData geodeItem = new ObjectGeodeDropData();
-            geodeItem.Id = dropID.ToString();
-            geodeItem.ItemId = item.itemID.ToString();
-
-            geodeItem.MinStack = item.minAmount;
-            geodeItem.MaxStack = item.maxAmount;
-            
-            geodeItem.Chance = BalanceItemPercentage(itemDrops,dropID,totalWeight);
-            geodeItem.Precedence = 0;
-            objects.Add(geodeItem);
-            dropID++;
-        }
-        
-        base.GeodeDropsDefaultItems = false;
-        base.GeodeDrops = objects;
-        base.Price = sellprice;
-    }
-
-
-    public TreasureObjects(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",-28)
-    {
-        base.SpriteIndex = spriteID;
-        List<ObjectGeodeDropData> objects = new();
-        
-        ObjectGeodeDropData geodeItem = new ObjectGeodeDropData();
-        geodeItem.Id = "0";
-        geodeItem.ItemId = "4291";
-        geodeItem.Chance = 1.0;
-        geodeItem.MinStack = 10;
-        geodeItem.MaxStack = 20;
-        geodeItem.Precedence = 0;
-        objects.Add(geodeItem);
-
-        base.GeodeDropsDefaultItems = false;
-        base.GeodeDrops = objects;
-        base.Price = 35;
-    }
-
-    /// <summary>
-    /// Finds what the new percentage should be for an index in the array to match its expected percentage chance -
-    /// assuming that we work sequentially
-    /// </summary>
-    /// <returns></returns>
-    protected static double BalanceItemPercentage(List<ItemDrop> items, int calculatedIndex, double totalWeight)
-    {
-        double desiredChance = (items[calculatedIndex].chance / totalWeight); //The specified chance of this item drop occuring divided by the total chances
-        if (calculatedIndex == 0)
-        {
-            return desiredChance; //If its the first index we always have the desired chance
-        }
-        
-        if (calculatedIndex == items.Count - 1)
-        {
-            return 1; //final item will always have 100% chance
-        }
-
-        double divisor = 1;
-
-        for(int i = calculatedIndex - 1; i >= 0;i--)
-        {
-            divisor *= (1 - BalanceItemPercentage(items,i,totalWeight)); 
-        }
-        
-        return desiredChance / divisor;
-    }
-}
-
-public class PackObject : TreasureObjects
-{
-    public int packItem;
-    public PackObject(int id, string name, string displayName, string description, int spriteID, int packItem, int packBaseIncrease = 0) :
-        base(id, name, displayName, description, spriteID,null)
-    {
-        this.packItem = packItem;
-        List<ItemDrop> itemDrops = new()
-        {
-            new ItemDrop(packItem, 7 + packBaseIncrease , 12 + packBaseIncrease, 1.5),
-            new ItemDrop(packItem, 13 + packBaseIncrease, 23 + packBaseIncrease, 0.5),
-            new ItemDrop(packItem, 25 + packBaseIncrease, 35 + packBaseIncrease, 0.25),
-        };
-        
-        base.SpriteIndex = spriteID;
-        List<ObjectGeodeDropData> objects = new();
-
-        double totalWeight = itemDrops.Sum(itemDrop => itemDrop.chance);
-
-        int dropID = 0;
-        foreach (ItemDrop item in itemDrops)
-        {
-            ObjectGeodeDropData geodeItem = new ObjectGeodeDropData();
-            geodeItem.Id = dropID.ToString();
-            geodeItem.ItemId = item.itemID.ToString();
-
-            geodeItem.MinStack = item.minAmount;
-            geodeItem.MaxStack = item.maxAmount;
-            
-            geodeItem.Chance = BalanceItemPercentage(itemDrops,dropID,totalWeight);
-            geodeItem.Precedence = 0;
-            objects.Add(geodeItem);
-            dropID++;
-        }
-        
-        base.GeodeDropsDefaultItems = false;
-        base.GeodeDrops = objects;
-    }
-}
-public class FishObject : ModLoadObjects
-{
-    private int dartChance;
-    private int minDayTime;
-    private int maxDayTime;
-    private List<Season> seasons;
-    private string weather;
-    private List<string> locations;
-    private int catchChance;
-    private int minFishingLevel;
-    private Color fishTypeWaterColour;
-    private Dictionary<int, List<string>> populationGates;
-    private Dictionary<int, ItemDrop> rewards;
-    private int spawnTime;
-    private int minLength;
-    private int maxLength;
-    
-    public FishObject(int id, string name,string displayName, string description, int spriteID, int dartChance, int minDayTime, 
-        int maxDayTime, List<Season> seasons, string weather, List<string> locations, int catchChance, int minFishingLevel, int price, int edibility, int spawnTime,
-        Color waterColour, string roeColour, int minLength, int maxLength, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards)
-        : base(id, name, displayName, description,null,"Basic",-4)
-    {
-        this.dartChance = dartChance;
-        this.minDayTime = minDayTime;
-        this.maxDayTime = maxDayTime;
-        this.seasons = seasons;
-        this.weather = weather;
-        this.locations = locations;
-        this.catchChance = catchChance;
-        this.minFishingLevel = minFishingLevel;
-        base.Price = price;
-        base.SpriteIndex = spriteID;
-        base.ExcludeFromFishingCollection = true;
-        base.Edibility = edibility;
-        base.ContextTags = new() {$"item_{name}",roeColour};
-        
-        this.fishTypeWaterColour = waterColour;
-        this.populationGates = populationGates;
-        this.rewards = rewards;
-        this.spawnTime = spawnTime;
-        this.minLength = minLength;
-        this.maxLength = maxLength;
-    }
-
-    public void AppendFishData(IDictionary<string,string> fishDict)
-    {
-        string seasonsText = "";
-        foreach (Season season in seasons)
-        {
-            if (seasonsText != "") { seasonsText += " ";}
-            seasonsText += season.ToString();
-        }
-
-        fishDict.Add($"{this.id}", $"{this.Name}/{this.dartChance}/dart/{this.minLength}/{this.maxLength}/{this.minDayTime} {this.maxDayTime}/{seasonsText}/{this.weather}/690 .4 685 .1/2/.{this.catchChance}/.5/{this.minFishingLevel}/false");
-    }
-
-    public void AppendPondData(IList<FishPondData> pondData)
-    {
-        FishPondData newPondData = new FishPondData();
-        newPondData.Id = this.Name.ToString();
-        newPondData.RequiredTags = new(){$"item_{base.Name}"};
-        newPondData.PopulationGates = this.populationGates;
-        newPondData.ProducedItems = new();
-        newPondData.SpawnTime = spawnTime;
-            
-        foreach (KeyValuePair<int,ItemDrop> pondDrop in rewards)
-        {
-            FishPondReward pondReward = new FishPondReward();
-            pondReward.RequiredPopulation = pondDrop.Key;
-            pondReward.Chance = (float)pondDrop.Value.chance;
-            pondReward.MinStack = pondDrop.Value.minAmount;
-            pondReward.MaxStack = pondDrop.Value.maxAmount;
-            pondReward.ItemId = $"{pondDrop.Value.itemID}";
-            newPondData.ProducedItems.Add(pondReward);
-        }
-        
-        FishPondWaterColor waterColour = new FishPondWaterColor();
-        waterColour.Color = $"{fishTypeWaterColour.R} {fishTypeWaterColour.G} {fishTypeWaterColour.B}";
-        waterColour.MinPopulation = 0;
-        waterColour.MinUnlockedPopulationGate = 0;
-        
-        newPondData.WaterColor = new() { waterColour };
-        pondData.Add(newPondData);
-    }
-    public void AppendLocationData(IDictionary<string, LocationData> locationSet)
-    {
-        foreach (string loc in this.locations)
-        {
-            SpawnFishData fishData = new SpawnFishData();
-            fishData.ItemId = $"(O){base.id}";
-            fishData.Chance = float.Parse($"0.{this.catchChance}"); 
-            fishData.MinFishingLevel = this.minFishingLevel;
-            fishData.MinDistanceFromShore = 2;
-            fishData.MaxDistanceFromShore = -1;
-            
-            string seasonsText = "";
-            foreach (Season season in seasons)
-            {
-                if (seasonsText != "") { seasonsText += " ";}
-                seasonsText += season.ToString();
-            }
-            
-            fishData.Condition = $"SEASON {seasonsText}";
-            
-            locationSet[loc].Fish.Add(fishData);
-        }
-    }
-}
-
-public class SeedObject : ModLoadObjects
-{
-    public SeedObject(int id, string name, string displayName, string description, int spriteIndex, int price, Dictionary<string, PrefType>? characterPreferences = null) : base(id,name,displayName,description,characterPreferences,"Basic",-74)
-    {
-        this.SpriteIndex = spriteIndex;
-        base.Price = price;
-    }
-}
-public class CropObject : ModLoadObjects
-{
-    private List<Season> growableSeasons;
-    private int phases;
-    private int daysPerPhase;
-    private string seedID;
-    private int growthSpriteRow;
-    private float harvestIncPerFarmLevel;
-    private int harvestAmount;
-    private HarvestMethod harvestMethod;
-    public CropObject(int harvestItemId, string name, string displayName, string description, string seedId, List<Season> growableSeasons, int daysPerPhase, int growthSpriteRow,
-        int spriteID, int price, int edibility, string colour, int category = -75, int harvestAmount = 1, float harvestIncPerFarmLevel = 0, Dictionary<string,PrefType>? characterPreferences = null, HarvestMethod harvestMethod = HarvestMethod.Grab)
-    : base(harvestItemId,name,displayName,description,characterPreferences,"Basic",category)
-    {
-        this.SpriteIndex = spriteID;
-        this.seedID = seedId;
-        this.growableSeasons = growableSeasons;
-        this.daysPerPhase = daysPerPhase;
-        this.harvestIncPerFarmLevel = harvestIncPerFarmLevel;
-        this.harvestMethod = harvestMethod;
-        this.growthSpriteRow = growthSpriteRow + (growthSpriteRow % 2);
-        
-        base.ContextTags = new() {colour};
-        this.harvestAmount = harvestAmount;
-        base.Price = price;
-        base.Edibility = edibility;
-    }
-
-    public void AppendCropData(IDictionary<string,CropData> cropDict)
-    {
-        CropData cropInfo = new CropData();
-        cropInfo.Texture = "Mods.RunescapeSpellbook.Assets.modplants";
-        cropInfo.SpriteIndex = growthSpriteRow;
-        cropInfo.Seasons = growableSeasons;
-        cropInfo.DaysInPhase = new() { daysPerPhase, daysPerPhase, daysPerPhase, daysPerPhase};
-        cropInfo.HarvestItemId = $"(O){base.id}";
-        cropInfo.HarvestMaxIncreasePerFarmingLevel = harvestIncPerFarmLevel;
-        cropInfo.HarvestMethod = this.harvestMethod;
-        cropInfo.HarvestMinStack = harvestAmount;
-        cropDict[this.seedID] = cropInfo;
-    }
-}
-
-public abstract class LoadableText
-{
-    public string id;
-    public List<string> contents;
-    public LoadableText()
-    {
-    }
-
-    public LoadableText(string id, List<string> contents)
-    {
-        this.id = id;
-        this.contents = contents;
-    }
-    
-    public LoadableText(string id, string contents)
-    {
-        this.id = id;
-        this.contents = new(){contents};
-    }
-}
-
-public class LoadableMail : LoadableText
-{
-    public LoadableMail(int day, Season season, int reqYear, string contents) : base(
-        $"{season.ToString().ToLower()}_{day}_{reqYear}",contents) { }
-    public LoadableMail(string mailID, string contents) : base(mailID, contents) { }
-}
-
-public class LoadableSecret : LoadableText
-{
-    public LoadableSecret(int id, string contents) : base(id.ToString(), contents){}
-}
-
-public abstract class LoadableTV : LoadableText
-{
-    protected abstract string introText { get; }
-    public abstract string channelName { get; }
-    
-    public int day;
-    public Season season;
-    public int firstYear;
-
-    public LoadableTV(int channelID, int day, Season season, int firstYear, List<string> contents)
-    {
-        base.id = $"{channelID}";
-        base.contents = CreateContentsWithIntro(contents);
-        this.day = day;
-        this.season = season;
-        this.firstYear = firstYear;
-    }
-
-    protected List<string> CreateContentsWithIntro(List<string> contents)
-    {
-        List<string> result = new() { introText };
-        result.AddRange(contents);
-        return result;
-    }
-}
-
-public class Gobcast : LoadableTV
-{
-    private static readonly string staticIntroText = "Hello! This My Goblin My Goblin and also Grubfoot. Me General Bentnoze. Me joined by General Wartface and also Grubfoot. "+
-                                                     "We solve goblin problems. You send us problems. Grubfoot! Get problem for today."; 
-    protected override string introText => staticIntroText;
-    
-    private static readonly string staticChannelName = "My Goblin My Goblin and also Grubfoot"; 
-    public override string channelName => staticChannelName;
-    
-    private static int channelID = 429;
-    public Gobcast(int day, Season season, int firstYear, List<string> contents) :
-        base(channelID,day, season, firstYear, contents) { }
-}
-public class PerkData
-{
-    public int perkID;
-    public string perkName;
-    public string perkDisplayName;
-    public string perkDescription;
-    public string perkDescriptionLine2;
-    public PerkData(int perkID, string perkName, string perkDisplayName, string perkDescription, string perkDescriptionLine2 = "")
-    {
-        this.perkID = perkID;
-        this.perkName = perkName;
-        this.perkDisplayName = perkDisplayName;
-        this.perkDescription = perkDescription;
-        this.perkDescriptionLine2 = perkDescriptionLine2;
-    }
-
-    public bool HasPerk(Farmer farmer)
-    {
-        return ModAssets.HasPerk(farmer, this.perkID);
-    }
-}
-
-public class ShopListings
-{
-    public readonly ShopItemData itemData;
-    public readonly int insertIndex;
-    public ShopListings(string tradeID, string qualifiedID, int price,int newInsertIndex = 0, int minStack = -1, int maxstack = -1, string condition = "",
-        int toolUpgradeLevel = -1)
-    {
-        itemData = new ShopItemData();
-        itemData.Id = qualifiedID;
-        itemData.ItemId = qualifiedID;
-        itemData.Price = price;
-        itemData.MinStack = minStack;
-        itemData.MaxStack = maxstack;
-        itemData.Condition = condition == "" ? null : condition;
-        itemData.ToolUpgradeLevel = toolUpgradeLevel;
-        insertIndex = newInsertIndex;
-    }
-
-    public ShopListings(string tradeID, string qualifiedID,string tradeItemID, int tradeAmount,int newInsertIndex = 0, int minStack = -1, int maxStack = -1, string condition = "")
-    {
-        itemData = new ShopItemData();
-        itemData.Id = tradeID;
-        itemData.ItemId = qualifiedID;
-        itemData.Price = -1;
-        itemData.MinStack = minStack;
-        itemData.MaxStack = maxStack;
-        itemData.Condition = condition == "" ? null : condition;
-        itemData.ToolUpgradeLevel = -1;
-        itemData.TradeItemId = tradeItemID;
-        itemData.TradeItemAmount = tradeAmount;
-        insertIndex = newInsertIndex;
-    }
-}
-
 public static class ModAssets
 {
     public static Texture2D extraTextures; //Includes spells + basic icons
@@ -723,10 +230,18 @@ public static class ModAssets
         )},
         {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. Takes 12 days to mature.",36,50)},
         {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature.",
-            "4374",new(){Season.Fall},3,0,37,150,-50,"color_brown",-75,1,0.25f) },
+            "4374",new(){Season.Fall},3,0,37,110,-50,"color_green",-75,1,0.25f) },
         {4376, new SeedObject(4376,"Lantadyme Seed","Lantadyme Seed","Plant these in the winter. Takes 12 days to mature.",38,50)},
         {4377,new CropObject(4377,"Lantadyme","Lantadyme","A herb that is said to resemble eyes when in bloom",
-            "4376",new(){Season.Winter},3,1,39,350,-50,"color_blue",-75,1,0.25f) },
+            "4376",new(){Season.Winter},3,1,39,130,-50,"color_blue",-75,1,0.25f) },
+        {4378, new PotionObject(4378,"Guthix Rest","Guthix Rest","A relaxing cup of tea that restores some health. Can heal over your maximum health.",40,350,0.3f,0.15f,"4375",5000)},
+        {4379, new PotionObject(4379,"Saradomin Brew","Saradomin Brew","A relaxing cup of tea that restores a lot of health. Can heal over your maximum health.",44,500,0.6f,0.25f,"4377",6000)},
+        {4380, new PotionObject(4380,"Harralander Dye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"4375",60,"colour_green")},
+        {4381, new PotionObject(4381,"Lantadyme Dye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"4377",60,"color_dark_blue")},
+        //{4382, new PotionObject(4382,"Compost Potion","Compost Potion","UNUSED",42,80,"4375 1 382 3")},
+        {4383, new PotionObject(4383,"Hunter Potion","Hunter Potion","Increases Fishing Prowess",43,80,"4375 1 881 3")},
+        {4384, new PotionObject(4384,"Battlemage Potion","Battlemage Potion","Increases Magical Damage",46,160,"4377 1 90 3")},
+        {4385, new PotionObject(4385,"Super Restore","Super Restore","Increases Max Energy Significantly",47,160,"4377 1 -5 3")},
     };
     
     //These are custom melee weapons that use 
@@ -1038,8 +553,11 @@ public static class ModAssets
         }},
         {"Sandy", new()
         {
-            new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"YEAR 2"),
-            new ShopListings("Seed_Lantadyme","(O)4376",300,5,-1,-1,"YEAR 2"), //, PLAYER_HAS_SEEN_EVENT Current RS.0
+            new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
+            new ShopListings("Seed_Lantadyme","(O)4376",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
+            new ShopListings("Recipe_Hunter","(O)4383",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
+            new ShopListings("Recipe_Battlemage","(O)4384",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+            new ShopListings("Recipe_SuperRestore","(O)4385",6000,8,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
         }}
     };
     
@@ -1452,13 +970,16 @@ public static class ModAssets
 public class PlayerLocalData
 {
     public int selectedSpellID;
+    public int bonusHealth;
     public PlayerLocalData()
     {
         selectedSpellID = -1;
+        bonusHealth = 0;
     }
     public void Reset()
     {
         selectedSpellID = -1;
+        bonusHealth = 0;
     }
     
 }
