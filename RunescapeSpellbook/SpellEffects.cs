@@ -385,7 +385,7 @@ public class SpellEffects : BaseSpellEffects
     {
         PlayAnimation(() =>
         {
-            Game1.player.applyBuff("429");
+            Game1.player.applyBuff("RS.Charge");
 
         }, "RunescapeSpellbook.Charge", 800,animOffset);
         
@@ -396,7 +396,7 @@ public class SpellEffects : BaseSpellEffects
     {
         PlayAnimation(() =>
         {
-            Game1.player.applyBuff("430");
+            Game1.player.applyBuff("RS.DarkLure");
 
         }, "RunescapeSpellbook.DarkLure", 800,animOffset);
         

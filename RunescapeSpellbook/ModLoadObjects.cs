@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Reflection;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
@@ -20,17 +21,18 @@ public static class ModAssets
     
     public static Dictionary<int,ModLoadObjects> modItems = new(){
         {4290,new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object.",-999)},
-        {4291,new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes",-429)},
+        {4291,new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes",-429,
+            new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral}})},
         {4292,new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",-429,
-            new(){{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
+            new(){{"Emily",PrefType.Neutral},{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
         {4293,new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",-429,
-            new(){{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
+            new(){{"Emily",PrefType.Neutral},{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
         {4294,new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",-429,
-            new(){{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
+            new(){{"Emily",PrefType.Neutral},{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
         {4295,new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",-431,
-            new(){{"Wizard",PrefType.Like}})},
+            new(){{"Emily",PrefType.Neutral},{"Wizard",PrefType.Like}})},
         {4296,new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",-431,
-            new(){{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
+            new(){{"Emily",PrefType.Neutral},{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
         {4297,new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",-431,
             new(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
         {4298,new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",-431,
@@ -151,7 +153,7 @@ public static class ModAssets
                 {5,new ItemDrop(4294,10,15,0.3)},
                 {6,new ItemDrop(4293,10,15,0.2)},
                 {0,new ItemDrop(812,1,1,1.0)}
-            }
+            },new(){{"Willy",PrefType.Neutral}}
             )},
         {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Traditionally associated with combat magic",33,60,1600,2300,new(){Season.Fall,Season.Winter,Season.Spring},"rainy",new()
             { "Beach" },4,5,60,50,3,Color.NavajoWhite,"color_sand",25,40,
@@ -176,7 +178,7 @@ public static class ModAssets
                 {7,new ItemDrop(4300,10,30,0.4)},
                 {3,new ItemDrop(4299,10,30,0.5)},
                 {0,new ItemDrop(812,1,1,1.0)}
-            }
+            },new(){{"Willy",PrefType.Neutral}}
         )},
         {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Traditionally associated with catalytic magic",34,75,1200,1800,new(){Season.Summer},"sunny",new()
                 { "Beach" },6,6,100,70,4,Color.RoyalBlue,"color_red",118,216,
@@ -201,7 +203,7 @@ public static class ModAssets
                 {6,new ItemDrop(4297,3,5,0.3)},
                 {5,new ItemDrop(4298,3,5,0.3)},
                 {0,new ItemDrop(4296,3,5,1.0)},
-            }
+            },new(){{"Willy",PrefType.Like}}
         )},
         {4373,new FishObject(4373,"Fish_Sword","Swordfish","A predatory fish with a flat sword-like pointed bill",35,95,2000,2600,new(){Season.Spring,Season.Summer,Season.Fall,Season.Winter},"both",new()
                 { "IslandSouth","IslandWest","IslandSouthEast" },3,8,280,30,4,Color.HotPink,"color_pink",100,130,
@@ -226,7 +228,7 @@ public static class ModAssets
                 {4,new ItemDrop(4300,10,15,0.6)},
                 {2,new ItemDrop(773,1,3,0.5)},
                 {0,new ItemDrop(812,1,1,1.0)},
-            }
+            },new(){{"Willy",PrefType.Love}}
         )},
         {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. Takes 12 days to mature.",36,50)},
         {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature.",
@@ -234,14 +236,18 @@ public static class ModAssets
         {4376, new SeedObject(4376,"Lantadyme Seed","Lantadyme Seed","Plant these in the winter. Takes 12 days to mature.",38,50)},
         {4377,new CropObject(4377,"Lantadyme","Lantadyme","A herb that is said to resemble eyes when in bloom",
             "4376",new(){Season.Winter},3,1,39,130,-50,"color_blue",-75,1,0.25f) },
-        {4378, new PotionObject(4378,"Guthix Rest","Guthix Rest","A relaxing cup of tea that restores some health. Can heal over your maximum health.",40,350,0.3f,0.15f,"4375",5000)},
-        {4379, new PotionObject(4379,"Saradomin Brew","Saradomin Brew","A relaxing cup of tea that restores a lot of health. Can heal over your maximum health.",44,500,0.6f,0.25f,"4377",6000)},
-        {4380, new PotionObject(4380,"Harralander Dye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"4375",60,"colour_green")},
-        {4381, new PotionObject(4381,"Lantadyme Dye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"4377",60,"color_dark_blue")},
-        //{4382, new PotionObject(4382,"Compost Potion","Compost Potion","UNUSED",42,80,"4375 1 382 3")},
-        //{4383, new PotionObject(4383,"Hunter Potion","Hunter Potion","Increases Fishing Prowess",43,80,"4375 1 881 3",new(){"431"},100)},
-        //{4384, new PotionObject(4384,"Battlemage Potion","Battlemage Potion","Increases Magical Damage",46,160,"4377 1 90 3",new(){"431"},100)},
-        //{4385, new PotionObject(4385,"Super Restore","Super Restore","Increases Max Energy Significantly",47,160,"4377 1 -5 3",new(){"431"},100)},
+        {4378, new PotionObject(4378,"Guthix Rest","Guthix Rest","A relaxing cup of tea that restores some health. Can heal over your maximum health.",40,350,0.3f,0.15f,"4375",5000,
+            new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
+        {4379, new PotionObject(4379,"Saradomin Brew","Saradomin Brew","A relaxing cup of tea that restores a lot of health. Can heal over your maximum health.",44,500,0.6f,0.25f,"4377",6000,
+            new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
+        {4380, new PotionObject(4380,"Harralander Dye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"4375",4000,"colour_green",
+            new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Leah",PrefType.Like}})},
+        {4381, new PotionObject(4381,"Lantadyme Dye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"4377",4000,"color_dark_blue",
+            new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Sebastian",PrefType.Love},{"Leah",PrefType.Like}})},
+        {4382, new PotionObject(4382,"Hunter Potion","Hunter Potion","A potion that imbues the user with the power of a hunter. Adds a second smaller bar to fishing that gives 1.5x progress",43,150,"4375 1 300 1 881 5",new(){"RS.Hunters"},
+            new(){{"Willy",PrefType.Like},{"Linus",PrefType.Like}})},
+        {4383, new PotionObject(4383,"Battlemage Potion","Battlemage Potion","A potion that imbues the user with the power of a battlemage. Combat spells have a 10% chance of costing no runes. Spells cast with no cost grant no experience.",46,160,"4377 1 807 1 90 3",new(){"RS.Battlemage"},
+            new(){{"Wizard",PrefType.Love}})},
     };
     
     //These are custom melee weapons that use 
@@ -326,7 +332,7 @@ public static class ModAssets
             "Convert any green gems into explosive poisonous ammo for the slingshot. On hitting an enemy, poison spreads to nearby enemies. Poison cannot finish off enemies.",2,"EnchantBolt"),
         
         new BuffSpell(13,"Buff_DarkLure","Dark Lure","Summons more enemies, and makes them prioritise you over other farmers for 3 minutes",6,
-            new() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("430")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
+            new() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("RS.DarkLure")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
         
         new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",0,
             new() { {4299, 1},{4291,1}}, 1,40,15,0,Color.White,"WindStrike"),
@@ -344,7 +350,7 @@ public static class ModAssets
             new() { {4300, 2},{4291,3},{4293,4}},5, 120,15,2,Color.OrangeRed,"FireWave"),
         
         new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 60 seconds",7,
-            new() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("429")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
+            new() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("RS.Charge")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
             new() { {4300, 2},{4298,2},{4293,4}},6, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
@@ -555,9 +561,8 @@ public static class ModAssets
         {
             new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
             new ShopListings("Seed_Lantadyme","(O)4376",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
-            //new ShopListings("Recipe_Hunter","(O)4383",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
-            //new ShopListings("Recipe_Battlemage","(O)4384",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
-            //new ShopListings("Recipe_SuperRestore","(O)4385",6000,8,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+            new ShopListings("Recipe_Hunter","(O)4382",8000,6,-1,-1,"YEAR 2",true),
+            new ShopListings("Recipe_Battlemage","(O)4383",12000,7,-1,-1,"YEAR 2",true),
         }}
     };
     
@@ -780,16 +785,31 @@ public static class ModAssets
             }
         }
     };
+
+    public static List<CustomBuff> loadableBuffs = new()
+    {
+        new CustomBuff("RS.Charge", "Charge", "Combat spells will produce extra projectiles", 60_000, 0),
+        new CustomBuff("RS.DarkLure", "Dark lure", "Spawns more monsters and makes them aggressive towards you", 180_000, 1),
+        new CustomBuff("RS.Hunters", "Hunter's Call", "Second bar while fishing which provides 1.5x progress", 300_000, 2),
+        new CustomBuff("RS.Battlemage", "Battlemage's Spark", "Combat spells have a 10% chance of not costing any runes", 120_000, 3),
+    };
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)
     {
         PerkData? perk = perks.FirstOrDefault(x => x.perkName == perkName);
         return perk == null ? false : perk.HasPerk(farmer);
     }
+    
+    private static MethodInfo cachedBroadcastMethod;
+    private static MethodInfo cachedGlobalChatMethod;
     public static void Load(IModHelper helper)
     {
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
         animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
+        
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
+        cachedBroadcastMethod = multiplayer.GetType().GetMethod("broadcastSprites", new[] { typeof(GameLocation), typeof(TemporaryAnimatedSprite[]) });
+        cachedGlobalChatMethod = multiplayer.GetType().GetMethod("globalChatInfoMessage", new[] { typeof(string), typeof(string[]) });
+        
         localFarmerData = new PlayerLocalData();
 
         infiniteRuneReferences = new();
@@ -809,20 +829,13 @@ public static class ModAssets
 
     public static void BroadcastSprite(GameLocation location, TemporaryAnimatedSprite sprite)
     {
-        var method = multiplayer.GetType().GetMethod("broadcastSprites", 
-            new[] { typeof(GameLocation), typeof(TemporaryAnimatedSprite[]) });
-        
         var spriteArray = new TemporaryAnimatedSprite[] { sprite };
-        
-        method.Invoke(multiplayer, new object[] { location, spriteArray });
+        cachedBroadcastMethod.Invoke(multiplayer, new object[] { location, spriteArray });
     }
     
     public static void GlobalChatMessage(string messageKey, params string[] args)
     {
-        var method = multiplayer.GetType().GetMethod("globalChatInfoMessage", 
-            new[] { typeof(string), typeof(string[]) });
-        
-        method.Invoke(multiplayer, new object[] { messageKey, args });
+        cachedGlobalChatMethod.Invoke(multiplayer, new object[] { messageKey, args });
     }
 
     public static List<Farmer> GetFarmers()

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.GameData.Buffs;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
@@ -53,7 +54,7 @@ public class ModLoadObjects : ObjectData
         base.DisplayName = displayName;
         base.Description = description;
         base.Type = type;
-        base.Texture = "Mods.RunescapeSpellbook.Assets.modsprites";
+        base.Texture = "Mods.RunescapeSpellbook.Assets.itemsprites";
         base.SpriteIndex = id - 4290;
         base.Category = category;
         base.ExcludeFromRandomSale = true;
@@ -222,8 +223,8 @@ public class FishObject : ModLoadObjects
     
     public FishObject(int id, string name,string displayName, string description, int spriteID, int dartChance, int minDayTime, 
         int maxDayTime, List<Season> seasons, string weather, List<string> locations, int catchChance, int minFishingLevel, int price, int edibility, int spawnTime,
-        Color waterColour, string roeColour, int minLength, int maxLength, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards)
-        : base(id, name, displayName, description,null,"Basic",-4)
+        Color waterColour, string roeColour, int minLength, int maxLength, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards, Dictionary<string,PrefType> characterPrefs = null)
+        : base(id, name, displayName, description,characterPrefs,"Basic",-4)
     {
         this.dartChance = dartChance;
         this.minDayTime = minDayTime;
@@ -409,7 +410,7 @@ public class PotionObject : ModLoadObjects
     }
     
     //Cooking (Usable)
-    public PotionObject(int id, string name, string displayName, string description, int spriteIndex, int price, string cookingRecipe, List<string> buffs, int duration, Dictionary<string, PrefType>? characterPreferences = null) :
+    public PotionObject(int id, string name, string displayName, string description, int spriteIndex, int price, string cookingRecipe, List<string> buffs, Dictionary<string, PrefType>? characterPreferences = null) :
         base(id,name,displayName,description,characterPreferences,"Basic",-7)
     {
         this.craftType = 0;
@@ -425,11 +426,7 @@ public class PotionObject : ModLoadObjects
             foreach (string buff in buffs)
             {
                 ObjectBuffData newBuff = new ObjectBuffData();
-                newBuff.Id = "Food";
                 newBuff.BuffId = buff;
-                newBuff.Duration = duration;
-                newBuff.IconTexture = "Mods.RunescapeSpellbook.Assets.modsprites";
-                newBuff.IconSpriteIndex = spriteIndex;
                 base.Buffs.Add(newBuff);
             }
         }
@@ -588,3 +585,33 @@ public class ShopListings
         insertIndex = newInsertIndex;
     }
 }
+
+public class CustomBuff
+{
+    private string buffID;
+    private string displayName;
+    private string description;
+    private int duration;
+    private int spriteIndex;
+
+    public CustomBuff(string buffId, string displayName, string description, int duration, int spriteIndex)
+    {
+        this.buffID = buffId;
+        this.displayName = displayName;
+        this.description = description;
+        this.duration = duration;
+        this.spriteIndex = spriteIndex;
+    }
+
+    public void AppendBuff(IDictionary<string, BuffData> buffDict)
+    {
+        BuffData buffInfo = new BuffData();
+        buffInfo.DisplayName = displayName;
+        buffInfo.Description = description;
+        buffInfo.Duration = duration;
+        buffInfo.IconTexture = "Mods.RunescapeSpellbook.Assets.buffsprites";
+        buffInfo.IconSpriteIndex = spriteIndex;
+        buffDict.Add(this.buffID,buffInfo);
+    }
+}
+

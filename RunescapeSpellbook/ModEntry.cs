@@ -7,9 +7,9 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
-using StardewValley.Buffs;
 using StardewValley.Extensions;
 using StardewValley.GameData;
+using StardewValley.GameData.Buffs;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
@@ -79,7 +79,7 @@ namespace RunescapeSpellbook
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modsprites"))
+            if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.itemsprites"))
             {
                 e.LoadFromModFile<Texture2D>("Assets/itemsprites", AssetLoadPriority.Medium);
             }
@@ -92,6 +92,11 @@ namespace RunescapeSpellbook
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modplants"))
             {
                 e.LoadFromModFile<Texture2D>("Assets/modplants", AssetLoadPriority.Medium);
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.buffsprites"))
+            {
+                e.LoadFromModFile<Texture2D>("Assets/buffsprites", AssetLoadPriority.Medium);
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Data/AudioChanges"))
@@ -202,6 +207,20 @@ namespace RunescapeSpellbook
                     }
                 );
             }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Buffs"))
+            {
+                e.Edit(asset =>
+                    {
+                        var buffDict = asset.AsDictionary<string, BuffData>().Data;
+                        foreach (CustomBuff newBuff in ModAssets.loadableBuffs)
+                        {
+                            newBuff.AppendBuff(buffDict);
+                        }
+                    }
+                );
+            }
+
             
             if (e.NameWithoutLocale.IsEquivalentTo("Data/FishPondData"))
             {
@@ -591,76 +610,93 @@ namespace RunescapeSpellbook
             }
         }
         
-        /*
-        [HarmonyPatch(typeof(BobberBar), "update")]
-        [HarmonyPatch(new Type[] { typeof(GameTime)})]
-        public class BobberUpdatePatcher
+        [HarmonyPatch(typeof(BobberBar), MethodType.Constructor)]
+        [HarmonyPatch(new Type[] { typeof(string), typeof(float),typeof(bool),typeof(List<string>),typeof(string),typeof(bool),typeof(string),typeof(bool)})]
+        public class BobberConstructPatcher
         {
-            public static void Postfix(ref BobberBar __instance, GameTime time)
+            public static void Postfix(ref BobberBar __instance, string whichFish, float fishSize, bool treasure, List<string> bobbers, string setFlagOnCatch, bool isBossFish, string baitID = "", bool goldenTreasure = false)
             {
-                float middleZoneStart = __instance.bobberBarPos + (__instance.bobberBarHeight * 0.35f);
-                float middleZoneEnd = __instance.bobberBarPos + (__instance.bobberBarHeight * 0.65f);
-            
-                bool bobberInMiddleZone = (__instance.bobberPosition + 12f) >= (middleZoneStart - 32f) && 
-                                          (__instance.bobberPosition - 16f) <= (middleZoneEnd - 32f);
-            
-                if (bobberInMiddleZone)
+                if (Game1.player.hasBuff("RS.Hunters"))
                 {
-                    __instance.distanceFromCatching += 0.001f;
+                    __instance.bobbers.Add("RS.Hunters");
                 }
             }
         }
-        
-        [HarmonyPatch(typeof(BobberBar), "draw")]
-        [HarmonyPatch(new Type[] { typeof(SpriteBatch)})]
-        public class BobberDrawPatcher
-        {
-            public static void Postfix(ref BobberBar __instance, SpriteBatch b)
-            {
-                if (__instance.scale == 1f && Game1.player.hasBuff("431"))
-                {
-                    Game1.StartWorldDrawInUI(b);
-            
-                    int middleZoneHeight = (int)(__instance.bobberBarHeight * 0.3f);
-                    int middleZoneStart = (int)(__instance.bobberBarHeight * 0.35f); 
 
-                    Color middleZoneColor = Color.Red;
-            
-                    // Calculate scale to match middle zone height
-                    float scaleMultiplier = (float)middleZoneHeight / (9 * 4f);
-                    float finalScale = 4f * scaleMultiplier;
-            
-                    // Position at the top-left of where we want the bar to start
-                    // When rotated -90 degrees, the bar will extend downward from this point
-                    Vector2 targetPosition = new Vector2(
-                        __instance.xPositionOnScreen + 64 - 20, // Left of the middle zone
-                        __instance.yPositionOnScreen + 12 + (int)__instance.bobberBarPos + middleZoneStart // Top of middle zone
-                    ) + __instance.barShake + __instance.everythingShake;
-            
-                    // Set origin to top-right (9, 0) so when rotated -90 degrees, 
-                    // the top-right becomes the top-left of the vertical bar
-                    Vector2 origin = new Vector2(9, 0);
-            
-                    // Rotate 90 degrees counter-clockwise
-                    float rotation = -(float)Math.PI / 2f;
-                
-                    b.Draw(Game1.mouseCursors, 
-                        targetPosition,
-                        new Rectangle(682, 2078, 9, 2), 
-                        middleZoneColor, 
-                        rotation,
-                        origin, 
-                        finalScale, 
-                        SpriteEffects.None, 
-                        0.1f);
-            
-                    Game1.EndWorldDrawInUI(b);
+        public static class BobberPatches
+        {
+
+            [HarmonyPatch(typeof(BobberBar), "update")]
+            [HarmonyPatch(new Type[] { typeof(GameTime) })]
+            public class BobberUpdatePatcher
+            {
+                public static void Postfix(ref BobberBar __instance, GameTime time)
+                {
+                    bool bobberInMiddleZone = IsBobberInsideMini(ref __instance, out int middleZoneCentre, out int middleZoneStart,
+                        out int middleZoneEnd, out int middleZoneHeight);
+                    
+                    if (__instance.bobberInBar && bobberInMiddleZone && __instance.distanceFromCatching < 1.0f &&
+                        __instance.bobbers.Contains("RS.Hunters"))
+                    {
+                        __instance.distanceFromCatching += 0.001f;
+                    }
                 }
             }
-        }
-        */
 
-        
+            [HarmonyPatch(typeof(BobberBar), "draw")]
+            [HarmonyPatch(new Type[] { typeof(SpriteBatch) })]
+            public class BobberDrawPatcher
+            {
+                public static void Postfix(ref BobberBar __instance, SpriteBatch b)
+                {
+                    if (__instance.scale == 1f && __instance.bobbers.Contains("RS.Hunters"))
+                    {
+                        Game1.StartWorldDrawInUI(b);
+
+                        bool bobberInMiddleZone = IsBobberInsideMini(ref __instance, out int middleZoneCentre, out int middleZoneStart,
+                            out int middleZoneEnd, out int middleZoneHeight);
+                        
+                        Vector2 targetPosition = new Vector2(
+                            __instance.xPositionOnScreen + (64 * __instance.scale - 12f),
+                            __instance.yPositionOnScreen + 12 + middleZoneStart
+                        ) + __instance.barShake + __instance.everythingShake;
+
+                        b.Draw(Game1.mouseCursors,
+                            targetPosition,
+                            new Rectangle(682, 2078, 9, 2),
+                            bobberInMiddleZone ? Color.Purple : Color.Red,
+                            -(float)Math.PI / 2f,
+                            new Vector2(9, 0),
+                            new Vector2(((float)middleZoneHeight) / 9f,6f),
+                            SpriteEffects.None,
+                            0.1f);
+                        Game1.EndWorldDrawInUI(b);
+                    }
+                }
+            }
+
+            private static readonly float zonePercent = 0.3f;
+            private static bool IsBobberInsideMini(ref BobberBar __instance, out int middleZoneCentre, out int middleZoneStart, out int middleZoneEnd, out int middleZoneHeight)
+            {
+                middleZoneCentre =
+                    (int)Math.Floor(__instance.bobberBarPos + (GetRandomPosition(ref __instance)));
+                middleZoneStart =
+                    middleZoneCentre - (int)Math.Floor((float)__instance.bobberBarHeight * (zonePercent / 2.0f));
+                middleZoneEnd =
+                    middleZoneCentre + (int)Math.Floor((float)__instance.bobberBarHeight * (zonePercent / 2.0f));
+                middleZoneHeight = middleZoneEnd - middleZoneStart;
+
+                return (__instance.bobberPosition + 4f) >= (middleZoneStart - 32f) &&
+                                          (__instance.bobberPosition - 4f) <= (middleZoneEnd - 32f);
+            }
+
+            private static int GetRandomPosition(ref BobberBar __instance)
+            {
+                float halfZone = __instance.bobberBarHeight * (zonePercent / 2.0f);
+                return (int)halfZone + (Game1.dayOfMonth * __instance.maxFishSize * (int)Math.Floor(Game1.player.stamina)) % (int)(__instance.bobberBarHeight - 2 * halfZone);
+            }
+        }
+
         [HarmonyPatch(typeof(Game1), "drawHUD")]
         public class FarmerHealthImage
         {
@@ -930,36 +966,6 @@ namespace RunescapeSpellbook
                 }
             }
         }
-        
-        //TODO we can replace this with modifications to Data/Buffs
-        
-        [HarmonyPatch(typeof(Buff), MethodType.Constructor)]
-        [HarmonyPatch(new Type[] { typeof(string),typeof(string),typeof(string),typeof(int),typeof(Texture2D),typeof(int),typeof(BuffEffects),typeof(bool),typeof(string),typeof(string) })]
-        public class BuffPatcher
-        {
-            public static void Postfix(Buff __instance,string id, string source = null, string displaySource = null, int duration = -1, Texture2D iconTexture = null, int iconSheetIndex = -1, BuffEffects effects = null, bool? isDebuff = null, string displayName = null, string description = null)
-            {
-                if (id == "429") //Charge buff
-                {
-                    __instance.displayName = "Charge";
-                    __instance.description = "Summons more shots for every combat spell";
-                    __instance.millisecondsDuration = 60000;
-                    __instance.glow = Color.White;
-                    __instance.iconTexture = ModAssets.extraTextures;
-                    __instance.iconSheetIndex = 3;
-                }
-                else if (id == "430") //Dark lure buff
-                {
-                    __instance.displayName = "Dark Lure";
-                    __instance.description = "Spawns more monsters, and makes them prioritise you over other farmers";
-                    __instance.millisecondsDuration = 180000;
-                    __instance.glow = Color.White;
-                    __instance.iconTexture = ModAssets.extraTextures;
-                    __instance.iconSheetIndex = 4;
-                }
-            }
-        }
-
 
         [HarmonyPatch(typeof(Farmer), "hasBuff")]
         [HarmonyPatch(new Type[] { typeof(string) })]
@@ -967,9 +973,9 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(ref bool __result, Farmer __instance, string id)
             {
-                if (id == "24" && !__result) //If we are searching for 24 - the monster musk bonus - and we do not find it, also check for 420 - the dark lure buff
+                if (id == "24") //If we are searching for 24 - the monster musk bonus - and we do not find it, also check for 420 - the dark lure buff
                 {
-                    __result = __instance.buffs.IsApplied("430");
+                    __result |= __instance.buffs.IsApplied("430");
                 }
             }
         }
@@ -1022,7 +1028,7 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(ref double __result, Monster __instance, Farmer f)
             {
-                if (f.hasBuff($"430")) //If we have dark lure, make the result extremely low for this player, so we can increase their priority
+                if (f.hasBuff($"RS.DarkLure")) //If we have dark lure, make the result extremely low for this player, so we can increase their priority
                 {
                     __result *= 0.1;
                 }
@@ -1665,11 +1671,8 @@ namespace RunescapeSpellbook
         
         private void DebugCommand(string command, string[] args)
         {
-            //if (HasNoWorldContextReady()){return;}
-
-            Crop x = new Crop();
-            Rectangle y = x.getSourceRect(2);
-            Monitor.Log($"x {y.X} y {y.Y} extx: {y.Width}, exty: {y.Height}");
+            if (HasNoWorldContextReady()){return;}
+            Game1.activeClickableMenu = new BobberBar("4372", 5, false, new(), "", false, "", false);
         }
         
         private void DebugPosition(string command, string[] args)

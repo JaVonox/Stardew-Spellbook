@@ -24,7 +24,7 @@ public class StaffWeaponData : WeaponData
         base.SpriteIndex = spriteIndex;
         
         base.Type = 429;
-        base.Texture = "Mods.RunescapeSpellbook.Assets.modsprites";
+        base.Texture = "Mods.RunescapeSpellbook.Assets.itemsprites";
         base.Knockback = 1.5f;
         base.CanBeLostOnDeath = false;
         
