@@ -561,8 +561,8 @@ public static class ModAssets
         {
             new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
             new ShopListings("Seed_Lantadyme","(O)4376",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
-            new ShopListings("Recipe_Hunter","(O)4382",8000,6,-1,-1,"YEAR 2",true),
-            new ShopListings("Recipe_Battlemage","(O)4383",12000,7,-1,-1,"YEAR 2",true),
+            new ShopListings("Recipe_Hunter","(O)4382",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
+            new ShopListings("Recipe_Battlemage","(O)4383",12000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
         }}
     };
     
