@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.GameData;
+using StardewValley.GameData.BigCraftables;
 using StardewValley.GameData.Buffs;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
@@ -165,19 +167,26 @@ public class TreasureObjects : ModLoadObjects
         return desiredChance / divisor;
     }
 }
+
 public class PackObject : TreasureObjects
 {
     public int packItem;
+    public int packBaseIncrease;
+    
+    public static readonly int PACK_BASE_MULT = 7;
+    public static readonly double[] PACK_CHANCES = {1.5,0.5,0.2};
+    public static readonly int[] PACK_TIERED_MULTIPLIERS = { 1, 2, 4, 5 };
     public PackObject(int id, string name, string displayName, string description, int spriteID, int packItem, int packBaseIncrease = 0) :
         base(id, name, displayName, description, spriteID,null)
     {
         this.packItem = packItem;
-        List<ItemDrop> itemDrops = new()
+        this.packBaseIncrease = packBaseIncrease;
+        List<ItemDrop> itemDrops = GetItemRanges();
+
+        for (int i = 0; i < PACK_CHANCES.Length;i++)
         {
-            new ItemDrop(packItem, 7 + packBaseIncrease , 12 + packBaseIncrease, 1.5),
-            new ItemDrop(packItem, 13 + packBaseIncrease, 23 + packBaseIncrease, 0.5),
-            new ItemDrop(packItem, 25 + packBaseIncrease, 35 + packBaseIncrease, 0.25),
-        };
+            itemDrops.Add( new ItemDrop(packItem,(PACK_BASE_MULT * (PACK_TIERED_MULTIPLIERS[i])) + this.packBaseIncrease,(PACK_BASE_MULT * (PACK_TIERED_MULTIPLIERS[i+1])) + this.packBaseIncrease - 1,PACK_CHANCES[i]));
+        }
         
         base.SpriteIndex = spriteID;
         List<ObjectGeodeDropData> objects = new();
@@ -202,6 +211,17 @@ public class PackObject : TreasureObjects
         
         base.GeodeDropsDefaultItems = false;
         base.GeodeDrops = objects;
+    }
+
+    public List<ItemDrop> GetItemRanges()
+    {
+        List<ItemDrop> itemDrops = new List<ItemDrop>();
+
+        for (int i = 0; i < PACK_CHANCES.Length;i++)
+        {
+            itemDrops.Add( new ItemDrop(packItem, (PACK_BASE_MULT * (PACK_TIERED_MULTIPLIERS[i])) + this.packBaseIncrease, ((PACK_BASE_MULT * (PACK_TIERED_MULTIPLIERS[i+1])) + this.packBaseIncrease - 1),PACK_CHANCES[i]));
+        }
+        return itemDrops;
     }
 }
 public class FishObject : ModLoadObjects
@@ -455,6 +475,116 @@ public class PotionObject : ModLoadObjects
     public void AddCookingOutput(IDictionary<string, string> cookingDict)
     {
         cookingDict[base.Name] = $"{this.creationString}/1 /{base.id}";
+    }
+}
+
+public class MachinesObject : BigCraftableData
+{
+    public string id;
+    private Dictionary<string, string> inToOut;
+    private int inputAmount;
+    private Func<string,List<ItemDrop>> amountReturnMethod;
+    private string? additionalItemRequired;
+    private string? failMessage;
+    private int returnRolls;
+    
+    public string? creationString;
+    public MachinesObject(string id, string name, string displayname, string description, int price, int spriteIndex, Dictionary<string,string> inToOut, int inputAmount, Func<string,List<ItemDrop>> amountReturnMethod, string craftingRecipe, int returnRolls = 1,string? additionalItemRequired = null, string? failMessage = "")
+    {
+        this.id = id;
+        base.Name = name;
+        base.DisplayName = displayname;
+        base.Description = description;
+        base.Price = price;
+        base.Texture = "Mods.RunescapeSpellbook.Assets.modmachines";
+        base.SpriteIndex = spriteIndex;
+        this.inToOut = inToOut;
+        this.inputAmount = inputAmount;
+        this.amountReturnMethod = amountReturnMethod;
+        this.additionalItemRequired = additionalItemRequired;
+        this.creationString = craftingRecipe;
+        this.failMessage = failMessage;
+        this.returnRolls = returnRolls;
+    }
+    
+    public void AddMachineRules(IDictionary<string,MachineData> machineDict)
+    {
+        MachineData targetMachineData = new MachineData();
+        targetMachineData.OutputRules = new List<MachineOutputRule>();
+        
+        foreach (KeyValuePair<string, string> processables in inToOut)
+        {
+            List<ItemDrop> itemRanges = (amountReturnMethod.Invoke(processables.Key)).OrderBy(x => x.chance).ToList(); //Get the item ranges ordered by chance lowest to highest
+            
+            MachineOutputRule nRule = new MachineOutputRule();
+            nRule.MinutesUntilReady = 10;
+            nRule.Id = $"RS_{this.id}_{processables.Key}";
+
+            MachineOutputTriggerRule nTrigRule = new MachineOutputTriggerRule();
+            nTrigRule.Id = $"RS_{this.id}_T_{processables.Key}";
+            nTrigRule.RequiredItemId = $"(O){processables.Key}";
+            nTrigRule.RequiredCount = inputAmount;
+
+            MachineItemOutput outItem = new MachineItemOutput();
+            outItem.Id = $"RS_{this.id}_T_{processables.Key}";
+            outItem.ItemId = $"(O){processables.Value}";
+            outItem.QualityModifierMode = QuantityModifier.QuantityModifierMode.Stack;
+            
+            List<List<float>> quantityRanges = new List<List<float>>();
+            for (int x = 0; x < itemRanges.Count; x++)
+            {
+                quantityRanges.Add(new List<float>());
+                for (int y = itemRanges[x].minAmount; y <= itemRanges[x].maxAmount;y++)
+                {
+                    quantityRanges[x].Add((float)y);
+                }
+            }
+            
+            List<QuantityModifier> quantModifiers = new List<QuantityModifier>();
+            for (int rollAmountIter = 0; rollAmountIter < this.returnRolls; rollAmountIter++)
+            {
+                double totalWeight = itemRanges.Sum(x => x.chance);
+                double cumulativeProb = 0;
+    
+                for (int i = 0; i < itemRanges.Count; i++)
+                {
+                    double prevCumulativeProb = cumulativeProb;
+                    cumulativeProb += itemRanges[i].chance / totalWeight;
+        
+                    QuantityModifier newModifier = new QuantityModifier();
+                    newModifier.Id = $"RS_{this.id}_T_{processables.Key}_{rollAmountIter}_{i}";
+                    newModifier.Modification = QuantityModifier.ModificationType.Add;
+                    
+                    newModifier.Condition = prevCumulativeProb > 0 
+                        ? $"SYNCED_RANDOM tick {rollAmountIter}_roll {cumulativeProb:F6}, !SYNCED_RANDOM tick {rollAmountIter}_roll {prevCumulativeProb:F6}"
+                        : $"SYNCED_RANDOM tick {rollAmountIter}_roll {cumulativeProb:F6}";
+                    newModifier.RandomAmount = quantityRanges[i];
+                    quantModifiers.Add(newModifier);
+
+                }
+            }
+
+            outItem.StackModifiers = quantModifiers;
+
+            nRule.Triggers = new List<MachineOutputTriggerRule>() { nTrigRule };
+            nRule.OutputItem = new List<MachineItemOutput>() { outItem };
+            targetMachineData.OutputRules.Add(nRule);
+        }
+
+        if (additionalItemRequired != null)
+        {
+            MachineItemAdditionalConsumedItems newAddItem = new MachineItemAdditionalConsumedItems();
+            newAddItem.ItemId = additionalItemRequired;
+            newAddItem.InvalidCountMessage = failMessage;
+            targetMachineData.AdditionalConsumedItems = new List<MachineItemAdditionalConsumedItems>(){newAddItem};
+        }
+        
+        machineDict.Add($"(BC){this.id}", targetMachineData);
+    }
+    
+    public void AddCraftingRecipe(IDictionary<string, string> craftingDict)
+    {
+        craftingDict[base.Name] = $"{this.creationString}/1 /{this.id}";
     }
 }
 public abstract class LoadableText

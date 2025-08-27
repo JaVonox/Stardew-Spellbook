@@ -68,13 +68,13 @@ public static class ModAssets
         {4360,new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. A blacksmith might be able to open it.",20,
             new()
             {
-                new ItemDrop(4295, 5, 12, 1),
+                new ItemDrop(4295, 10, 15, 1),
                 
-                new ItemDrop(4296, 7, 12, 1),
+                new ItemDrop(4296, 10, 15, 1),
                 
-                new ItemDrop(4297, 7, 12, 1),
+                new ItemDrop(4297, 10, 15, 1),
                 
-                new ItemDrop(4298, 7, 12, 1),
+                new ItemDrop(4298, 10, 15, 1),
                 
                 new ItemDrop(4299, 10, 15, 1),
                 new ItemDrop(4299, 16, 23, 0.5),
@@ -232,20 +232,22 @@ public static class ModAssets
         )},
         {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. Takes 12 days to mature.",36,50)},
         {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature.",
-            "4374",new(){Season.Fall},3,0,37,110,-50,"color_green",-75,1,0.25f) },
+            "4374",new(){Season.Fall},3,0,37,110,-50,"color_green",-75,1,0.25f,
+            new(){{"Emily",PrefType.Like}})},
         {4376, new SeedObject(4376,"Lantadyme Seed","Lantadyme Seed","Plant these in the winter. Takes 12 days to mature.",38,50)},
         {4377,new CropObject(4377,"Lantadyme","Lantadyme","A herb that is said to resemble eyes when in bloom",
-            "4376",new(){Season.Winter},3,1,39,130,-50,"color_blue",-75,1,0.25f) },
+            "4376",new(){Season.Winter},3,1,39,130,-50,"color_blue",-75,1,0.25f,
+            new(){{"Emily",PrefType.Love}})},
         {4378, new PotionObject(4378,"Guthix Rest","Guthix Rest","A relaxing cup of tea that restores some health. Can heal over your maximum health.",40,350,0.3f,0.15f,"4375",5000,
-            new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
+            new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Harvey",PrefType.Like},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
         {4379, new PotionObject(4379,"Saradomin Brew","Saradomin Brew","A relaxing cup of tea that restores a lot of health. Can heal over your maximum health.",44,500,0.6f,0.25f,"4377",6000,
-            new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
+            new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Harvey",PrefType.Like},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
         {4380, new PotionObject(4380,"Harralander Dye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"4375",4000,"colour_green",
             new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Leah",PrefType.Like}})},
         {4381, new PotionObject(4381,"Lantadyme Dye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"4377",4000,"color_dark_blue",
             new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Sebastian",PrefType.Love},{"Leah",PrefType.Like}})},
         {4382, new PotionObject(4382,"Hunter Potion","Hunter Potion","A potion that imbues the user with the power of a hunter. Adds a second smaller bar to fishing that gives 1.5x progress",43,150,"4375 1 300 1 881 5",new(){"RS.Hunters"},
-            new(){{"Willy",PrefType.Like},{"Linus",PrefType.Like}})},
+            new(){{"Willy",PrefType.Like},{"Linus",PrefType.Like},{"Penny",PrefType.Hate}})},
         {4383, new PotionObject(4383,"Battlemage Potion","Battlemage Potion","A potion that imbues the user with the power of a battlemage. Combat spells have a 10% chance of costing no runes. Spells cast with no cost grant no experience.",46,160,"4377 1 807 1 90 3",new(){"RS.Battlemage"},
             new(){{"Wizard",PrefType.Love}})},
     };
@@ -276,6 +278,22 @@ public static class ModAssets
             1.5f)
     };
 
+    //Machines
+    public static readonly MachinesObject[] machineItems =
+    {
+        new MachinesObject("RS0","RS_Shredder","Pack Shredder","Shreds three rune packs at once in exchange for coal",100,0,
+            new()
+            {
+                {"4364","4291"},
+                {"4365","4292"},
+                {"4366","4293"},
+                {"4367","4294"},
+                {"4368","4299"},
+                {"4369","4300"},
+            }, 3,new Func<string,List<ItemDrop>>((itemID)=>((PackObject)modItems[int.Parse(itemID)]).GetItemRanges()),"336 1 338 2 709 5",3,"(O)382","I don't have enough coal for this"
+            )
+    };
+    
     //This dictionary provides a quick reference for which weapons provide what rune
     public static Dictionary<int, List<string>> infiniteRuneReferences;
     
@@ -425,16 +443,14 @@ public static class ModAssets
             new ItemDrop(4368,1,0.3f),
         } },
         { "Ghost", new(){
-            new ItemDrop(4295,3,0.1f),
-            new ItemDrop(4297,2,0.05f),
-            new ItemDrop(4360,1,0.15f),
+            new ItemDrop(4360,2,0.35f),
         } },
         { "Frost Jelly", new(){
             new ItemDrop(4365,1,0.1f),
             new ItemDrop(4359,1,0.2f),
         } },
         { "Skeleton", new(){
-            new ItemDrop(4368,2,0.3f),
+            new ItemDrop(4368,1,0.3f),
             new ItemDrop(4369,1,0.02f),
             new ItemDrop(4360,1,0.05f),
             new ItemDrop(4361,1,0.08f),
@@ -452,6 +468,7 @@ public static class ModAssets
             new ItemDrop(4296,3,0.2f),
             new ItemDrop(4298,2,0.2f),
             new ItemDrop(4360,2,0.2f),
+            new ItemDrop(4361,1,0.02f),
         } },
         { "Metal Head", new(){
             new ItemDrop(4367,2,0.3f),
@@ -473,14 +490,12 @@ public static class ModAssets
         } },
         { "Serpent", new(){
             new ItemDrop(4364,2,0.25f),
-            new ItemDrop(4297,6,0.1f),
-            new ItemDrop(4361,1,0.1f),
             new ItemDrop(4368,2,0.1f),
+            new ItemDrop(4361,1,0.07f),
         } },
         { "Carbon Ghost", new(){
-            new ItemDrop(4295,4,0.3f),
-            new ItemDrop(4298,4,0.2f),
             new ItemDrop(4369,2,0.1f),
+            new ItemDrop(4360,2,0.35f),
         } },
         { "Iridium Crab", new(){
             new ItemDrop(4365,5,0.6f),
@@ -494,7 +509,6 @@ public static class ModAssets
         } },
         { "Mummy", new(){
             new ItemDrop(4367,2,0.2f),
-            new ItemDrop(4295,3,0.3f),
             new ItemDrop(4368,3,0.3f),
             new ItemDrop(4369,1,0.2f),
             new ItemDrop(4362,1,0.1f),
@@ -551,18 +565,22 @@ public static class ModAssets
     {
         {"AdventureShop", new()
         {
-            new ShopListings("Marlon_Battlestaff","(W)4351",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("RS_Marlon_Battlestaff","(W)4351",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }},
         {"DesertTrade", new()
         {
-            new ShopListings("Desert_AirRunes","(O)4291","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("RS_Desert_AirRunes","(O)4291","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }},
         {"Sandy", new()
         {
-            new ShopListings("Seed_Harralander","(O)4374",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
-            new ShopListings("Seed_Lantadyme","(O)4376",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
-            new ShopListings("Recipe_Hunter","(O)4382",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
-            new ShopListings("Recipe_Battlemage","(O)4383",12000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+            new ShopListings("RS_Seed_Harralander","(O)4374",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
+            new ShopListings("RS_Seed_Lantadyme","(O)4376",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
+            new ShopListings("RS_Recipe_Hunter","(O)4382",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
+            new ShopListings("RS_Recipe_Battlemage","(O)4383",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+        }},
+        {"Blacksmith", new()
+        {
+            new ShopListings("RS_Recipe_Shredder","(BC)RS0",2500,0,-1,-1,"",true),
         }}
     };
     

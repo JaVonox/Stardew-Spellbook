@@ -9,6 +9,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Extensions;
 using StardewValley.GameData;
+using StardewValley.GameData.BigCraftables;
 using StardewValley.GameData.Buffs;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
@@ -99,6 +100,11 @@ namespace RunescapeSpellbook
                 e.LoadFromModFile<Texture2D>("Assets/buffsprites", AssetLoadPriority.Medium);
             }
             
+            if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modmachines"))
+            {
+                e.LoadFromModFile<Texture2D>("Assets/modmachines", AssetLoadPriority.Medium);
+            }
+            
             if (e.NameWithoutLocale.IsEquivalentTo("Data/AudioChanges"))
             {
                 e.Edit(asset =>
@@ -167,11 +173,30 @@ namespace RunescapeSpellbook
                 );
             }
             
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/BigCraftables"))
+            {
+                e.Edit(asset =>
+                    {
+                        var machineCraftablesDict = asset.AsDictionary<string, BigCraftableData>().Data;
+                        
+                        foreach (MachinesObject machineItem in ModAssets.machineItems)
+                        {
+                            machineCraftablesDict.Add(machineItem.id,machineItem);
+                        }
+                    }
+                );
+            }
+            
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Machines"))
             {
                 e.Edit(asset =>
                     {
                         var machineDict = asset.AsDictionary<string, MachineData>().Data;
+                        
+                        foreach (MachinesObject machineItem in ModAssets.machineItems)
+                        {
+                            machineItem.AddMachineRules(machineDict);
+                        }
                         
                         foreach (PotionObject newKegItem in ModAssets.modItems.Where(x=>x.Value is PotionObject pot && pot.craftType != 0).Select(y=>y.Value).ToList())
                         {
@@ -185,11 +210,25 @@ namespace RunescapeSpellbook
             {
                 e.Edit(asset =>
                     {
-                        var cookingDict = asset.AsDictionary<string, String>().Data;
+                        var cookingDict = asset.AsDictionary<string, string>().Data;
                         
                         foreach (PotionObject newKegItem in ModAssets.modItems.Where(x=>x.Value is PotionObject pot && pot.craftType == 0).Select(y=>y.Value).ToList())
                         {
                             newKegItem.AddCookingOutput(cookingDict);
+                        }
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/CraftingRecipes"))
+            {
+                e.Edit(asset =>
+                    {
+                        var craftingRecipe = asset.AsDictionary<string, string>().Data;
+                        
+                        foreach (MachinesObject newKegItem in ModAssets.machineItems.Where(x=>x.creationString != null).ToList())
+                        {
+                            newKegItem.AddCraftingRecipe(craftingRecipe);
                         }
                     }
                 );
@@ -276,9 +315,9 @@ namespace RunescapeSpellbook
                             string mailKey = mail.id;
                             string mailVal = mail.contents[0];
                             
-                            while (true) //Loop until we get a valid assignment for mail
+                            try
                             {
-                                try
+                                while (true) //Loop until we get a valid assignment for mail
                                 {
                                     //This removes the mail if it overlaps with another mail - such as if a new mail is added on a date the mod uses or if a future update adds the same key
                                     if (mailDict.TryAdd(mailKey,mailVal))
@@ -299,11 +338,11 @@ namespace RunescapeSpellbook
                                         mailKey = mailDelim[0] + "_" + mailDelim[1] + "_" + newYear; //Adds mail to the same date next year. increments year until we get a valid value
                                     }
                                 }
-                                catch (Exception ex)
-                                {
-                                    Monitor.Log(ex.Message, LogLevel.Error); //reports mail error if the mail delim method failed. this should be rare, and only should occur with non-dated mail
-                                    break;
-                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Monitor.Log(ex.Message, LogLevel.Error); //reports mail error if the mail delim method failed. this should be rare, and only should occur with non-dated mail
+                                break;
                             }
                         }
                     }
@@ -408,11 +447,8 @@ namespace RunescapeSpellbook
 
                             preferencesDict[characterName] = characterPrefsStrings.Join(null, "/");
                         }
-                        
-                        
                     }
                 });
-
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Weapons"))
@@ -1058,7 +1094,6 @@ namespace RunescapeSpellbook
             }
         }
         
-        
         [HarmonyPatch(typeof(Slingshot), "canThisBeAttached")]
         [HarmonyPatch(new Type[] { typeof(StardewValley.Object),typeof(int) })]
         public class SlingshotAttachmentPatcher
@@ -1086,9 +1121,6 @@ namespace RunescapeSpellbook
                         case "(O)4302":
                             __result = 25;
                             break;
-                        default:
-                            __result = 1;
-                            break;
                     }
                 }
             }
@@ -1111,8 +1143,6 @@ namespace RunescapeSpellbook
                     case -431:
                         __result = "Catalytic Rune";
                         break;
-                    default:
-                        break;
                 } 
             }
         }
@@ -1133,8 +1163,6 @@ namespace RunescapeSpellbook
                         break;
                     case -431:
                         __result = new Color(114,34,28);
-                        break;
-                    default:
                         break;
                 } 
             }
@@ -1332,9 +1360,7 @@ namespace RunescapeSpellbook
                 {
                     return instructions;
                 }
-                
             }
-
             public static void ModifyChannelsList(List<Response> channels)
             {
                 foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
