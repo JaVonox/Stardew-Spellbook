@@ -410,7 +410,7 @@ namespace RunescapeSpellbook
                         }
                         else if (!characterName.Contains("Universal_")) //We only accept non universals for this so far
                         {
-                            Dictionary<int,PrefType> itemPreferences = 
+                            Dictionary<string,PrefType> itemPreferences = 
                                 ModAssets.modItems.Where(x=>x.Value.characterPreferences != null && x.Value.characterPreferences.Keys.Contains(characterName))
                                     .ToDictionary(i=>i.Value.id,j=> j.Value.characterPreferences[characterName]); //get a dictionary of gifts for this character with their preference
                             
@@ -418,7 +418,7 @@ namespace RunescapeSpellbook
                             
                             //If all treasures are the same for a treasureitem, then we consider it the same as gifting the item itself
                             //I.e. Fire rune packs will have the same gift value as a fire rune
-                            Dictionary<int, PrefType> treasureItems =
+                            Dictionary<string, PrefType> treasureItems =
                                 ModAssets.modItems.Where(x =>
                                     x.Value is PackObject pack && ModAssets.modItems.ContainsKey(pack.packItem) && ModAssets.modItems[pack.packItem].characterPreferences.ContainsKey(characterName))
                                     .ToDictionary(i=>i.Value.id,j=> ModAssets.modItems[((PackObject)j.Value).packItem].characterPreferences[characterName]);
@@ -431,7 +431,7 @@ namespace RunescapeSpellbook
                             string[] characterPrefsStrings = preferencesDict[characterName].Split('/'); //character preferences are delimited with / 
                             //The indexes always follow this format: 0 text 1 loveIDs 2 text 3 likeIDs 4 text 5 dislikeIDs 6 text 7 hateIDs 8 text 9 neutralIDs
                             
-                            foreach (KeyValuePair<int, PrefType> itemPref in itemPreferences)
+                            foreach (KeyValuePair<string, PrefType> itemPref in itemPreferences)
                             {
                                 int idToModify = itemPref.Value switch
                                 {
@@ -459,7 +459,7 @@ namespace RunescapeSpellbook
                     
                     foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
                     {
-                        weaponDict.Add(newWeapon.id.ToString(), newWeapon);
+                        weaponDict.Add(newWeapon.id, newWeapon);
                     }
                 });
 
@@ -555,9 +555,9 @@ namespace RunescapeSpellbook
             {
                 //Special geode blocking check now includes TreasureObjects, since those can output weapons. This prevents bugs with using geodes in the geode crusher.
                 //ContextTags could be used to do this as well, but it seems to cause errors too.
-                if (disallow_special_geodes && int.TryParse(item.ItemId, out int outID) && ModAssets.modItems.TryGetValue(outID, out ModLoadObjects modItem))
+                if (disallow_special_geodes && ModAssets.modItems.TryGetValue(item.ItemId, out ModLoadObjects modItem))
                 {
-                    if (outID != 4359 && outID != 4360 && modItem is TreasureObjects and not PackObject)
+                    if (item.ItemId != "Tofu.RunescapeSpellbook_TreasureElemental" && item.ItemId != "Tofu.RunescapeSpellbook_TreasureCatalytic" && modItem is TreasureObjects and not PackObject)
                     {
                         __result = false;
                         return false;
@@ -605,13 +605,13 @@ namespace RunescapeSpellbook
                     string consumedID = consumed.QualifiedItemId;
                     if (ModAssets.modItems.Any(x=> x.Value is PotionObject && consumedID == $"(O){x.Key}"))
                     {
-                        PotionObject pot = (PotionObject)ModAssets.modItems[int.Parse(consumed.ItemId)];
+                        PotionObject pot = (PotionObject)ModAssets.modItems[consumed.ItemId];
                         __instance.isEating = false;
                         __instance.tempFoodItemTextureName.Value = null;
                         __instance.completelyStopAnimatingOrDoingAction();
                         __instance.forceCanMove();
 
-                        if (consumedID == "(O)4378" || consumedID == "(O)4379")
+                        if (consumedID == "(O)Tofu.RunescapeSpellbook_PotGuthix" || consumedID == "(O)Tofu.RunescapeSpellbook_PotSara")
                         {
                             int addAmount = (int)Math.Floor((float)__instance.maxHealth * (pot.healPercent + ((float)__instance.itemToEat.Quality * pot.extraHealthPerQuality)));
                             int newTotal = __instance.health + addAmount;
@@ -875,7 +875,7 @@ namespace RunescapeSpellbook
                 if (__instance.type.Value == 429) //Staff type
                 {
                     StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-                    bool staffProvidesRune = staffWeaponData.providesRune != -1;
+                    bool staffProvidesRune = staffWeaponData.providesRune != "";
                     __result.Y += (staffWeaponData.projectileDamageModifier > 1.0f ? 48 : 0) + (staffProvidesRune ? 48 : 0); //Add to the size of the extra space to allow for extra staff damage symbol
                 }
             }
@@ -889,9 +889,8 @@ namespace RunescapeSpellbook
                 if (__instance.type.Value == 429) //Staff type
                 {
                     StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-                    int level = staffWeaponData.providesRune != -1 ? 10 : staffWeaponData.id - 4343;
                     
-                    __result = $"Level {level} Battlestaff";
+                    __result = $"Level {staffWeaponData.level} Battlestaff";
                 }
             }
         }
@@ -944,7 +943,7 @@ namespace RunescapeSpellbook
                         y += extraSize;
                     }
                     
-                    if (staffWeaponData.providesRune != -1)
+                    if (staffWeaponData.providesRune != "")
                     {
                         Utility.drawWithShadow(spriteBatch, ModAssets.extraTextures,
                             new Vector2(x + 16 + 4, y + 16 + 4), new Rectangle(26, 0, 10, 10), Color.White, 0f,
@@ -995,7 +994,7 @@ namespace RunescapeSpellbook
                         {
                             for (int i = 0; i < item.amount; i++)
                             {
-                                __instance.objectsToDrop.Add(item.itemID.ToString());
+                                __instance.objectsToDrop.Add(item.itemID);
                             }
                         }
                     }
@@ -1009,9 +1008,9 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(ref bool __result, Farmer __instance, string id)
             {
-                if (id == "24") //If we are searching for 24 - the monster musk bonus - and we do not find it, also check for 420 - the dark lure buff
+                if (id == "24") //If we are searching for 24 - the monster musk bonus - and we do not find it, also check for dark lure buff
                 {
-                    __result |= __instance.buffs.IsApplied("430");
+                    __result |= __instance.buffs.IsApplied("Tofu.RunescapeSpellbook_BuffDark");
                 }
             }
         }
@@ -1023,9 +1022,9 @@ namespace RunescapeSpellbook
             public static void Postfix(Farmer __instance,Item item, int countAdded, Item mergedIntoStack, bool hideHudNotification = false)
             {
                 //If any mod items are picked up for the first time we play a special animation
-                if (!__instance.hasOrWillReceiveMail("RSRunesFound") && int.TryParse(item.ItemId, out int itemId) && ModAssets.modItems.TryGetValue(itemId, out var modItem))
+                if (!__instance.hasOrWillReceiveMail("RSRunesFound") && ModAssets.modItems.TryGetValue(item.ItemId, out var modItem))
                 {
-                    if (modItem is PackObject || itemId == 4359 || itemId == 4360)
+                    if (modItem is PackObject || item.ItemId == "Tofu.RunescapeSpellbook_TreasureElemental" || item.ItemId == "Tofu.RunescapeSpellbook_TreasureCatalytic")
                     {
                         __instance.mailReceived.Add("RSRunesFound");
                         __instance.holdUpItemThenMessage(item, countAdded);
@@ -1041,9 +1040,9 @@ namespace RunescapeSpellbook
             public static bool Prefix(Farmer __instance,Farmer who, Item item, int countAdded)
             {
                 //If any mod items are picked up for the first time we play a special animation
-                if (int.TryParse(item.ItemId, out int itemId) && ModAssets.modItems.TryGetValue(itemId, out var modItem))
+                if (ModAssets.modItems.TryGetValue(item.ItemId, out var modItem))
                 {
-                    if (modItem is PackObject || itemId == 4359 || itemId == 4360)
+                    if (modItem is PackObject || item.ItemId == "Tofu.RunescapeSpellbook_TreasureElemental" || item.ItemId == "Tofu.RunescapeSpellbook_TreasureCatalytic")
                     {
                         Game1.drawObjectDialogue(new List<string>
                         {
@@ -1101,7 +1100,7 @@ namespace RunescapeSpellbook
             public static void Postfix(ref bool __result, StardewValley.Object o, int slot)
             {
                 //update result to check if the item is either of the extra ammos
-                __result = __result || o.QualifiedItemId == "(O)4301" || o.QualifiedItemId == "(O)4302";
+                __result = __result || ModAssets.modItems.Any(x=> o.ItemId == x.Key && x.Value is SlingshotItem);
             }
         }
         
@@ -1111,17 +1110,9 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(ref int __result, StardewValley.Object ammunition)
             {
-                if (__result == 1) //Append extra slingshot damages to the orb items
+                if (__result == 1 && ModAssets.modItems.TryGetValue(ammunition.ItemId, out ModLoadObjects objItem) && objItem is SlingshotItem ammo)
                 {
-                    switch (ammunition.QualifiedItemId)
-                    {
-                        case "(O)4301":
-                            __result = 15;
-                            break;
-                        case "(O)4302":
-                            __result = 25;
-                            break;
-                    }
+                    __result += ammo.extraDamage;
                 }
             }
         }
@@ -1174,7 +1165,7 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(Slingshot __instance, ref BasicProjectile.onCollisionBehavior __result, Object ammunition)
             {
-                if (ammunition.ItemId == "4302")
+                if (ModAssets.modItems.TryGetValue(ammunition.ItemId, out ModLoadObjects objItem) && objItem is SlingshotItem ammo && ammo.explodes)
                 {
                     __result = BasicProjectile.explodeOnImpact;
                 }
@@ -1187,7 +1178,7 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(Slingshot __instance, ref string __result, Object ammunition)
             {
-                if (ammunition.ItemId == "4302")
+                if (ModAssets.modItems.TryGetValue(ammunition.ItemId, out ModLoadObjects objItem) && objItem is SlingshotItem ammo && ammo.explodes)
                 {
                     __result = "explosion";
                 }
@@ -1203,17 +1194,17 @@ namespace RunescapeSpellbook
                 if (__instance.itemId != null && (__instance.damagesMonsters.Value && n is Monster))
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);
-                    if (__instance.itemId.ToString() == "(O)4301") //Fire Ammo
+
+                    if (ModAssets.modItems.TryGetValue(__instance.itemId.Value, out ModLoadObjects objItem) && objItem is SlingshotItem ammoItem)
                     {
-                        HitMonster(__instance,n as Monster,location,player,2);
+                        HitMonster(__instance, n as Monster, location, player, ammoItem.debuffType);
                         n.currentLocation.playSound("explosion", n.Tile, null);
-                        return false;
-                    }
-                    if (__instance.itemId.ToString() == "(O)4302") //Earth Ammo
-                    {
-                        n.currentLocation.explode(new Vector2(n.Tile.X, n.Tile.Y), 2, player);
-                        n.currentLocation.playSound("explosion", n.Tile, null);
-                        HitMonster(__instance,n as Monster,location,player,1);
+
+                        if (ammoItem.explodes) //Earth Ammo
+                        {
+                            n.currentLocation.explode(new Vector2(n.Tile.X, n.Tile.Y), 2, player);
+                        }
+
                         return false;
                     }
                 }
@@ -1557,87 +1548,57 @@ namespace RunescapeSpellbook
                 }
             }
         }
-        private void GrantElemRunes()
-        {
-            for (int i = 4291; i <= 4294; i++)
-            {
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                item.Stack = 255;
-                Game1.player.addItemToInventory(item);
-            }
-        }
         private void GrantRunes(string command, string[] args)
         {
             if(HasNoWorldContextReady()){return;}
             
             string runeReq = args.Length == 0 ? "default" : args[0].ToLower();
+
+            List<int> runeReqs;
             
             if (runeReq == "default")
             {
-                foreach (int id in ModAssets.modItems.Where(x => x.Value is RunesObjects && x.Key != 4290).Select(y=>y.Key))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{id}");
-                    item.Stack = 255;
-                    Game1.player.addItemToInventory(item);
-                }
+                runeReqs = new List<int>() { -429, -431, -430 };
             }
             else if (runeReq == "elemental" || runeReq == "elem")
             {
-                GrantElemRunes();
+                runeReqs = new List<int>() { -429 };
             }
             else if (runeReq == "catalytic" || runeReq == "cat" || runeReq == "cata")
             {
-                for (int i = 4295; i <= 4300; i++)
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.Stack = 255;
-                    Game1.player.addItemToInventory(item);
-                }
+                runeReqs = new List<int>() { -431, -430 };
             }
             else if (runeReq == "teleport" || runeReq == "tele")
             {
-                GrantElemRunes();
+                runeReqs = new List<int>() { -429};
                 
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"4295");
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneLaw");
                 item.Stack = 255;
                 Game1.player.addItemToInventory(item);
             }
             else if (runeReq == "utility" || runeReq == "util")
             {
-                GrantElemRunes();
-                
-                for (int i = 4296; i <= 4298; i++)
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.Stack = 255;
-                    Game1.player.addItemToInventory(item);
-                }
+                runeReqs = new List<int>() { -429,-431};
             }
             else if (runeReq == "combat" || runeReq == "comb")
             {
-                GrantElemRunes();
-                
-                for (int i = 4299; i <= 4300; i++)
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.Stack = 255;
-                    Game1.player.addItemToInventory(item);
-                }
+                runeReqs = new List<int>() { -429,-430};
             }
             else if (runeReq == "combat2" || runeReq == "com2" || runeReq == "comb2")
             {
-                GrantElemRunes();
+                runeReqs = new List<int>() { -429,-430};
                 
-                for (int i = 4297; i <= 4300; i++)
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{i}");
-                    item.Stack = 255;
-                    Game1.player.addItemToInventory(item);
-                }
+                StardewValley.Object cosmRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneCosmic");
+                cosmRune.Stack = 255;
+                Game1.player.addItemToInventory(cosmRune);
+                
+                StardewValley.Object astRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneAstral");
+                astRune.Stack = 255;
+                Game1.player.addItemToInventory(astRune);
             }
             else
             {
-                List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.Name.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
+                List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.DisplayName.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
                 if (matchList.Count == 0)
                 {
                     this.Monitor.Log($"Invalid rune set to grant {runeReq}",LogLevel.Error);
@@ -1649,7 +1610,14 @@ namespace RunescapeSpellbook
                     item.Stack = 255;
                     Game1.player.addItemToInventory(item);
                 }
+                return;
                 
+            }
+            foreach (string id in ModAssets.modItems.Where(x => runeReqs.Contains(x.Value.Category)).Select(y=>y.Key))
+            {
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O){id}");
+                item.Stack = 255;
+                Game1.player.addItemToInventory(item);
             }
             
             this.Monitor.Log($"Granted runes from set {runeReq}",LogLevel.Info);
@@ -1674,7 +1642,7 @@ namespace RunescapeSpellbook
 
             foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
             {
-                MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id.ToString());
+                MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id);
                 Game1.player.addItemToInventory(item);
             }
             
@@ -1698,7 +1666,6 @@ namespace RunescapeSpellbook
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
-            Game1.activeClickableMenu = new BobberBar("4372", 5, false, new(), "", false, "", false);
         }
         
         private void DebugPosition(string command, string[] args)

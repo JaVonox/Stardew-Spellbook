@@ -45,8 +45,6 @@ public class MagicProjectile : BasicProjectile
             return;
         }
         Farmer player = GetPlayerWhoFiredMe(location);
-        //Only process if we are the local player
-        if (Game1.player != player) { return;}
         
         explosionAnimation(location);
         if (n is Monster)
@@ -79,15 +77,6 @@ public class MagicProjectile : BasicProjectile
                 piercesLeft.Value--;
             }
         }
-    }
-    
-    //TODO check how well this works
-    //This is very experimental. Having all collisions checked locally for magic projectiles means there might be some extra processing, but its hard to tell if that matters
-    //It might also make collisions with monsters a bit more janky, but it fixes the issue where projectiles were going through walls on non-local devices.
-    //Basically, could be good, could be terrible. Need to test more. 
-    protected override bool ShouldApplyCollisionLocally(GameLocation location)
-    {
-        return true;
     }
     
     //Allows piercing through objects like rocks

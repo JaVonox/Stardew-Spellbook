@@ -27,7 +27,7 @@ public class InventorySpellMenu : MenuWithInventory
     private string spellDescriptionText;
     public InventorySpellMenu(InventorySpell targetSpell, Predicate<object>? selectablePredicate) : base(null, okButton: true, trashCan: true, 12, 132)
     {
-        runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
+        runesTextures = ItemRegistry.GetData($"(O)Tofu.RunescapeSpellbook_RuneSpellbook").GetTexture();
         this.targetSpell = targetSpell;
         this.selectablePredicate = selectablePredicate;
         currentFrame = 0;
@@ -250,12 +250,12 @@ public class InventorySpellMenu : MenuWithInventory
         float startX = (casterX + 16) - (totalWidth / 2);
         
         int itemIndex = 0;
-        foreach (KeyValuePair<int,int> runePair in targetSpell.requiredItems) //Key is ID, value is amount
+        foreach (KeyValuePair<string,int> runePair in targetSpell.requiredItems) //Key is ID, value is amount
         {
             float runeX = startX + (itemIndex * (itemWidth + spacing));
             Vector2 runePos = new Vector2(runeX, centreY - (16 * 4 + 80));
 
-            b.Draw(runesTextures, new Vector2(runePos.X,runePos.Y), new Rectangle(((runePair.Key - 4290) * 16), 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
+            b.Draw(runesTextures, new Vector2(runePos.X,runePos.Y), new Rectangle(((ModAssets.modItems[runePair.Key].SpriteIndex) * 16), 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
             
             Color runeCountColour = targetSpell.HasRuneCost(runePair.Key) ? Color.LawnGreen : Color.Red;
             b.DrawString(Game1.dialogueFont, runePair.Value.ToString(), new Vector2(runePos.X + (16*2) + 10,runePos.Y + (16*2)), runeCountColour);

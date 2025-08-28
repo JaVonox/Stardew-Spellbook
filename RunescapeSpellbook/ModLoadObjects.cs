@@ -19,116 +19,116 @@ public static class ModAssets
     
     public const int animFrames = 4; 
     
-    public static Dictionary<int,ModLoadObjects> modItems = new(){
-        {4290,new RunesObjects(4290,"Rune_Spellbook","Spellbook","Debug object.",-999)},
-        {4291,new RunesObjects(4291,"Rune_Air","Air Rune","One of the 4 basic elemental Runes",-429,
+    public static Dictionary<string,ModLoadObjects> modItems = new(){
+        {"Tofu.RunescapeSpellbook_RuneSpellbook",new RunesObjects("Tofu.RunescapeSpellbook_RuneSpellbook","Spellbook","Debug object.",0,-999)},
+        {"Tofu.RunescapeSpellbook_RuneAir",new RunesObjects("Tofu.RunescapeSpellbook_RuneAir","Air Rune","One of the 4 basic elemental Runes",1,-429,
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral}})},
-        {4292,new RunesObjects(4292,"Rune_Water","Water Rune","One of the 4 basic elemental Runes",-429,
+        {"Tofu.RunescapeSpellbook_RuneWater",new RunesObjects("Tofu.RunescapeSpellbook_RuneWater","Water Rune","One of the 4 basic elemental Runes",2,-429,
             new(){{"Emily",PrefType.Neutral},{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
-        {4293,new RunesObjects(4293,"Rune_Fire","Fire Rune","One of the 4 basic elemental Runes",-429,
+        {"Tofu.RunescapeSpellbook_RuneFire",new RunesObjects("Tofu.RunescapeSpellbook_RuneFire","Fire Rune","One of the 4 basic elemental Runes",3,-429,
             new(){{"Emily",PrefType.Neutral},{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
-        {4294,new RunesObjects(4294,"Rune_Earth","Earth Rune","One of the 4 basic elemental Runes",-429,
+        {"Tofu.RunescapeSpellbook_RuneEarth",new RunesObjects("Tofu.RunescapeSpellbook_RuneEarth","Earth Rune","One of the 4 basic elemental Runes",4,-429,
             new(){{"Emily",PrefType.Neutral},{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
-        {4295,new RunesObjects(4295,"Rune_Law","Law Rune","Used for teleport spells",-431,
+        {"Tofu.RunescapeSpellbook_RuneLaw",new RunesObjects("Tofu.RunescapeSpellbook_RuneLaw","Law Rune","Used for teleport spells",5,-431,
             new(){{"Emily",PrefType.Neutral},{"Wizard",PrefType.Like}})},
-        {4296,new RunesObjects(4296,"Rune_Nature","Nature Rune","Used for alchemy spells",-431,
+        {"Tofu.RunescapeSpellbook_RuneNature",new RunesObjects("Tofu.RunescapeSpellbook_RuneNature","Nature Rune","Used for alchemy spells",6,-431,
             new(){{"Emily",PrefType.Neutral},{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {4297,new RunesObjects(4297,"Rune_Cosmic","Cosmic Rune","Used for enchant spells",-431,
+        {"Tofu.RunescapeSpellbook_RuneCosmic",new RunesObjects("Tofu.RunescapeSpellbook_RuneCosmic","Cosmic Rune","Used for enchant spells",7,-431,
             new(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
-        {4298,new RunesObjects(4298,"Rune_Astral","Astral Rune","Used for Lunar spells",-431,
+        {"Tofu.RunescapeSpellbook_RuneAstral",new RunesObjects("Tofu.RunescapeSpellbook_RuneAstral","Astral Rune","Used for Lunar spells",8,-431,
             new(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {4299,new RunesObjects(4299,"Rune_Chaos","Chaos Rune","Used for low level combat spells",-430,
+        {"Tofu.RunescapeSpellbook_RuneChaos",new RunesObjects("Tofu.RunescapeSpellbook_RuneChaos","Chaos Rune","Used for low level combat spells",9,-430,
             new(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
-        {4300,new RunesObjects(4300,"Rune_Death","Death Rune","Used for high level combat spells",-430,
+        {"Tofu.RunescapeSpellbook_RuneDeath",new RunesObjects("Tofu.RunescapeSpellbook_RuneDeath","Death Rune","Used for high level combat spells",10,-430,
             new(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
 
-        {4301,new SlingshotItem(4301,"Ammo_Fire","Fire Orb","Enchanted ammo that burns enemies in a radius around a hit enemy. Fire cannot finish off enemies.",30)},
-        {4302,new SlingshotItem(4302,"Ammo_Earth","Earth Orb","Enchanted ammo that explodes and poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",31)},
+        {"Tofu.RunescapeSpellbook_AmmoFire",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoFire","Fire Orb","Enchanted ammo that burns enemies in a radius around a hit enemy. Fire cannot finish off enemies.",30,15,2)},
+        {"Tofu.RunescapeSpellbook_AmmoEarth",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoEarth","Earth Orb","Enchanted ammo that explodes and poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",31,25,1,true)},
         
-        {4359,new TreasureObjects(4359,"Treasure_Elemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
+        {"Tofu.RunescapeSpellbook_TreasureElemental",new TreasureObjects("Tofu.RunescapeSpellbook_TreaasureElemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
             new()
             {
-                new ItemDrop(4291, 10, 12, 1),
-                new ItemDrop(4291, 13, 23, 0.6),
-                new ItemDrop(4291, 25, 35, 0.35),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneAir", 10, 12, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneAir", 13, 23, 0.6),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneAir", 25, 35, 0.35),
                 
-                new ItemDrop(4292, 10, 12, 1),
-                new ItemDrop(4292, 13, 23, 0.5),
-                new ItemDrop(4292, 25, 35, 0.25),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneWater", 10, 12, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneWater", 13, 23, 0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneWater", 25, 35, 0.25),
                 
-                new ItemDrop(4293, 10, 12, 1),
-                new ItemDrop(4293, 13, 23, 0.5),
-                new ItemDrop(4293, 25, 35, 0.25),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneEarth", 10, 12, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneEarth", 13, 23, 0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneEarth", 25, 35, 0.25),
                 
-                new ItemDrop(4294, 10, 12, 1),
-                new ItemDrop(4294, 13, 23, 0.5),
-                new ItemDrop(4294, 25, 35, 0.25),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneFire", 10, 12, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneFire", 13, 23, 0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneFire", 25, 35, 0.25),
             },40)},
         
-        {4360,new TreasureObjects(4360,"Treasure_Catalytic","Catalytic Geode","Contains some catalytic Runes. A blacksmith might be able to open it.",20,
+        {"Tofu.RunescapeSpellbook_TreasureCatalytic",new TreasureObjects("Tofu.RunescapeSpellbook_TreasureCatalytic","Catalytic Geode","Contains some catalytic Runes. A blacksmith might be able to open it.",20,
             new()
             {
-                new ItemDrop(4295, 10, 15, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw", 10, 15, 1),
                 
-                new ItemDrop(4296, 10, 15, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneNature", 10, 15, 1),
                 
-                new ItemDrop(4297, 10, 15, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic", 10, 15, 1),
                 
-                new ItemDrop(4298, 10, 15, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral", 10, 15, 1),
                 
-                new ItemDrop(4299, 10, 15, 1),
-                new ItemDrop(4299, 16, 23, 0.5),
-                new ItemDrop(4299, 25, 35, 0.25),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneChaos", 10, 15, 1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneChaos", 16, 23, 0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneChaos", 25, 35, 0.25),
                 
-                new ItemDrop(4300, 10, 15, 0.5),
-                new ItemDrop(4300, 16, 23, 0.25),
-                new ItemDrop(4300, 25, 35, 0.1),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneDeath", 10, 15, 0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneDeath", 16, 23, 0.25),
+                new ItemDrop("Tofu.RunescapeSpellbook_RuneDeath", 25, 35, 0.1),
             },70)},
         
-        {4361, new TreasureObjects(4361,"Treasure_EasyCasket","Low Level Casket","Contains some magical goodies. A blacksmith might be able to open it.",21,
+        {"Tofu.RunescapeSpellbook_EasyCasket", new TreasureObjects("Tofu.RunescapeSpellbook_EasyCasket","Low Level Casket","Contains some magical goodies. A blacksmith might be able to open it.",21,
             new()
             {
-                new ItemDrop(4359,5,10,0.5),
-                new ItemDrop(4360,5,10,0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",5,10,0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",5,10,0.5),
                 
-                new ItemDrop(4352,1,1,0.3),
-                new ItemDrop(4353,1,1,0.3),
-                new ItemDrop(4354,1,1,0.3),
-                new ItemDrop(4355,1,1,0.3),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffAir",1,1,0.3),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffWater",1,1,0.3),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffEarth",1,1,0.3),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffFire",1,1,0.3),
                 
-                new ItemDrop(4362,1,1,0.05),
+                new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,1,0.05),
             },200,new(){{"Abigail",PrefType.Like}})},
         
-        {4362,new TreasureObjects(4362,"Treasure_HardCasket","High Level Casket","Contains some valuable magical goodies. A blacksmith might be able to open it.",22,
+        {"Tofu.RunescapeSpellbook_HardCasket",new TreasureObjects("Tofu.RunescapeSpellbook_HardCasket","High Level Casket","Contains some valuable magical goodies. A blacksmith might be able to open it.",22,
             new()
             {
-                new ItemDrop(4359,10,15,0.5),
-                new ItemDrop(4360,10,15,0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",10,15,0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",10,15,0.5),
                 
-                new ItemDrop(4352,1,1,0.7),
-                new ItemDrop(4353,1,1,0.7),
-                new ItemDrop(4354,1,1,0.7),
-                new ItemDrop(4355,1,1,0.7),
-                new ItemDrop(4356,1,1,0.5),
-                new ItemDrop(4363,1,1,0.1),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffAir",1,1,0.7),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffWater",1,1,0.7),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffEarth",1,1,0.7),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffFire",1,1,0.7),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffAncient",1,1,0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_BarrowsCasket",1,1,0.1),
             },500,new(){{"Abigail",PrefType.Love}})},
         
-        {4363,new TreasureObjects(4363,"Treasure_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. A blacksmith might be able to open it.",23,
+        {"Tofu.RunescapeSpellbook_BarrowsCasket",new TreasureObjects("Tofu.RunescapeSpellbook_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. A blacksmith might be able to open it.",23,
             new()
             {
-                new ItemDrop(4356,1,1,1),
-                new ItemDrop(4357,1,1,0.5),
-                new ItemDrop(4358,1,1,0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffAncient",1,1,1),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffAhrims",1,1,0.5),
+                new ItemDrop("Tofu.RunescapeSpellbook_StaffBlueMoon",1,1,0.5),
             },1000,new(){{"Abigail",PrefType.Love}})},
         
-        {4364,new PackObject(4364,"Treasure_AirPack","Air Rune Pack","A pack containing many air Runes. A blacksmith might be able to open it.",24,4291,3)},
-        {4365,new PackObject(4365,"Treasure_WaterPack","Water Rune Pack","A pack containing many water Runes. A blacksmith might be able to open it.",25,4292,1)},
-        {4366,new PackObject(4366,"Treasure_FirePack","Fire Rune Pack","A pack containing many fire Runes. A blacksmith might be able to open it.",26,4293)},
-        {4367,new PackObject(4367,"Treasure_EarthPack","Earth Rune Pack","A pack containing many earth Runes. A blacksmith might be able to open it.",27,4294)},
-        {4368,new PackObject(4368,"Treasure_ChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. A blacksmith might be able to open it.",28,4299)},
-        {4369,new PackObject(4369,"Treasure_DeathPack","Death Rune Pack","A pack containing many death Runes. A blacksmith might be able to open it.",29,4300)},
+        {"Tofu.RunescapeSpellbook_TreasureAirPack",new PackObject("Tofu.RunescapeSpellbook_TreasureAirPack","Air Rune Pack","A pack containing many air Runes. A blacksmith might be able to open it.",24,"Tofu.RunescapeSpellbook_RuneAir",3)},
+        {"Tofu.RunescapeSpellbook_TreasureWaterPack",new PackObject("Tofu.RunescapeSpellbook_TreasureWaterPack","Water Rune Pack","A pack containing many water Runes. A blacksmith might be able to open it.",25,"Tofu.RunescapeSpellbook_RuneWater",1)},
+        {"Tofu.RunescapeSpellbook_TreasureFirePack",new PackObject("Tofu.RunescapeSpellbook_TreasureFirePack","Fire Rune Pack","A pack containing many fire Runes. A blacksmith might be able to open it.",26,"Tofu.RunescapeSpellbook_RuneFire")},
+        {"Tofu.RunescapeSpellbook_TreasureEarthPack",new PackObject("Tofu.RunescapeSpellbook_TreasureEarthPack","Earth Rune Pack","A pack containing many earth Runes. A blacksmith might be able to open it.",27,"Tofu.RunescapeSpellbook_RuneEarth")},
+        {"Tofu.RunescapeSpellbook_TreasureChaosPack",new PackObject("Tofu.RunescapeSpellbook_TreasureChaosPack","Chaos Rune Pack","A pack containing many chaos Runes. A blacksmith might be able to open it.",28,"Tofu.RunescapeSpellbook_RuneChaos")},
+        {"Tofu.RunescapeSpellbook_TreasureDeathPack",new PackObject("Tofu.RunescapeSpellbook_TreasureDeathPack","Death Rune Pack","A pack containing many death Runes. A blacksmith might be able to open it.",29,"Tofu.RunescapeSpellbook_RuneDeath")},
         
-        {4370,new FishObject(4370,"Fish_Karam","Karambwanji","A small brightly coloured tropical fish. Traditionally associated with elemental magic",32,45,600,1800,new(){Season.Spring,Season.Summer},"sunny",new()
+        {"Tofu.RunescapeSpellbook_FishKaram",new FishObject("Tofu.RunescapeSpellbook_FishKaram","Karambwanji","A small brightly coloured tropical fish. Traditionally associated with elemental magic",32,45,600,1800,new(){Season.Spring,Season.Summer},"sunny",new()
             { "Beach" },6,2,20,5,2,Color.Cyan,"color_sea_green",1,7,
             new()
             {
@@ -147,15 +147,15 @@ public static class ModAssets
                 }
             }, new()
             {
-                {9,new ItemDrop(4361,1,1,0.05)},
-                {1,new ItemDrop(4292,10,16,0.5)},
-                {2,new ItemDrop(4291,10,16,0.3)},
-                {5,new ItemDrop(4294,10,15,0.3)},
-                {6,new ItemDrop(4293,10,15,0.2)},
-                {0,new ItemDrop(812,1,1,1.0)}
+                {9,new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,1,0.05)},
+                {1,new ItemDrop("Tofu.RunescapeSpellbook_RuneWater",10,16,0.5)},
+                {2,new ItemDrop("Tofu.RunescapeSpellbook_RuneAir",10,16,0.3)},
+                {5,new ItemDrop("Tofu.RunescapeSpellbook_RuneEarth",10,15,0.3)},
+                {6,new ItemDrop("Tofu.RunescapeSpellbook_RuneFire",10,15,0.2)},
+                {0,new ItemDrop("812",1,1,1.0)}
             },new(){{"Willy",PrefType.Neutral}}
             )},
-        {4371,new FishObject(4371,"Fish_Monk","Monkfish","An anglerfish known for its toothy smile. Traditionally associated with combat magic",33,60,1600,2300,new(){Season.Fall,Season.Winter,Season.Spring},"rainy",new()
+        {"Tofu.RunescapeSpellbook_FishMonk",new FishObject("Tofu.RunescapeSpellbook_FishMonk","Monkfish","An anglerfish known for its toothy smile. Traditionally associated with combat magic",33,60,1600,2300,new(){Season.Fall,Season.Winter,Season.Spring},"rainy",new()
             { "Beach" },4,5,60,50,3,Color.NavajoWhite,"color_sand",25,40,
             new()
             {
@@ -168,19 +168,19 @@ public static class ModAssets
                 {8,
                     new()
                     {
-                        "213","242","728","787","4361"
+                        "213","242","728","787","Tofu.RunescapeSpellbook_EasyCasket"
                     }
                     
                 }
             }, new()
             {
-                {9,new ItemDrop(4362,1,1,0.05)},
-                {7,new ItemDrop(4300,10,30,0.4)},
-                {3,new ItemDrop(4299,10,30,0.5)},
-                {0,new ItemDrop(812,1,1,1.0)}
+                {9,new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,1,0.05)},
+                {7,new ItemDrop("Tofu.RunescapeSpellbook_RuneDeath",10,30,0.4)},
+                {3,new ItemDrop("Tofu.RunescapeSpellbook_RuneChaos",10,30,0.5)},
+                {0,new ItemDrop("812",1,1,1.0)}
             },new(){{"Willy",PrefType.Neutral}}
         )},
-        {4372,new FishObject(4372,"Fish_Manta","Manta Ray","A large and intelligent fish that feeds on plankton. Traditionally associated with catalytic magic",34,75,1200,1800,new(){Season.Summer},"sunny",new()
+        {"Tofu.RunescapeSpellbook_FishManta",new FishObject("Tofu.RunescapeSpellbook_FishManta","Manta Ray","A large and intelligent fish that feeds on plankton. Traditionally associated with catalytic magic",34,75,1200,1800,new(){Season.Summer},"sunny",new()
                 { "Beach" },6,6,100,70,4,Color.RoyalBlue,"color_red",118,216,
             new()
             {
@@ -193,19 +193,19 @@ public static class ModAssets
                 {8,
                     new()
                     {
-                        "4359 10","832","4361"
+                        "Tofu.RunescapeSpellbook_TreasureElemental 10","832","Tofu.RunescapeSpellbook_EasyCasket"
                     }
                     
                 }
             }, new()
             {
-                {2,new ItemDrop(4295,3,5,0.5)},
-                {6,new ItemDrop(4297,3,5,0.3)},
-                {5,new ItemDrop(4298,3,5,0.3)},
-                {0,new ItemDrop(4296,3,5,1.0)},
+                {2,new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",3,5,0.5)},
+                {6,new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",3,5,0.3)},
+                {5,new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",3,5,0.3)},
+                {0,new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",3,5,1.0)},
             },new(){{"Willy",PrefType.Like}}
         )},
-        {4373,new FishObject(4373,"Fish_Sword","Swordfish","A predatory fish with a flat sword-like pointed bill",35,95,2000,2600,new(){Season.Spring,Season.Summer,Season.Fall,Season.Winter},"both",new()
+        {"Tofu.RunescapeSpellbook_FishSword",new FishObject("Tofu.RunescapeSpellbook_FishSword","Swordfish","A predatory fish with a flat sword-like pointed bill",35,95,2000,2600,new(){Season.Spring,Season.Summer,Season.Fall,Season.Winter},"both",new()
                 { "IslandSouth","IslandWest","IslandSouthEast" },3,8,280,30,4,Color.HotPink,"color_pink",100,130,
             new()
             {
@@ -224,160 +224,160 @@ public static class ModAssets
                 }
             }, new()
             {
-                {9,new ItemDrop(74,1,1,0.01)},
-                {4,new ItemDrop(4300,10,15,0.6)},
-                {2,new ItemDrop(773,1,3,0.5)},
-                {0,new ItemDrop(812,1,1,1.0)},
+                {9,new ItemDrop("74",1,1,0.01)},
+                {4,new ItemDrop("Tofu.RunescapeSpellbook_RuneDeath",10,15,0.6)},
+                {2,new ItemDrop("773",1,3,0.5)},
+                {0,new ItemDrop("812",1,1,1.0)},
             },new(){{"Willy",PrefType.Love}}
         )},
-        {4374, new SeedObject(4374,"Harralander Seed","Harralander Seed","Plant these in the fall. Takes 12 days to mature.",36,50)},
-        {4375,new CropObject(4375,"Harralander","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature.",
-            "4374",new(){Season.Fall},3,0,37,110,-50,"color_green",-75,1,0.25f,
+        {"Tofu.RunescapeSpellbook_SeedHarra", new SeedObject("Tofu.RunescapeSpellbook_SeedHarra","Harralander Seed","Plant these in the fall. Takes 12 days to mature.",36,50)},
+        {"Tofu.RunescapeSpellbook_CropHarra",new CropObject("Tofu.RunescapeSpellbook_CropHarra","Harralander","A herb that naturally grows in rocky crevices, named for its destructive nature.",
+            "Tofu.RunescapeSpellbook_SeedHarra",new(){Season.Fall},3,0,37,110,-50,"color_green",-75,1,0.25f,
             new(){{"Emily",PrefType.Like}})},
-        {4376, new SeedObject(4376,"Lantadyme Seed","Lantadyme Seed","Plant these in the winter. Takes 12 days to mature.",38,50)},
-        {4377,new CropObject(4377,"Lantadyme","Lantadyme","A herb that is said to resemble eyes when in bloom",
-            "4376",new(){Season.Winter},3,1,39,130,-50,"color_blue",-75,1,0.25f,
+        {"Tofu.RunescapeSpellbook_SeedLanta", new SeedObject("Tofu.RunescapeSpellbook_SeedLanta","Lantadyme Seed","Plant these in the winter. Takes 12 days to mature.",38,50)},
+        {"Tofu.RunescapeSpellbook_CropLanta",new CropObject("Tofu.RunescapeSpellbook_CropLanta","Lantadyme","A herb that is said to resemble eyes when in bloom",
+            "Tofu.RunescapeSpellbook_SeedLanta",new(){Season.Winter},3,1,39,130,-50,"color_blue",-75,1,0.25f,
             new(){{"Emily",PrefType.Love}})},
-        {4378, new PotionObject(4378,"Guthix Rest","Guthix Rest","A relaxing cup of tea that restores some health. Can heal over your maximum health.",40,350,0.3f,0.15f,"4375",5000,
+        {"Tofu.RunescapeSpellbook_PotGuthix", new PotionObject("Tofu.RunescapeSpellbook_PotGuthix","Guthix Rest","A relaxing cup of tea that restores some health. Can heal over your maximum health.",40,350,0.3f,0.15f,"Tofu.RunescapeSpellbook_CropHarra",5000,
             new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Harvey",PrefType.Like},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
-        {4379, new PotionObject(4379,"Saradomin Brew","Saradomin Brew","A relaxing cup of tea that restores a lot of health. Can heal over your maximum health.",44,500,0.6f,0.25f,"4377",6000,
+        {"Tofu.RunescapeSpellbook_PotSara", new PotionObject("Tofu.RunescapeSpellbook_PotSara","Saradomin Brew","A relaxing cup of tea that restores a lot of health. Can heal over your maximum health.",44,500,0.6f,0.25f,"Tofu.RunescapeSpellbook_CropLanta",6000,
             new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Harvey",PrefType.Like},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
-        {4380, new PotionObject(4380,"Harralander Dye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"4375",4000,"colour_green",
+        {"Tofu.RunescapeSpellbook_PotHarraDye", new PotionObject("Tofu.RunescapeSpellbook_PotHarraDye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"Tofu.RunescapeSpellbook_CropHarra",4000,"colour_green",
             new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Leah",PrefType.Like}})},
-        {4381, new PotionObject(4381,"Lantadyme Dye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"4377",4000,"color_dark_blue",
+        {"Tofu.RunescapeSpellbook_PotLantaDye", new PotionObject("Tofu.RunescapeSpellbook_PotLantaDye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"Tofu.RunescapeSpellbook_CropLanta",4000,"color_dark_blue",
             new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Sebastian",PrefType.Love},{"Leah",PrefType.Like}})},
-        {4382, new PotionObject(4382,"Hunter Potion","Hunter Potion","A potion that imbues the user with the power of a hunter. Adds a second smaller bar to fishing that gives 1.5x progress",43,150,"4375 1 300 1 881 5",new(){"RS.Hunters"},
+        {"Tofu.RunescapeSpellbook_PotHunter", new PotionObject("Tofu.RunescapeSpellbook_PotHunter","Hunter Potion","A potion that imbues the user with the power of a hunter. Adds a second smaller bar to fishing that gives 1.5x progress",43,150,"Tofu.RunescapeSpellbook_CropHarra 1 300 1 881 5",new(){"Tofu.RunescapeSpellbook_BuffHunters"},
             new(){{"Willy",PrefType.Like},{"Linus",PrefType.Like},{"Penny",PrefType.Hate}})},
-        {4383, new PotionObject(4383,"Battlemage Potion","Battlemage Potion","A potion that imbues the user with the power of a battlemage. Combat spells have a 10% chance of costing no runes. Spells cast with no cost grant no experience.",46,160,"4377 1 807 1 90 3",new(){"RS.Battlemage"},
+        {"Tofu.RunescapeSpellbook_PotBattlemage", new PotionObject("Tofu.RunescapeSpellbook_PotBattlemage","Battlemage Potion","A potion that imbues the user with the power of a battlemage. Combat spells have a 10% chance of costing no runes. Spells cast with no cost grant no experience.",46,160,"Tofu.RunescapeSpellbook_CropLanta 1 807 1 90 3",new(){"Tofu.RunescapeSpellbook_BuffBattlemage"},
             new(){{"Wizard",PrefType.Love}})},
     };
     
     //These are custom melee weapons that use 
     public static readonly StaffWeaponData[] staffWeapons =
     {
-        new StaffWeaponData(4351, "Staff_Magic", "Magic Staff", "A magical battlestaff", 5, 10, 11),
-        new StaffWeaponData(4352, "Staff_Air", "Staff of Air",
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffMagic", "Magic Staff", "A magical battlestaff", 5, 10, 11),
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffAir", "Staff of Air",
             "A magical battlestaff imbued with air magic. Provides air runes for combat spells.", 20, 30, 12,
-            1.2f, 4291),
-        new StaffWeaponData(4353, "Staff_Water", "Staff of Water",
+            11,1.2f, "Tofu.RunescapeSpellbook_RuneAir"),
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffWater",  "Staff of Water",
             "A magical battlestaff imbued with water magic. Provides water runes for combat spells.", 20, 30, 13,
-            1.2f, 4292),
-        new StaffWeaponData(4354, "Staff_Earth", "Staff of Earth",
+            11,1.2f, "Tofu.RunescapeSpellbook_RuneWater"),
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffEarth",  "Staff of Earth",
             "A magical battlestaff imbued with earth magic. Provides earth runes for combat spells.", 20, 30, 14,
-            1.2f, 4294),
-        new StaffWeaponData(4355, "Staff_Fire", "Staff of Fire",
+            11,1.2f, "Tofu.RunescapeSpellbook_RuneEarth"),
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffFire", "Staff of Fire",
             "A magical battlestaff imbued with fire magic. Provides fire runes for combat spells.", 20, 30, 15,
-            1.2f, 4293),
-        new StaffWeaponData(4356, "Staff_Ancient", "Ancient Staff", "A magical battlestaff of ancient origin...",
+            11,1.2f, "Tofu.RunescapeSpellbook_RuneFire"),
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffAncient",  "Ancient Staff", "A magical battlestaff of ancient origin...",
             25, 40, 16,
-            1.4f,-1,0,0,0,0.05f),
-        new StaffWeaponData(4357, "Staff_Ahrims", "Ahrims Staff", "Ahrim the Blighted's quarterstaff", 30, 45, 17,
-            1.6f),
-        new StaffWeaponData(4358, "Staff_Bluemoon", "Blue Moon Spear",
+            13,1.4f,"",0,0,0,0.05f),
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffAhrims", "Ahrims Staff", "Ahrim the Blighted's quarterstaff", 30, 45, 17,
+            15,1.6f),
+        new StaffWeaponData("Tofu.RunescapeSpellbook_BlueMoon", "Blue Moon Spear",
             "An ancient battlestaff that doubles as a spear", 70, 90, 18,
-            1.5f)
+            15,1.5f)
     };
 
     //Machines
     public static readonly MachinesObject[] machineItems =
     {
-        new MachinesObject("RS0","RS_Shredder","Pack Shredder","Shreds three rune packs at once in exchange for coal",100,0,
+        new MachinesObject("Tofu.RunescapeSpellbook_PackShredder","Pack Shredder","Shreds three rune packs at once in exchange for coal",100,0,
             new()
             {
-                {"4364","4291"},
-                {"4365","4292"},
-                {"4366","4293"},
-                {"4367","4294"},
-                {"4368","4299"},
-                {"4369","4300"},
-            }, 3,new Func<string,List<ItemDrop>>((itemID)=>((PackObject)modItems[int.Parse(itemID)]).GetItemRanges()),"336 1 338 2 709 5",3,"(O)382","I don't have enough coal for this"
+                {"Tofu.RunescapeSpellbook_TreasureAirPack","Tofu.RunescapeSpellbook_RuneAir"},
+                {"Tofu.RunescapeSpellbook_TreasureWaterPack","Tofu.RunescapeSpellbook_RuneWater"},
+                {"Tofu.RunescapeSpellbook_TreasureFirePack","Tofu.RunescapeSpellbook_RuneFire"},
+                {"Tofu.RunescapeSpellbook_TreasureEarthPack","Tofu.RunescapeSpellbook_RuneEarth"},
+                {"Tofu.RunescapeSpellbook_TreasureChaosPack","Tofu.RunescapeSpellbook_RuneChaos"},
+                {"Tofu.RunescapeSpellbook_TreasureDeathPack","Tofu.RunescapeSpellbook_RuneDeath"},
+            }, 3,new Func<string,List<ItemDrop>>((itemID)=>((PackObject)modItems[itemID]).GetItemRanges()),"336 1 338 2 709 5",3,"(O)382","I don't have enough coal for this"
             )
     };
     
     //This dictionary provides a quick reference for which weapons provide what rune
-    public static Dictionary<int, List<string>> infiniteRuneReferences;
+    public static Dictionary<string, List<string>> infiniteRuneReferences;
     
     public static readonly Spell[] modSpells = {
         new TeleportSpell(0,"Teleport_Valley","Valley Teleport","Teleports you to Pierre's Store in Pelican Town",0,
-            new() { {4295, 1},{4291,3},{4292,2} },8,"Town", 43, 60,0),
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneWater",2} },8,"Town", 43, 60,0),
         
         new TeleportSpell(1,"Teleport_Home","Farm Teleport","Teleports you outside the main house on your farm",4,
-            new() { {4295, 1},{4291,3},{4294,3} },10, "FarmHouse"),
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneEarth",3} },10, "FarmHouse"),
         
         new InventorySpell(2,"Menu_Superheat","Superheat Item","Smelts ore without a furnace or coal, or burns wood into coal at a discount",1,
-            new() { {4296, 1},{4293,4}},10,
+            new() { {"Tofu.RunescapeSpellbook_RuneNature", 1},{"Tofu.RunescapeSpellbook_RuneFire",4}},10,
             (i=>i is Item item && (item.QualifiedItemId == "(O)388" || DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId)))),
             SpellEffects.SuperheatItem,"Smelt any ores into bars instantly without any coal cost, or smelt wood into coal. Put an appropriate item in the slot and press the spell icon to cast.",1,"Superheat"),
         
         new InventorySpell(3,"Menu_HighAlch","High Level Alchemy","Converts an item into 1.5x its sell price",5,
-            new() { {4296, 1},{4293,5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
+            new() { {"Tofu.RunescapeSpellbook_RuneNature", 1},{"Tofu.RunescapeSpellbook_RuneFire",5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
             SpellEffects.HighAlchemy,"Turn any sellable item into money. Provides 150% of the items value. Put an appropriate item in the slot and press the spell icon to cast.",0,"HighAlch"),
         
         new TilesSpell(4,"Area_Humidify","Humidify","Waters the ground around you",1,
-            new() { {4298, 1},{4293,1},{4292,3}}, 0.4f,SpellEffects.Humidify, 10,5,"Humidify",
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",1},{"Tofu.RunescapeSpellbook_RuneWater",3}}, 0.4f,SpellEffects.Humidify, 10,5,"Humidify",
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
         
         new TilesSpell(5,"Area_Cure","Cure Plant","Replants dead crops",6,
-            new() { {4298, 1},{4294,8}},0.6f, SpellEffects.CurePlant, 10,6,"Cure",
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneEarth",8}},0.6f, SpellEffects.CurePlant, 10,6,"Cure",
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
         
         new BuffSpell(6,"Buff_VileVigour","Vile Vigour","Sacrifices a third of your max health to fill your energy",3,
-            new() { {4297, 1},{4291,3}},5, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
+            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 1},{"Tofu.RunescapeSpellbook_RuneAir",3}},5, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
             7,"Vile","My energy is already full"),
         
         new BuffSpell(7,"Buff_PieMake","Bake Pie","Cooks a random recipe that you know using your held ingredients",3,
-            new() { {4298, 1},{4293,1},{4292,1}}, 15,
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",1},{"Tofu.RunescapeSpellbook_RuneWater",1}}, 15,
             (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0), SpellEffects.BakePie, 8,"BakePie","I don't know enough recipes"),
         
         new TeleportSpell(8,"Teleport_Desert","Desert Teleport","Teleports you to the desert, if you have access to it",5,
-            new() { {4295, 2},{4294,5},{4293,5}}, 15,"Desert", 19, 34,2,
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 2},{"Tofu.RunescapeSpellbook_RuneEarth",5},{"Tofu.RunescapeSpellbook_RuneFire",5}}, 15,"Desert", 19, 34,2,
             ((farmer => Game1.MasterPlayer.mailReceived.Contains("ccVault")))),
         
         new TeleportSpell(9,"Teleport_Ginger","Ginger Island Teleport","Teleports you to ginger island, if you have access to it",7,
-            new() { {4295, 2},{4292,5},{4293,5}},15, "IslandSouth",21,37,0,
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 2},{"Tofu.RunescapeSpellbook_RuneWater",5},{"Tofu.RunescapeSpellbook_RuneFire",5}},15, "IslandSouth",21,37,0,
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("willyBoatFixed")))),
         
         new TeleportSpell(10,"Teleport_Caves","Caves Teleport","Teleports you to the pelican town mines",2,
-            new() { {4295, 1},{4291,5}},10, "Mountain",54,7,0, 
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",5}},10, "Mountain",54,7,0, 
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("landslideDone")))),
         
         new InventorySpell(11,"Menu_EnchantRuby","Enchant Ruby Bolt","Convert any red or orange stones into fiery ammo",4,
-            new() { {4297, 1},{4293,3}},10,(i => i is Item item && SpellEffects.redGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantRubyBolts,
+            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 1},{"Tofu.RunescapeSpellbook_RuneFire",3}},10,(i => i is Item item && SpellEffects.redGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantRubyBolts,
             "Convert any red gems or rocks into fiery ammo for the slingshot. On hitting an enemy, fire spreads to nearby enemies. Fire cannot finish off enemies.",2,"EnchantBolt"),
         
         new InventorySpell(12,"Menu_EnchantEmerald","Enchant Emerald Bolt","Convert any green stones into explosive poisonous ammo",8,
-            new() { {4297, 2},{4294,3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
+            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 2},{"Tofu.RunescapeSpellbook_RuneEarth",3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,
             "Convert any green gems into explosive poisonous ammo for the slingshot. On hitting an enemy, poison spreads to nearby enemies. Poison cannot finish off enemies.",2,"EnchantBolt"),
         
         new BuffSpell(13,"Buff_DarkLure","Dark Lure","Summons more enemies, and makes them prioritise you over other farmers for 3 minutes",6,
-            new() { {4296, 2},{4297,2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("RS.DarkLure")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
+            new() { {"Tofu.RunescapeSpellbook_RuneNature", 2},{"Tofu.RunescapeSpellbook_RuneCosmic",2}},10,(f=> f is Farmer farmer && !farmer.hasBuff("Tofu.RunescapeSpellbook_BuffDark")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
         
         new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",0,
-            new() { {4299, 1},{4291,1}}, 1,40,15,0,Color.White,"WindStrike"),
+            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 1},{"Tofu.RunescapeSpellbook_RuneAir",1}}, 1,40,15,0,Color.White,"WindStrike"),
        
         new CombatSpell(15,"Combat_Water","Water Bolt","A low level water missile",2,
-            new() { {4299, 2},{4291,2},{4292,2}},2, 70,16,1,Color.DarkCyan,"WaterBolt"),
+            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 2},{"Tofu.RunescapeSpellbook_RuneAir",2},{"Tofu.RunescapeSpellbook_RuneWater",2}},2, 70,16,1,Color.DarkCyan,"WaterBolt"),
         
         new CombatSpell(16,"Combat_Undead","Crumble Undead","Hits undead monsters for extra damage",4,
-            new() { {4299, 2},{4291,2},{4294,2}},4, 60,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
+            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 2},{"Tofu.RunescapeSpellbook_RuneAir",2},{"Tofu.RunescapeSpellbook_RuneEarth",2}},4, 60,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
         
         new CombatSpell(17,"Combat_Earth","Earth Blast","A medium level earth missile",6,
-            new() { {4300, 1},{4291,3},{4294,3}},4, 90,16,1,Color.DarkGreen,"EarthBlast"),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneEarth",3}},4, 90,16,1,Color.DarkGreen,"EarthBlast"),
         
         new CombatSpell(18,"Combat_Fire","Fire Wave","A high level fire missile",8,
-            new() { {4300, 2},{4291,3},{4293,4}},5, 120,15,2,Color.OrangeRed,"FireWave"),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 2},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneFire",4}},5, 120,15,2,Color.OrangeRed,"FireWave"),
         
         new BuffSpell(19,"Buff_Charge","Charge","Spells cast three projectiles for 60 seconds",7,
-            new() { {4300, 3},{4291,3},{4293,3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("RS.Charge")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 3},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneFire",3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("Tofu.RunescapeSpellbook_BuffCharge")),SpellEffects.Charge, 10,"Charge","I'm already charged!"),
         
         new CombatSpell(20,"Combat_Demonbane","Demonbane","Hits undead monsters for a lot of extra damage",9,
-            new() { {4300, 2},{4298,2},{4293,4}},6, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 2},{"Tofu.RunescapeSpellbook_RuneAstral",2},{"Tofu.RunescapeSpellbook_RuneFire",4}},6, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
         
         new CombatSpell(21,"Combat_Blood","Blood Barrage","Fires a strong vampiric blood missile",10,
-            new() { {4300, 4},{4297,3}}, 10,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 4},{"Tofu.RunescapeSpellbook_RuneCosmic",3}}, 10,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
         
         new InventorySpell(22,"Menu_Plank","Plank Make","Turns wood into hardwood and vice versa and uncrafts wooden items into wood",3,
-            new() { {4298, 1},{4297,1}},10,
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneCosmic",1}},10,
             (i => i is Item item && (item.itemId.Value == "388" || item.itemId.Value == "709" || 
                                      (CraftingRecipe.craftingRecipes.ContainsKey(item.Name) 
                                       && CraftingRecipe.craftingRecipes[item.Name].Split(' ').ToList() is List<string> recipes 
@@ -398,165 +398,165 @@ public static class ModAssets
     {
         //Caves (Basic)
         { "Big Slime", new(){ 
-            new ItemDrop(4295,2,0.08f),
-            new ItemDrop(4296,2,0.1f),
-            new ItemDrop(4359,1,0.02f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.08f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.02f),
         } },
         { "Prismatic Slime", new(){
-            new ItemDrop(4295,4,0.9f),
-            new ItemDrop(4298,5,0.9f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",4,0.9f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",5,0.9f),
         } },
         { "Green Slime", new(){
-            new ItemDrop(4295,2,0.08f),
-            new ItemDrop(4359,1,0.02f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.08f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.02f),
         } },
         { "Fly", new(){
-            new ItemDrop(4364,1,0.2f),
-            new ItemDrop(4368,1,0.05f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.05f),
         } },
         { "Rock Crab", new(){
-            new ItemDrop(4359,1,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.3f),
         } },
         { "Grub", new(){
-            new ItemDrop(4296,2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",2,0.1f),
         } },
         { "Bug", new(){
-            new ItemDrop(4368,1,0.08f),
-            new ItemDrop(4359,1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.08f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
         } },
         { "Bat", new(){
-            new ItemDrop(4364,1,0.15f),
-            new ItemDrop(4368,1,0.25f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.25f),
         } },
         { "Stone Golem", new(){
-            new ItemDrop(4367,1,0.2f),
-            new ItemDrop(4360,1,0.1f),
-            new ItemDrop(4361,1,0.04f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.04f),
         } },
         { "Dust Spirit", new(){
-            new ItemDrop(4364,1,0.04f),
-            new ItemDrop(4296,1,0.02f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.04f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",1,0.02f),
         } },
         { "Frost Bat", new(){
-            new ItemDrop(4364,1,0.05f),
-            new ItemDrop(4365,1,0.15f),
-            new ItemDrop(4368,1,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.05f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.3f),
         } },
         { "Ghost", new(){
-            new ItemDrop(4360,2,0.35f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.35f),
         } },
         { "Frost Jelly", new(){
-            new ItemDrop(4365,1,0.1f),
-            new ItemDrop(4359,1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
         } },
         { "Skeleton", new(){
-            new ItemDrop(4368,1,0.3f),
-            new ItemDrop(4369,1,0.02f),
-            new ItemDrop(4360,1,0.05f),
-            new ItemDrop(4361,1,0.08f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",1,0.02f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.05f),
+            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.08f),
         } },
         { "Lava Bat", new(){
-            new ItemDrop(4364,2,0.15f),
-            new ItemDrop(4366,2,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.15f),
         } },
         { "Lava Crab", new(){
-            new ItemDrop(4365,1,0.15f),
-            new ItemDrop(4366,1,0.3f),
-            new ItemDrop(4359,2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",1,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",2,0.3f),
         } },
         { "Shadow Shaman", new(){
-            new ItemDrop(4296,3,0.2f),
-            new ItemDrop(4298,2,0.2f),
-            new ItemDrop(4360,2,0.2f),
-            new ItemDrop(4361,1,0.02f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",3,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.02f),
         } },
         { "Metal Head", new(){
-            new ItemDrop(4367,2,0.3f),
-            new ItemDrop(4361,1,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.1f),
         } },
         { "Shadow Brute", new(){
-            new ItemDrop(4364,2,0.1f),
-            new ItemDrop(4368,2,0.3f),
-            new ItemDrop(4360,1,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.1f),
         } },
         { "Squid Kid", new(){
-            new ItemDrop(4364,3,0.2f),
-            new ItemDrop(4297,2,0.2f),
-            new ItemDrop(4359,2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",2,0.2f),
         } }, //Skull Cavern 
         { "Sludge", new(){
-            new ItemDrop(4295,2,0.2f),
-            new ItemDrop(4359,1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
         } },
         { "Serpent", new(){
-            new ItemDrop(4364,2,0.25f),
-            new ItemDrop(4368,2,0.1f),
-            new ItemDrop(4361,1,0.07f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.25f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.07f),
         } },
         { "Carbon Ghost", new(){
-            new ItemDrop(4369,2,0.1f),
-            new ItemDrop(4360,2,0.35f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.35f),
         } },
         { "Iridium Crab", new(){
-            new ItemDrop(4365,5,0.6f),
-            new ItemDrop(4359,6,0.6f),
-            new ItemDrop(4360,3,0.4f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",5,0.6f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",6,0.6f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",3,0.4f),
         } },
         { "Pepper Rex", new(){
-            new ItemDrop(4366,3,1f),
-            new ItemDrop(4296,3,0.5f),
-            new ItemDrop(4361,1,0.5f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",3,1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",3,0.5f),
+            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.5f),
         } },
         { "Mummy", new(){
-            new ItemDrop(4367,2,0.2f),
-            new ItemDrop(4368,3,0.3f),
-            new ItemDrop(4369,1,0.2f),
-            new ItemDrop(4362,1,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",3,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.1f),
         } },
         { "Iridium Bat", new(){
-            new ItemDrop(4364,3,0.5f),
-            new ItemDrop(4369,2,0.2f),
-            new ItemDrop(4362,1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.5f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.2f),
         } },
         { "Haunted Skull", new(){ //Quarry Mine
-            new ItemDrop(4297,3,0.4f),
-            new ItemDrop(4298,3,0.3f),
-            new ItemDrop(4361,1,0.05f),
-            new ItemDrop(4362,1,0.02f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",3,0.4f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",3,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.05f),
+            new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.02f),
         } },
         { "Hot Head", new(){ //Ginger Island/Volcano
-            new ItemDrop(4366,2,0.3f),
-            new ItemDrop(4369,3,0.2f),
-            new ItemDrop(4360,2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",3,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.2f),
         } },
         { "Tiger Slime", new(){
-            new ItemDrop(4365,2,0.1f),
-            new ItemDrop(4367,1,0.2f),
-            new ItemDrop(4296,5,0.3f),
-            new ItemDrop(4368,3,0.3f),
-            new ItemDrop(4369,2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",5,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",3,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.1f),
         } },
         { "Magma Sprite", new(){
-            new ItemDrop(4364,3,0.2f),
-            new ItemDrop(4366,2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
         } },
         { "Dwarvish Sentry", new(){
-            new ItemDrop(4295,4,0.24f),
-            new ItemDrop(4297,10,0.2f),
-            new ItemDrop(4369,3,0.3f),
-            new ItemDrop(4363,1,0.05f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",4,0.24f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",10,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",3,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_BarrowsCasket",1,0.05f),
         } },
         { "Magma Duggy", new(){
-            new ItemDrop(4366,2,0.3f),
-            new ItemDrop(4359,5,0.3f),
-            new ItemDrop(4363,1,0.05f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",5,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_BarrowsCasket",1,0.05f),
         } },
         { "Magma Sparker", new(){
-            new ItemDrop(4366,2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
         } },
         { "False Magma Cap", new(){
-            new ItemDrop(4367,1,0.2f),
-            new ItemDrop(4297,10,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",10,0.2f),
         } },
     };
 
@@ -565,22 +565,22 @@ public static class ModAssets
     {
         {"AdventureShop", new()
         {
-            new ShopListings("RS_Marlon_Battlestaff","(W)4351",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("RS_Marlon_Battlestaff","(W)Tofu.RunescapeSpellbook_StaffMagic",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }},
         {"DesertTrade", new()
         {
-            new ShopListings("RS_Desert_AirRunes","(O)4291","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("RS_Desert_AirRunes","(O)Tofu.RunescapeSpellbook_RuneAir","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
         }},
         {"Sandy", new()
         {
-            new ShopListings("RS_Seed_Harralander","(O)4374",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
-            new ShopListings("RS_Seed_Lantadyme","(O)4376",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
-            new ShopListings("RS_Recipe_Hunter","(O)4382",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
-            new ShopListings("RS_Recipe_Battlemage","(O)4383",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+            new ShopListings("RS_Seed_Harralander","(O)Tofu.RunescapeSpellbook_SeedHarra",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
+            new ShopListings("RS_Seed_Lantadyme","(O)Tofu.RunescapeSpellbook_SeedLanta",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
+            new ShopListings("RS_Recipe_Hunter","(O)Tofu.RunescapeSpellbook_PotHunter",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
+            new ShopListings("RS_Recipe_Battlemage","(O)Tofu.RunescapeSpellbook_PotBattlemage",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
         }},
         {"Blacksmith", new()
         {
-            new ShopListings("RS_Recipe_Shredder","(BC)RS0",2500,0,-1,-1,"",true),
+            new ShopListings("RS_Recipe_Shredder","(BC)Tofu.RunescapeSpellbook_PackShredder",2500,0,-1,-1,"",true),
         }}
     };
     
@@ -594,41 +594,41 @@ public static class ModAssets
             new LoadableMail("RSSpellMailGet","Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
               "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. " +
               "^^   -M. Rasmodius, Wizard[letterbg 2]" +
-              "%item object 4351 1 %%" +
+              "%item object Tofu.RunescapeSpellbook_StaffMagic 1 %%" +
               "[#]Wizard's Battlestaff Gift")
         },
         {
             new LoadableMail(15,Season.Summer,1,"@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes." +
                 "^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it" +
                 "^^   -Clint^^P.S I've included some samples with this letter" +
-                "%item object 4364 3 %%" +
+                "%item object Tofu.RunescapeSpellbook_TreasureAirPack 3 %%" +
                 "[#]Clint's Pack Opening Service")
         },
         {
             new LoadableMail(3,Season.Spring,2,"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas." +
             "^^It seems like something ya might get some use out of, it'd make some fine firewood!" +
             "^^   -Willy" +
-            "%item object 4361 1 %%" +
+            "%item object Tofu.RunescapeSpellbook_EasyCasket 1 %%" +
             "[#]Willy's Casket")
         },
         {
             new LoadableMail(1,Season.Summer,3,"@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable." +
              "^^Maybe you'll get something out of them." +
              "^^   -Clint" +
-             "%item object 4300 60 %%" +
+             "%item object Tofu.RunescapeSpellbook_RuneDeath 60 %%" +
              "[#]Clint's Terrible Gift")
         },
         {
             new LoadableMail(9,Season.Spring,2,"@,^An old friend gave me some of these, but I don't have enough space to keep all of them." +
              "^^I hope you'll think of the great outdoors when you use them." +
              "^^   -Linus" +
-             "%item object 4296 40 %%" +
+             "%item object Tofu.RunescapeSpellbook_RuneNature 40 %%" +
              "[#]Linus' Nature Stones")
         },
         {
             new LoadableMail(27,Season.Fall,2,"Coco,^^Beef Soup" +
              "^^   -Tofu" +
-             "%item object 4362 1 %%" +
+             "%item object Tofu.RunescapeSpellbook_HardCasket 1 %%" +
              "[#]Letter For Someone Else")
         },
         {
@@ -764,7 +764,7 @@ public static class ModAssets
                     "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
                     "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
                     "/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"" +
-                    "/stopMusic /itemAboveHead 4290 /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail RSSpellMailGet" +
+                    "/stopMusic /itemAboveHead Tofu.RunescapeSpellbook_RuneSpellbook /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail RSSpellMailGet" +
                     "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600" +
                     "/speak Wizard \"Well, that was all. I'll be on my way now.\"" +
                     "/pause 300/end"
@@ -806,10 +806,10 @@ public static class ModAssets
 
     public static List<CustomBuff> loadableBuffs = new()
     {
-        new CustomBuff("RS.Charge", "Charge", "Combat spells will produce extra projectiles", 60_000, 0),
-        new CustomBuff("RS.DarkLure", "Dark lure", "Spawns more monsters and makes them aggressive towards you", 180_000, 1),
-        new CustomBuff("RS.Hunters", "Hunter's Call", "Second bar while fishing which provides 1.5x progress", 300_000, 2),
-        new CustomBuff("RS.Battlemage", "Battlemage's Spark", "Combat spells have a 10% chance of not costing any runes", 120_000, 3),
+        new CustomBuff("Tofu.RunescapeSpellbook_BuffCharge", "Charge", "Combat spells will produce extra projectiles", 60_000, 0),
+        new CustomBuff("Tofu.RunescapeSpellbook_BuffDark", "Dark lure", "Spawns more monsters and makes them aggressive towards you", 180_000, 1),
+        new CustomBuff("Tofu.RunescapeSpellbook_BuffHunters", "Hunter's Call", "Second bar while fishing which provides 1.5x progress", 300_000, 2),
+        new CustomBuff("Tofu.RunescapeSpellbook_BuffBattlemage", "Battlemage's Spark", "Combat spells have a 10% chance of not costing any runes", 120_000, 3),
     };
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)
     {
@@ -832,7 +832,7 @@ public static class ModAssets
 
         infiniteRuneReferences = new();
         //Generate the lookup dictionary for determining what weapons give infinite values for each rune
-        foreach (StaffWeaponData weapon in staffWeapons.Where(x=>x.providesRune != -1))
+        foreach (StaffWeaponData weapon in staffWeapons.Where(x=>x.providesRune != null))
         {
             if (!infiniteRuneReferences.ContainsKey(weapon.providesRune))
             {

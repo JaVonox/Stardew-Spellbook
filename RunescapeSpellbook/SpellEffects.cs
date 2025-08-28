@@ -156,7 +156,7 @@ public class SpellEffects : BaseSpellEffects
         if (redGemsEnchants.ContainsKey(itemArgs.ItemId))
         {
             int postCastStackSize = itemArgs.Stack - 1;
-            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"4301");
+            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"Tofu.RunescapeSpellbook_AmmoFire");
             returnItem.Stack = redGemsEnchants[itemArgs.ItemId];
             Utility.CollectOrDrop(returnItem);
 
@@ -192,7 +192,7 @@ public class SpellEffects : BaseSpellEffects
         if (greenGemsEnchants.ContainsKey(itemArgs.ItemId))
         {
             int postCastStackSize = itemArgs.Stack - 1;
-            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"4302");
+            StardewValley.Object returnItem = ItemRegistry.Create<StardewValley.Object>($"Tofu.RunescapeSpellbook_AmmoEarth");
             returnItem.Stack = greenGemsEnchants[itemArgs.ItemId];
             Utility.CollectOrDrop(returnItem);
 

@@ -13,13 +13,13 @@ using StardewValley.GameData.Shops;
 namespace RunescapeSpellbook;
 public struct ItemDrop
 {
-    public int itemID;
+    public string itemID;
     public int amount;
     public double chance;
 
     public int minAmount;
     public int maxAmount;
-    public ItemDrop(int itemID, int amount, double chance = 1.0)
+    public ItemDrop(string itemID, int amount, double chance = 1.0)
     {
         this.itemID = itemID;
         this.amount = amount;
@@ -28,7 +28,7 @@ public struct ItemDrop
         this.minAmount = amount;
         this.maxAmount = amount;
     }
-    public ItemDrop(int itemID, int minAmount, int maxAmount, double weight = 1.0) 
+    public ItemDrop(string itemID, int minAmount, int maxAmount, double weight = 1.0) 
     {
         this.itemID = itemID;
         this.amount = minAmount;
@@ -47,17 +47,17 @@ public enum PrefType
 }
 public class ModLoadObjects : ObjectData
 {
-    public int id;
+    public string id;
     public Dictionary<string, PrefType>? characterPreferences;
-    public ModLoadObjects(int id, string name, string displayName, string description, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
+    public ModLoadObjects(string id, string displayName, string description, int spriteIndex, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
     {
         this.id = id;
-        base.Name = name;
+        base.Name = id;
         base.DisplayName = displayName;
         base.Description = description;
         base.Type = type;
         base.Texture = "Mods.RunescapeSpellbook.Assets.itemsprites";
-        base.SpriteIndex = id - 4290;
+        base.SpriteIndex = spriteIndex;
         base.Category = category;
         base.ExcludeFromRandomSale = true;
         this.characterPreferences = characterPreferences ?? new();
@@ -71,8 +71,8 @@ public class ModLoadObjects : ObjectData
 }
 public class RunesObjects : ModLoadObjects
 {
-    public RunesObjects(int id, string name, string displayName, string description,int category,Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",category)
+    public RunesObjects(string id,string displayName, string description, int spriteIndex,int category,Dictionary<string, PrefType>? characterPreferences = null) : 
+        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",category)
     {
         base.Price = 2;
     }
@@ -80,19 +80,21 @@ public class RunesObjects : ModLoadObjects
 }
 public class SlingshotItem : ModLoadObjects
 {
-    public SlingshotItem(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",-2)
+    public int extraDamage = 0;
+    public int debuffType = 0;
+    public bool explodes = false;
+    public SlingshotItem(string id, string displayName, string description, int spriteID, int extraDamage, int debuffType, bool explodes = false, Dictionary<string, PrefType>? characterPreferences = null) : 
+        base(id,displayName,description,spriteID,characterPreferences,"Basic",-2)
     {
-        base.SpriteIndex = spriteID;
+        this.extraDamage = extraDamage;
     }
 }
 public class TreasureObjects : ModLoadObjects
 {
-    public TreasureObjects(int id, string name, string displayName, string description, int spriteID,
+    public TreasureObjects(string id,  string displayName, string description, int spriteID,
         List<ItemDrop> itemDrops, int sellprice = 35, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id, name, displayName, description,characterPreferences, "Basic", -28)
+        base(id, displayName, description,spriteID,characterPreferences, "Basic", -28)
     {
-        base.SpriteIndex = spriteID;
         List<ObjectGeodeDropData> objects = new();
 
         double totalWeight = itemDrops.Sum(itemDrop => itemDrop.chance);
@@ -119,15 +121,14 @@ public class TreasureObjects : ModLoadObjects
     }
 
 
-    public TreasureObjects(int id, string name, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences) : 
-        base(id,name,displayName,description,characterPreferences,"Basic",-28)
+    public TreasureObjects(string id, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences) : 
+        base(id,displayName,description,spriteID,characterPreferences,"Basic",-28)
     {
-        base.SpriteIndex = spriteID;
         List<ObjectGeodeDropData> objects = new();
         
         ObjectGeodeDropData geodeItem = new ObjectGeodeDropData();
         geodeItem.Id = "0";
-        geodeItem.ItemId = "4291";
+        geodeItem.ItemId = "Tofu.RunescapeSpellbook_RuneAir";
         geodeItem.Chance = 1.0;
         geodeItem.MinStack = 10;
         geodeItem.MaxStack = 20;
@@ -170,14 +171,14 @@ public class TreasureObjects : ModLoadObjects
 
 public class PackObject : TreasureObjects
 {
-    public int packItem;
+    public string packItem;
     public int packBaseIncrease;
     
     public static readonly int PACK_BASE_MULT = 7;
     public static readonly double[] PACK_CHANCES = {1.5,0.5,0.2};
     public static readonly int[] PACK_TIERED_MULTIPLIERS = { 1, 2, 4, 5 };
-    public PackObject(int id, string name, string displayName, string description, int spriteID, int packItem, int packBaseIncrease = 0) :
-        base(id, name, displayName, description, spriteID,null)
+    public PackObject(string id, string displayName, string description, int spriteID, string packItem, int packBaseIncrease = 0) :
+        base(id, displayName, description, spriteID,null)
     {
         this.packItem = packItem;
         this.packBaseIncrease = packBaseIncrease;
@@ -241,10 +242,10 @@ public class FishObject : ModLoadObjects
     private int minLength;
     private int maxLength;
     
-    public FishObject(int id, string name,string displayName, string description, int spriteID, int dartChance, int minDayTime, 
+    public FishObject(string id,string displayName, string description, int spriteID, int dartChance, int minDayTime, 
         int maxDayTime, List<Season> seasons, string weather, List<string> locations, int catchChance, int minFishingLevel, int price, int edibility, int spawnTime,
         Color waterColour, string roeColour, int minLength, int maxLength, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards, Dictionary<string,PrefType> characterPrefs = null)
-        : base(id, name, displayName, description,characterPrefs,"Basic",-4)
+        : base(id, displayName, description,spriteID,characterPrefs,"Basic",-4)
     {
         this.dartChance = dartChance;
         this.minDayTime = minDayTime;
@@ -255,10 +256,9 @@ public class FishObject : ModLoadObjects
         this.catchChance = catchChance;
         this.minFishingLevel = minFishingLevel;
         base.Price = price;
-        base.SpriteIndex = spriteID;
         base.ExcludeFromFishingCollection = true;
         base.Edibility = edibility;
-        base.ContextTags = new() {$"item_{name}",roeColour};
+        base.ContextTags = new() {$"item_{id}",roeColour};
         
         this.fishTypeWaterColour = waterColour;
         this.populationGates = populationGates;
@@ -334,9 +334,8 @@ public class FishObject : ModLoadObjects
 }
 public class SeedObject : ModLoadObjects
 {
-    public SeedObject(int id, string name, string displayName, string description, int spriteIndex, int price, Dictionary<string, PrefType>? characterPreferences = null) : base(id,name,displayName,description,characterPreferences,"Basic",-74)
+    public SeedObject(string id, string displayName, string description, int spriteIndex, int price, Dictionary<string, PrefType>? characterPreferences = null) : base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-74)
     {
-        this.SpriteIndex = spriteIndex;
         base.Price = price;
     }
 }
@@ -350,11 +349,10 @@ public class CropObject : ModLoadObjects
     private float harvestIncPerFarmLevel;
     private int harvestAmount;
     private HarvestMethod harvestMethod;
-    public CropObject(int harvestItemId, string name, string displayName, string description, string seedId, List<Season> growableSeasons, int daysPerPhase, int growthSpriteRow,
+    public CropObject(string harvestItemId, string displayName, string description, string seedId, List<Season> growableSeasons, int daysPerPhase, int growthSpriteRow,
         int spriteID, int price, int edibility, string colour, int category = -75, int harvestAmount = 1, float harvestIncPerFarmLevel = 0, Dictionary<string,PrefType>? characterPreferences = null, HarvestMethod harvestMethod = HarvestMethod.Grab)
-    : base(harvestItemId,name,displayName,description,characterPreferences,"Basic",category)
+    : base(harvestItemId,displayName,description,spriteID,characterPreferences,"Basic",category)
     {
-        this.SpriteIndex = spriteID;
         this.seedID = seedId;
         this.growableSeasons = growableSeasons;
         this.daysPerPhase = daysPerPhase;
@@ -402,40 +400,37 @@ public class PotionObject : ModLoadObjects
     public int creationTime = 180;
         
     //Keg item (Usable)
-    public PotionObject(int id, string name, string displayName, string description, int spriteIndex, int price, float healPercent, float extraHealthPerQuality, string kegItemID, int creationTime, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id,name,displayName,description,characterPreferences,"Basic",-26)
+    public PotionObject(string id, string displayName, string description, int spriteIndex, int price, float healPercent, float extraHealthPerQuality, string kegItemID, int creationTime, Dictionary<string, PrefType>? characterPreferences = null) :
+        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-26)
     {
         this.healPercent = healPercent;
         this.extraHealthPerQuality = extraHealthPerQuality;
         this.craftType = 1;
         this.creationString = kegItemID;
         this.creationTime = creationTime;
-        this.SpriteIndex = spriteIndex;
         this.Price = price;
         base.Edibility = 0;
         base.IsDrink = true;
     }
     
     //Preservable (Unusable)
-    public PotionObject(int id, string name, string displayName, string description, int spriteIndex, int price, string preserveItemID, int creationTime, string colour, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id,name,displayName,description,characterPreferences,"Basic",-26)
+    public PotionObject(string id, string displayName, string description, int spriteIndex, int price, string preserveItemID, int creationTime, string colour, Dictionary<string, PrefType>? characterPreferences = null) :
+        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-26)
     {
         this.craftType = 2;
         this.creationString = preserveItemID;
         this.creationTime = creationTime;
-        this.SpriteIndex = spriteIndex;
         this.Price = price;
         base.Edibility = -300;
         base.ContextTags = new() {colour};
     }
     
     //Cooking (Usable)
-    public PotionObject(int id, string name, string displayName, string description, int spriteIndex, int price, string cookingRecipe, List<string> buffs, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id,name,displayName,description,characterPreferences,"Basic",-7)
+    public PotionObject(string id, string displayName, string description, int spriteIndex, int price, string cookingRecipe, List<string> buffs, Dictionary<string, PrefType>? characterPreferences = null) :
+        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-7)
     {
         this.craftType = 0;
         this.creationString = cookingRecipe;
-        this.SpriteIndex = spriteIndex;
         this.Price = price;
         base.Edibility = 0;
         base.IsDrink = true;
@@ -489,10 +484,10 @@ public class MachinesObject : BigCraftableData
     private int returnRolls;
     
     public string? creationString;
-    public MachinesObject(string id, string name, string displayname, string description, int price, int spriteIndex, Dictionary<string,string> inToOut, int inputAmount, Func<string,List<ItemDrop>> amountReturnMethod, string craftingRecipe, int returnRolls = 1,string? additionalItemRequired = null, string? failMessage = "")
+    public MachinesObject(string id, string displayname, string description, int price, int spriteIndex, Dictionary<string,string> inToOut, int inputAmount, Func<string,List<ItemDrop>> amountReturnMethod, string craftingRecipe, int returnRolls = 1,string? additionalItemRequired = null, string? failMessage = "")
     {
         this.id = id;
-        base.Name = name;
+        base.Name = id;
         base.DisplayName = displayname;
         base.Description = description;
         base.Price = price;

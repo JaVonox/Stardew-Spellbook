@@ -26,7 +26,7 @@ public class SpellbookPage : IClickableMenu
     public SpellbookPage(int x, int y, int width, int height)
         : base(x, y, width, height)
     {
-        runesTextures = ItemRegistry.GetData($"(O)4290").GetTexture();
+        runesTextures = ItemRegistry.GetData($"(O)Tofu.RunescapeSpellbook_RuneSpellbook").GetTexture();
         
         hasMagic = ModAssets.HasMagic(Game1.player);
         if (hasMagic)
@@ -200,10 +200,10 @@ public class SpellbookPage : IClickableMenu
         nextYOffset += 16;
         
         int nextXOffset = 16;
-        foreach (KeyValuePair<int,int> runePair in hoveredSpell.requiredItems) //Key is ID, value is amount
+        foreach (KeyValuePair<string,int> runePair in hoveredSpell.requiredItems) //Key is ID, value is amount
         {
             Vector2 runePosition = new Vector2(x + nextXOffset, y + nextYOffset + 4);
-            b.Draw(runesTextures, runePosition, new Rectangle(((runePair.Key - 4290) * 16), 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
+            b.Draw(runesTextures, runePosition, new Rectangle(((ModAssets.modItems[runePair.Key].SpriteIndex) * 16), 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
             
             Color runeCountColour = hoveredSpell.HasRuneCost(runePair.Key) ? Color.LawnGreen : Color.Red;
             b.DrawString(Game1.dialogueFont, runePair.Value.ToString(), new Vector2(runePosition.X + (16*2) + 10,runePosition.Y + (16*2)), runeCountColour);

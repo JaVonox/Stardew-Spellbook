@@ -16,7 +16,7 @@ public class Spell
     public string displayName;
     public string description;
     public int magicLevelRequirement;
-    public Dictionary<int,int> requiredItems; //Set of IDs for the required runes
+    public Dictionary<string,int> requiredItems; //Set of IDs for the required runes
     public int expReward;
     public string audioID;
     
@@ -24,7 +24,7 @@ public class Spell
     /// the offset from 16 y in the spellanimations.xnb to use for the inventory spell
     /// </summary>
     public int spellAnimOffset;
-    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int,int> requiredItems, int expReward, int spellAnimOffset, string audioID = "HighAlch")
+    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string,int> requiredItems, int expReward, int spellAnimOffset, string audioID = "HighAlch")
     {
         this.id = id;
         this.name = name;
@@ -48,7 +48,7 @@ public class Spell
             return new KeyValuePair<bool,string>(false, "My magic level is not high enough to perform this spell");;
         }
 
-        foreach (int runeID in requiredItems.Keys)
+        foreach (string runeID in requiredItems.Keys)
         {
             if (!HasRuneCost(runeID))
             {
@@ -58,10 +58,10 @@ public class Spell
         return new KeyValuePair<bool,string>(true, "");;
     }
 
-    public virtual bool HasRuneCost(int runeID)
+    public virtual bool HasRuneCost(string runeID)
     {
         return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || 
-                (runeID == 4291 && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")));
+                (runeID == "Tofu.RunescapeSpellbook_RuneAir" && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")));
     }
 
         
@@ -79,11 +79,11 @@ public class Spell
     /// Removes the runes that are required for the cast spell 
     /// </summary>
     /// <param name="ignoreRune">Any runes that should not be decremented</param>
-    protected void RemoveRunes(int ignoreRune = -1)
+    protected void RemoveRunes(string? ignoreRune = null)
     {
         //Remove all required runes - any granted by staffs (ignoreRune) and air runes if we have the emerald perk
         bool hasInfiniteAir = ModAssets.CheckHasPerkByName(Game1.player, "Emerald");
-        List<int> skippedItems = requiredItems.Where(x=>x.Key == ignoreRune || (x.Key == 4291 && hasInfiniteAir)).Select(x=>x.Key).ToList();
+        List<string> skippedItems = requiredItems.Where(x=>x.Key == ignoreRune || (x.Key == "Tofu.RunescapeSpellbook_RuneAir" && hasInfiniteAir)).Select(x=>x.Key).ToList();
 
         //If we have the ruby perk we have a 20% chance of skipping the cost entirely
         if (GetType() != typeof(CombatSpell) && ModAssets.CheckHasPerkByName(Game1.player, "Ruby") && Game1.random.NextDouble() <= 0.2)
@@ -91,7 +91,7 @@ public class Spell
             return;
         }
         
-        foreach (KeyValuePair<int, int> runeCost in requiredItems) //Remove runes if we have successfully cast the spell
+        foreach (KeyValuePair<string, int> runeCost in requiredItems) //Remove runes if we have successfully cast the spell
         {
             if(skippedItems.Contains(runeCost.Key)) {continue;}
             Game1.player.Items.ReduceId($"{runeCost.Key}", runeCost.Value);
@@ -117,7 +117,7 @@ public class TeleportSpell : Spell
     /// the island has not yet been unlocked </summary>
     /// <returns>True if the requirements for the teleport are met</returns>
     private Predicate<Farmer>? extraTeleportReqs;
-    public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
+    public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward,
         string location, int xPos = 0, int yPos = 0, int dir = 2, Predicate<Farmer>? extraTeleportReqs = null):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,4,"Teleport")
     {
@@ -201,10 +201,10 @@ public class TeleportSpell : Spell
         return actionResult;
     }
     
-    public override bool HasRuneCost(int runeID)
+    public override bool HasRuneCost(string runeID)
     {
         return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] ||
-                (runeID == 4291 && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")) 
+                (runeID == "Tofu.RunescapeSpellbook_RuneAir" && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")) 
                 || ModAssets.CheckHasPerkByName(Game1.player, "Sapphire"));
     }
 }
@@ -222,7 +222,7 @@ public class TilesSpell : Spell
     
     ///<summary>Specifies a function to be ran with the set of tiles collected via the terrainReqs predicate</summary>
     private TilesMethod doAction; 
-    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize, int spellAnimOffset, string AudioID = "HighAlch",
+    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize, int spellAnimOffset, string AudioID = "HighAlch",
         Predicate<TerrainFeature>? terrainReqs = null, string noTilesMessage = "Couldn't find any tiles to cast on"):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0,spellAnimOffset,AudioID)
     {
@@ -301,7 +301,7 @@ public class InventorySpell : Spell
     ///<summary>Description placed on the side menu to detail specific mechanics</summary>
     public string longDescription;
     
-    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset, string AudioID = "HighAlch"):
+    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset, string AudioID = "HighAlch"):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.highlightPredicate = highlightPredicate;
@@ -372,7 +372,7 @@ public class BuffSpell : Spell
     
     ///<summary>The message to display when a player does not meet the requirements for the spell specified in the farmerConditions predicate</summary>
     private string buffInvalidMessage;
-    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, int spellAnimOffset,string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
+    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, int spellAnimOffset,string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.farmerConditions = farmerConditions;
@@ -432,7 +432,7 @@ public class CombatSpell : Spell
 
     //Sprite rotation offset is the amount of rotation we need to have to make it point upwards in the projectile (in degrees)
     public CombatSpell(int id, string name, string displayName, string description,
-        int magicLevelRequirement, Dictionary<int, int> requiredItems, int expReward,
+        int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward,
         int damage,float velocity,int projectileSpriteID, Color projectileColor,string firingSound = "HighAlch", CombatExtraMethod? combatEffect = null)
         : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,projectileSpriteID,firingSound)
     {
@@ -444,9 +444,9 @@ public class CombatSpell : Spell
         this.combatEffect = combatEffect;
     }
     
-    public override bool HasRuneCost(int runeID)
+    public override bool HasRuneCost(string runeID)
     {
-        if (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || (runeID == 4291 && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")))
+        if (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || (runeID == "Tofu.RunescapeSpellbook_RuneAir" && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")))
         {
             return true;
         }
@@ -471,7 +471,7 @@ public class CombatSpell : Spell
             return canCast;
         }
         
-        foreach (int runeID in requiredItems.Keys) //If we can cast it, then we have to check if the weapon is the reason we can get the rune
+        foreach (string runeID in requiredItems.Keys) //If we can cast it, then we have to check if the weapon is the reason we can get the rune
         {
             //we now check every rune that the weapon doesnt provide, and if the base HasRuneCost says the rune cost is not sufficientt
             //then the spell cannot be cast (this catches the case where a player has a staff in their inventory that provides infinite runes but is not using it)
