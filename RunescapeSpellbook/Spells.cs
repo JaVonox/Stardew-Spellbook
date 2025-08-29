@@ -522,7 +522,7 @@ public class CombatSpell : Spell
                                (caster.hasBuff("statue_of_blessings_5") ? 0.1f : 0f) *
                                (caster.professions.Contains(25) ? 1.5f : 1f);
             
-            int projectileCount = caster.hasBuff("RS.Charge") || (ModAssets.CheckHasPerkByName(Game1.player, "Dragonstone") && Game1.random.NextDouble() <= 0.2) ? 3 : 1;
+            int projectileCount = caster.hasBuff("Tofu.RunescapeSpellbook_BuffCharge") || (ModAssets.CheckHasPerkByName(Game1.player, "Dragonstone") && Game1.random.NextDouble() <= 0.2) ? 3 : 1;
             
             List<MagicProjectile> generatedProjectiles = new();
             for(int i = 0; i < projectileCount; i++)
@@ -580,7 +580,7 @@ public class CombatSpell : Spell
                 generatedProjectiles.Add(generatedProjectile);
             }
 
-            if (generatedProjectiles.Count > 0 || (caster.hasBuff("RS.Battlemage") && Game1.random.NextDouble() <= 0.1f))
+            if (generatedProjectiles.Count > 0 || (caster.hasBuff("Tofu.RunescapeSpellbook_BuffBattlemage") && Game1.random.NextDouble() <= 0.1f))
             {
                 RemoveRunes(castingWeapon.providesRune);
                 AddExperience();

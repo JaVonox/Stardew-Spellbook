@@ -385,7 +385,7 @@ public class SpellEffects : BaseSpellEffects
     {
         PlayAnimation(() =>
         {
-            Game1.player.applyBuff("RS.Charge");
+            Game1.player.applyBuff("Tofu.RunescapeSpellbook_BuffCharge");
 
         }, "RunescapeSpellbook.Charge", 800,animOffset);
         
@@ -396,7 +396,7 @@ public class SpellEffects : BaseSpellEffects
     {
         PlayAnimation(() =>
         {
-            Game1.player.applyBuff("RS.DarkLure");
+            Game1.player.applyBuff("Tofu.RunescapeSpellbook_BuffDark");
 
         }, "RunescapeSpellbook.DarkLure", 800,animOffset);
         

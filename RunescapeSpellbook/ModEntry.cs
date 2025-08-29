@@ -652,9 +652,9 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(ref BobberBar __instance, string whichFish, float fishSize, bool treasure, List<string> bobbers, string setFlagOnCatch, bool isBossFish, string baitID = "", bool goldenTreasure = false)
             {
-                if (Game1.player.hasBuff("RS.Hunters"))
+                if (Game1.player.hasBuff("Tofu.RunescapeSpellbook_BuffHunters"))
                 {
-                    __instance.bobbers.Add("RS.Hunters");
+                    __instance.bobbers.Add("Tofu.RunescapeSpellbook_BuffHunters");
                 }
             }
         }
@@ -672,7 +672,7 @@ namespace RunescapeSpellbook
                         out int middleZoneEnd, out int middleZoneHeight);
                     
                     if (__instance.bobberInBar && bobberInMiddleZone && __instance.distanceFromCatching < 1.0f &&
-                        __instance.bobbers.Contains("RS.Hunters"))
+                        __instance.bobbers.Contains("Tofu.RunescapeSpellbook_BuffHunters"))
                     {
                         __instance.distanceFromCatching += 0.001f;
                     }
@@ -685,7 +685,7 @@ namespace RunescapeSpellbook
             {
                 public static void Postfix(ref BobberBar __instance, SpriteBatch b)
                 {
-                    if (__instance.scale == 1f && __instance.bobbers.Contains("RS.Hunters"))
+                    if (__instance.scale == 1f && __instance.bobbers.Contains("Tofu.RunescapeSpellbook_BuffHunters"))
                     {
                         Game1.StartWorldDrawInUI(b);
 
@@ -966,12 +966,12 @@ namespace RunescapeSpellbook
             {
                 if (!Context.IsMultiplayer || (Context.IsMultiplayer && __instance.IsLocalPlayer))
                 {
-                    if (!__instance.modData.ContainsKey("TofuMagicLevel"))
+                    if (!__instance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicLevel"))
                     {
-                        __instance.modData.Add("TofuMagicLevel","0");
-                        __instance.modData.Add("TofuMagicExperience","0");
-                        __instance.modData.Add("TofuMagicProfession1","-1");
-                        __instance.modData.Add("TofuMagicProfession2","-1");
+                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicLevel","0");
+                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicExp","0");
+                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicProf1","-1");
+                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicProf2","-1");
                     }
                     
                     ModAssets.localFarmerData.Reset();
@@ -1022,11 +1022,11 @@ namespace RunescapeSpellbook
             public static void Postfix(Farmer __instance,Item item, int countAdded, Item mergedIntoStack, bool hideHudNotification = false)
             {
                 //If any mod items are picked up for the first time we play a special animation
-                if (!__instance.hasOrWillReceiveMail("RSRunesFound") && ModAssets.modItems.TryGetValue(item.ItemId, out var modItem))
+                if (!__instance.hasOrWillReceiveMail("Tofu.RunescapeSpellbook_RunesFound") && ModAssets.modItems.TryGetValue(item.ItemId, out var modItem))
                 {
                     if (modItem is PackObject || item.ItemId == "Tofu.RunescapeSpellbook_TreasureElemental" || item.ItemId == "Tofu.RunescapeSpellbook_TreasureCatalytic")
                     {
-                        __instance.mailReceived.Add("RSRunesFound");
+                        __instance.mailReceived.Add("Tofu.RunescapeSpellbook_RunesFound");
                         __instance.holdUpItemThenMessage(item, countAdded);
                     }
                 }
@@ -1063,7 +1063,7 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(ref double __result, Monster __instance, Farmer f)
             {
-                if (f.hasBuff($"RS.DarkLure")) //If we have dark lure, make the result extremely low for this player, so we can increase their priority
+                if (f.hasBuff($"Tofu.RunescapeSpellbook_BuffDark")) //If we have dark lure, make the result extremely low for this player, so we can increase their priority
                 {
                     __result *= 0.1;
                 }
@@ -1184,9 +1184,9 @@ namespace RunescapeSpellbook
                 }
             }
         }
-        
+
         [HarmonyPatch(typeof(BasicProjectile), "behaviorOnCollisionWithMonster")]
-        [HarmonyPatch(new Type[] { typeof(NPC),typeof(GameLocation) })]
+        [HarmonyPatch(new Type[] { typeof(NPC), typeof(GameLocation) })]
         public class SlingshotProjectileMonsterHit
         {
             public static bool Prefix(BasicProjectile __instance, NPC n, GameLocation location)
@@ -1195,7 +1195,8 @@ namespace RunescapeSpellbook
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);
 
-                    if (ModAssets.modItems.TryGetValue(__instance.itemId.Value, out ModLoadObjects objItem) && objItem is SlingshotItem ammoItem)
+                    if (ModAssets.modItems.TryGetValue(__instance.itemId.Value, out ModLoadObjects objItem) &&
+                        objItem is SlingshotItem ammoItem)
                     {
                         HitMonster(__instance, n as Monster, location, player, ammoItem.debuffType);
                         n.currentLocation.playSound("explosion", n.Tile, null);
@@ -1208,500 +1209,490 @@ namespace RunescapeSpellbook
                         return false;
                     }
                 }
-                return true; 
+
+                return true;
             }
 
             //These monsters do not allow for glowing effects, so it isn't possible to show the player the fact they're debuffed. Its easier to give them immunity
-            private static void HitMonster(BasicProjectile __instance, Monster n, GameLocation location, Farmer player, int debuffType)
+            private static void HitMonster(BasicProjectile __instance, Monster n, GameLocation location, Farmer player,
+                int debuffType)
             {
-                location.damageMonster(n.GetBoundingBox(), __instance.damageToFarmer.Value, __instance.damageToFarmer.Value + 1, isBomb: false, player, isProjectile: true);
-                
-                foreach (NPC npcEffected in location.characters.Where(x=> x is Monster mon && Vector2.Distance(n.Tile,x.Tile) < 5))
+                location.damageMonster(n.GetBoundingBox(), __instance.damageToFarmer.Value,
+                    __instance.damageToFarmer.Value + 1, isBomb: false, player, isProjectile: true);
+
+                foreach (NPC npcEffected in location.characters.Where(x =>
+                             x is Monster mon && Vector2.Distance(n.Tile, x.Tile) < 5))
                 {
                     Monster monsterEffected = npcEffected as Monster;
-                    
+
                     if (monsterEffected.mineMonster.Value)
                     {
                         ModAssets.BroadcastSprite(monsterEffected.currentLocation,
-                            new TemporaryAnimatedSprite(362, Game1.random.Next(15, 50), 6, 1, monsterEffected.Position - new Vector2(32 + Game1.random.Next(-21, 21) - 32, 32 + Game1.random.Next(-21, 21)), flicker: false, Game1.random.NextBool())
-                        {
-                            scale = 0.5f,
-                            delayBeforeAnimationStart = 100,
-                            alpha = 0.5f
-                        });
-                        int newDebuffValue = (-1800 * debuffType) + (monsterEffected.Manners == 0 ? 0 : monsterEffected.Manners % 90);
-                        monsterEffected.Manners = newDebuffValue;
-                }
+                            new TemporaryAnimatedSprite(362, Game1.random.Next(15, 50), 6, 1,
+                                monsterEffected.Position - new Vector2(32 + Game1.random.Next(-21, 21) - 32,
+                                    32 + Game1.random.Next(-21, 21)), flicker: false, Game1.random.NextBool())
+                            {
+                                scale = 0.5f,
+                                delayBeforeAnimationStart = 100,
+                                alpha = 0.5f
+                            });
 
-                if (!n.IsInvisible)
-                {
-                    __instance.piercesLeft.Value--;
+                        if (!monsterEffected.isGlowing)
+                        {
+                            monsterEffected.startGlowing(debuffType == 2 ? Color.Red : Color.Green, false, 0.05f);
+                        }
+
+                        for (int i = 1; i <= DEBUFFHITS + 1; i++)
+                        {
+                            DelayedAction.functionAfterDelay(() => ApplyPoisonEffect(monsterEffected, debuffType),
+                                i * DEBUFFDELAY);
+                        }
+                    }
+
+                    if (!n.IsInvisible)
+                    {
+                        __instance.piercesLeft.Value--;
+                    }
                 }
             }
-        }
-        
-        [HarmonyPatch(typeof(Monster), "update")]
-        [HarmonyPatch(new Type[] { typeof(GameTime),typeof(GameLocation)})]
-        public class MonsterUpdatePatcher
-        {
-            public static void Prefix(Monster __instance, GameTime time, GameLocation location)
+
+            private static readonly int DEBUFFHITS = 10;
+            private static readonly int DEBUFFDELAY = 1000;
+
+            private static void ApplyPoisonEffect(Monster target, int debuffIndex)
             {
-                if (__instance.Manners < 0)
+                if (target != null && target.Health > 1 && !target.isInvincible())
                 {
-                    __instance.Manners++;
-                    if(__instance.Manners % 4 == 0 && __instance.Manners % 90 != 0) return;
-
-                    bool isFire = __instance.Manners <= -1801;
-                    
+                    bool isFire = debuffIndex == 2;
                     int hitDamage = isFire ? 30 : 50;
-                    int bound = isFire ? -1801 : -1;
-                    
-                    if (__instance.Manners == bound || __instance.Health == 1)
-                    {
-                        __instance.Speed = 1;
-                        __instance.stopGlowing();
-                        __instance.Manners = 0;
-                        return;
-                    }
-                    else if (__instance.invincibleCountdown > 0)
-                    {
-                        __instance.Manners = 0;
-                        return;
-                    }
-                    else
-                    {
-                        if (__instance.Manners % 90 == 0) //Every 90 frames we do damage
-                        {
-                            int realDamage = __instance.Health - hitDamage <= 0 ? __instance.Health - 1 : hitDamage;
-                            if (!__instance.isInvincible())
-                            {
-                                Rectangle monsterBox = __instance.GetBoundingBox();
-                                __instance.currentLocation.playSound(isFire ? "RunescapeSpellbook.FireBurn" : "RunescapeSpellbook.Liquid", __instance.Tile,
-                                    null);
-                                __instance.currentLocation.debris.Add(new Debris(realDamage,
-                                    new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y), isFire ? Color.Orange : Color.Purple,
-                                    1.25f, __instance));
-                                __instance.Health -= realDamage;
-                            }
-                        }
 
-                        if (!__instance.isGlowing)
-                        {
-                            __instance.startGlowing(isFire ? Color.Red : Color.Green, false, 0.05f);
-                        }
+                    int realDamage = target.Health - hitDamage <= 0 ? target.Health - 1 : hitDamage;
+
+                    Rectangle monsterBox = target.GetBoundingBox();
+                    target.currentLocation.playSound(
+                        isFire ? "RunescapeSpellbook.FireBurn" : "RunescapeSpellbook.Liquid", target.Tile,
+                        null);
+                    target.currentLocation.debris.Add(new Debris(realDamage,
+                        new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y),
+                        isFire ? Color.Orange : Color.Purple,
+                        1.25f, target));
+                    target.Health -= realDamage;
+
+                    if (!target.isGlowing)
+                    {
+                        target.startGlowing(isFire ? Color.Red : Color.Green, false, 0.05f);
                     }
-                }
                 }
             }
         }
 
         [HarmonyPatch(typeof(TV), "checkForAction")]
-        public class TVChannelTranspiler
-        {
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            public class TVChannelTranspiler
             {
-                try
+                static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
-                    var codes = new List<CodeInstruction>(instructions);
+                    try
+                    {
+                        var codes = new List<CodeInstruction>(instructions);
 
-                    var toArrayMethod = AccessTools.Method(typeof(List<Response>), "ToArray");
-                    var modifyChannelsMethod = AccessTools.Method(typeof(TVChannelTranspiler), "ModifyChannelsList");
+                        var toArrayMethod = AccessTools.Method(typeof(List<Response>), "ToArray");
+                        var modifyChannelsMethod = AccessTools.Method(typeof(TVChannelTranspiler), "ModifyChannelsList");
 
-                    if (toArrayMethod == null)
+                        if (toArrayMethod == null)
+                        {
+                            return instructions;
+                        }
+
+                        for (int i = 0; i < codes.Count; i++)
+                        {
+                            var current = codes[i];
+                            var next = codes[i + 1];
+
+                            if (next.opcode == OpCodes.Callvirt &&
+                                next.operand is MethodInfo method &&
+                                method == toArrayMethod &&
+                                (current.opcode == OpCodes.Ldloc_S ||
+                                 current.opcode == OpCodes.Ldloc_0 ||
+                                 current.opcode == OpCodes.Ldloc_1 ||
+                                 current.opcode == OpCodes.Ldloc_2 ||
+                                 current.opcode == OpCodes.Ldloc_3 ||
+                                 current.opcode == OpCodes.Ldloc))
+                            {
+                                var insertPoint = i + 1;
+                            
+                                var dupInstruction = new CodeInstruction(OpCodes.Dup);
+                                var callInstruction = new CodeInstruction(OpCodes.Call, modifyChannelsMethod);
+                            
+                                if (codes[insertPoint].labels.Count > 0)
+                                {
+                                    dupInstruction.labels.AddRange(codes[insertPoint].labels);
+                                    codes[insertPoint].labels.Clear();
+                                }
+                            
+                                codes.Insert(insertPoint, dupInstruction);
+                                codes.Insert(insertPoint + 1, callInstruction);
+                                break;
+                            }
+                        }
+                    
+                        return codes;
+
+                    }
+                    catch (Exception e)
                     {
                         return instructions;
                     }
-
-                    for (int i = 0; i < codes.Count; i++)
+                }
+                public static void ModifyChannelsList(List<Response> channels)
+                {
+                    foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
+                                 x is LoadableTV tvChannel && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season && Game1.year >= tvChannel.firstYear))
                     {
-                        var current = codes[i];
-                        var next = codes[i + 1];
+                        string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : " (Rerun)");
+                        channels.Insert(channels.Count - 1, new Response($"RS_{addChannel.id}", channelName));
+                    }
+                }
 
-                        if (next.opcode == OpCodes.Callvirt &&
-                            next.operand is MethodInfo method &&
-                            method == toArrayMethod &&
-                            (current.opcode == OpCodes.Ldloc_S ||
-                             current.opcode == OpCodes.Ldloc_0 ||
-                             current.opcode == OpCodes.Ldloc_1 ||
-                             current.opcode == OpCodes.Ldloc_2 ||
-                             current.opcode == OpCodes.Ldloc_3 ||
-                             current.opcode == OpCodes.Ldloc))
+                [HarmonyPatch(typeof(TV), "selectChannel")]
+                [HarmonyPatch(new Type[] { typeof(Farmer), typeof(string)})]
+                public class ChannelSelectPatcher
+                {
+                    public static void Postfix(TV __instance, Farmer who, string answer)
+                    {
+                        var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
+                        var currentChannelValue = currentChannelTraverse.GetValue<int>();
+                    
+                        if (currentChannelValue == 0)
                         {
-                            var insertPoint = i + 1;
-                            
-                            var dupInstruction = new CodeInstruction(OpCodes.Dup);
-                            var callInstruction = new CodeInstruction(OpCodes.Call, modifyChannelsMethod);
-                            
-                            if (codes[insertPoint].labels.Count > 0)
+                            LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && $"RS_{x.id}" == answer && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
+
+                            if (modChannel != null)
                             {
-                                dupInstruction.labels.AddRange(codes[insertPoint].labels);
-                                codes[insertPoint].labels.Clear();
-                            }
+                                currentChannelTraverse.SetValue(int.Parse(modChannel.id));
                             
-                            codes.Insert(insertPoint, dupInstruction);
-                            codes.Insert(insertPoint + 1, callInstruction);
-                            break;
+                                var screenTraverse = Traverse.Create(__instance).Field("screen");
+                                screenTraverse.SetValue(new TemporaryAnimatedSprite("Mods.RunescapeSpellbook.Assets.spellanimations", new Rectangle(64, 0, 42, 28), 3000f, 2, 999999, __instance.getScreenPosition(), flicker: false, flipped: false, (float)(__instance.boundingBox.Bottom - 1) / 10000f + 1E-05f, 0f, Color.White, __instance.getScreenSizeModifier(), 0f, 0f, 0f));
+                                Game1.drawObjectDialogue(modChannel.contents[0]);
+                                Game1.afterDialogues = __instance.proceedToNextScene;
+                            }
+
                         }
                     }
-                    
-                    return codes;
+                }
 
-                }
-                catch (Exception e)
+                [HarmonyPatch(typeof(TV), "proceedToNextScene")]
+                public class ChannelNextDialoguePatcher
                 {
-                    return instructions;
-                }
-            }
-            public static void ModifyChannelsList(List<Response> channels)
-            {
-                foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
-                             x is LoadableTV tvChannel && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season && Game1.year >= tvChannel.firstYear))
-                {
-                    string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : " (Rerun)");
-                    channels.Insert(channels.Count - 1, new Response($"RS_{addChannel.id}", channelName));
-                }
-            }
-
-            [HarmonyPatch(typeof(TV), "selectChannel")]
-            [HarmonyPatch(new Type[] { typeof(Farmer), typeof(string)})]
-            public class ChannelSelectPatcher
-            {
-                public static void Postfix(TV __instance, Farmer who, string answer)
-                {
-                    var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
-                    var currentChannelValue = currentChannelTraverse.GetValue<int>();
-                    
-                    if (currentChannelValue == 0)
+                    private static int lastIndex = 0;
+                    public static void Postfix(TV __instance)
                     {
-                        LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && $"RS_{x.id}" == answer && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
-
+                        var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
+                        var currentChannelValue = currentChannelTraverse.GetValue<int>();
+                    
+                        LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && int.Parse(x.id) == currentChannelValue && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
                         if (modChannel != null)
                         {
-                            currentChannelTraverse.SetValue(int.Parse(modChannel.id));
-                            
-                            var screenTraverse = Traverse.Create(__instance).Field("screen");
-                            screenTraverse.SetValue(new TemporaryAnimatedSprite("Mods.RunescapeSpellbook.Assets.spellanimations", new Rectangle(64, 0, 42, 28), 3000f, 2, 999999, __instance.getScreenPosition(), flicker: false, flipped: false, (float)(__instance.boundingBox.Bottom - 1) / 10000f + 1E-05f, 0f, Color.White, __instance.getScreenSizeModifier(), 0f, 0f, 0f));
-                            Game1.drawObjectDialogue(modChannel.contents[0]);
-                            Game1.afterDialogues = __instance.proceedToNextScene;
-                        }
+                            int maxDialogue = modChannel.contents.Count - 1;
 
-                    }
-                }
-            }
-
-            [HarmonyPatch(typeof(TV), "proceedToNextScene")]
-            public class ChannelNextDialoguePatcher
-            {
-                private static int lastIndex = 0;
-                public static void Postfix(TV __instance)
-                {
-                    var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
-                    var currentChannelValue = currentChannelTraverse.GetValue<int>();
-                    
-                    LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && int.Parse(x.id) == currentChannelValue && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
-                    if (modChannel != null)
-                    {
-                        int maxDialogue = modChannel.contents.Count - 1;
-
-                        if (maxDialogue == lastIndex)
-                        {
-                            __instance.turnOffTV();
-                            lastIndex = 0;
-                        }
-                        else
-                        {
-                            lastIndex++;
-                            Game1.drawObjectDialogue(modChannel.contents[lastIndex]);
-                            Game1.afterDialogues = __instance.proceedToNextScene;
+                            if (maxDialogue == lastIndex)
+                            {
+                                __instance.turnOffTV();
+                                lastIndex = 0;
+                            }
+                            else
+                            {
+                                lastIndex++;
+                                Game1.drawObjectDialogue(modChannel.contents[lastIndex]);
+                                Game1.afterDialogues = __instance.proceedToNextScene;
+                            }
                         }
                     }
                 }
             }
-        }
 
-        //Console Commands
-        private bool HasNoMagic()
-        {
-            if (!ModAssets.HasMagic(Game1.player))
+            //Console Commands
+            private bool HasNoMagic()
             {
-                this.Monitor.Log("You don't have access to magic, use rs_grantmagic to give magic access",LogLevel.Warn);
-                return true;
-            }
-
-            return false;
-        }
-        
-        private bool HasNoWorldContextReady()
-        {
-            if (!Context.IsWorldReady)
-            {
-                this.Monitor.Log("World not yet initialised",LogLevel.Warn);
-                return true;
-            }
-
-            return false;
-        }
-
-        private void GrantMagic(string command, string[] args)
-        {
-            if(HasNoWorldContextReady()){return;}
-            
-            if (ModAssets.HasMagic(Game1.player))
-            {
-                this.Monitor.Log("You already have access to magic",LogLevel.Warn);
-                return;
-            }
-            Game1.player.eventsSeen.Add("RS.0");
-            Monitor.Log("Added magic",LogLevel.Info);
-            if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
-            {
-                reqLevel = Math.Clamp(reqLevel, 0, 10);
-                Game1.player.modData["TofuMagicLevel"] = (reqLevel).ToString();
-                Game1.player.modData["TofuMagicExperience"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
-                this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
-            }
-        }
-    
-        private void SetLevel(string command, string[] args)
-        {
-            if (HasNoWorldContextReady() || HasNoMagic()){return;}
-
-            if (args.Length == 0)
-            {
-                this.Monitor.Log("Specify a magic level to apply",LogLevel.Error);
-                return;
-            }
-            
-            if (int.TryParse(args[0], out int reqLevel))
-            {
-                reqLevel = Math.Clamp(reqLevel, 0, 10);
-                Game1.player.modData["TofuMagicLevel"] = (reqLevel).ToString();
-                Game1.player.modData["TofuMagicExperience"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
-                this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
-            }
-        }
-        
-        private void SetExp(string command, string[] args)
-        {
-            if (HasNoWorldContextReady() || HasNoMagic()){return;}
-
-            if (args.Length == 0)
-            {
-                this.Monitor.Log("Specify an amount of exp to set to",LogLevel.Error);
-                return;
-            }
-            
-            if (int.TryParse(args[0], out int reqExp))
-            {
-                reqExp = Math.Clamp(reqExp, 0, 15000);
-                Game1.player.modData["TofuMagicLevel"] = "0";
-                ModAssets.IncrementMagicExperience(Game1.player, reqExp);
-                this.Monitor.Log($"Set experience to {reqExp}",LogLevel.Info);
-            }
-        }
-        
-        private void AddExp(string command, string[] args)
-        {
-            if (HasNoWorldContextReady() || HasNoMagic()){return;}
-
-            if (args.Length == 0)
-            {
-                this.Monitor.Log("Specify an amount of exp to add",LogLevel.Error);
-                return;
-            }
-            
-            if (int.TryParse(args[0], out int reqAddExp))
-            {
-                reqAddExp = Math.Clamp(reqAddExp, 0, Farmer.getBaseExperienceForLevel(10) - ModAssets.GetFarmerExperience(Game1.player));
-                ModAssets.IncrementMagicExperience(Game1.player, reqAddExp);
-                this.Monitor.Log($"Added {reqAddExp} experience to player",LogLevel.Info);
-            }
-        }
-        
-        private void ResetPerks(string command, string[] args)
-        {
-            if (HasNoWorldContextReady() || HasNoMagic()){return;}
-            
-            Game1.player.modData["TofuMagicProfession1"] = "-1";
-            Game1.player.modData["TofuMagicProfession2"] = "-1";
-            
-            this.Monitor.Log($"Removed assigned perks",LogLevel.Info);
-        }
-        
-        private void PlayerInfo(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-
-            foreach (Farmer farmerRoot in ModAssets.GetFarmers())
-            {
-                Monitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Info);
-                Monitor.Log($"HasMagic: {ModAssets.HasMagic(farmerRoot)}",LogLevel.Info);
-                Monitor.Log($"Level: {ModAssets.GetFarmerMagicLevel(farmerRoot)}",LogLevel.Info);
-                Monitor.Log($"Exp: {farmerRoot.modData["TofuMagicExperience"]}",LogLevel.Info);
-                
-                List<int> perkIDs = ModAssets.PerksAssigned(farmerRoot);
-                int perkIndex = 1;
-                foreach (int id in perkIDs)
+                if (!ModAssets.HasMagic(Game1.player))
                 {
-                    string perkName = id == -1 ? "Unassigned" : ModAssets.perks.Where(x=>x.perkID==id).Select(x=>x.perkName).First();
-                    Monitor.Log($"Perk Slot {perkIndex}: {perkName}",LogLevel.Info);
+                    this.Monitor.Log("You don't have access to magic, use rs_grantmagic to give magic access",LogLevel.Warn);
+                    return true;
                 }
-            }
-        }
-        private void GrantRunes(string command, string[] args)
-        {
-            if(HasNoWorldContextReady()){return;}
-            
-            string runeReq = args.Length == 0 ? "default" : args[0].ToLower();
 
-            List<int> runeReqs;
-            
-            if (runeReq == "default")
-            {
-                runeReqs = new List<int>() { -429, -431, -430 };
+                return false;
             }
-            else if (runeReq == "elemental" || runeReq == "elem")
+        
+            private bool HasNoWorldContextReady()
             {
-                runeReqs = new List<int>() { -429 };
-            }
-            else if (runeReq == "catalytic" || runeReq == "cat" || runeReq == "cata")
-            {
-                runeReqs = new List<int>() { -431, -430 };
-            }
-            else if (runeReq == "teleport" || runeReq == "tele")
-            {
-                runeReqs = new List<int>() { -429};
-                
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneLaw");
-                item.Stack = 255;
-                Game1.player.addItemToInventory(item);
-            }
-            else if (runeReq == "utility" || runeReq == "util")
-            {
-                runeReqs = new List<int>() { -429,-431};
-            }
-            else if (runeReq == "combat" || runeReq == "comb")
-            {
-                runeReqs = new List<int>() { -429,-430};
-            }
-            else if (runeReq == "combat2" || runeReq == "com2" || runeReq == "comb2")
-            {
-                runeReqs = new List<int>() { -429,-430};
-                
-                StardewValley.Object cosmRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneCosmic");
-                cosmRune.Stack = 255;
-                Game1.player.addItemToInventory(cosmRune);
-                
-                StardewValley.Object astRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneAstral");
-                astRune.Stack = 255;
-                Game1.player.addItemToInventory(astRune);
-            }
-            else
-            {
-                List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.DisplayName.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
-                if (matchList.Count == 0)
+                if (!Context.IsWorldReady)
                 {
-                    this.Monitor.Log($"Invalid rune set to grant {runeReq}",LogLevel.Error);
+                    this.Monitor.Log("World not yet initialised",LogLevel.Warn);
+                    return true;
+                }
+
+                return false;
+            }
+
+            private void GrantMagic(string command, string[] args)
+            {
+                if(HasNoWorldContextReady()){return;}
+            
+                if (ModAssets.HasMagic(Game1.player))
+                {
+                    this.Monitor.Log("You already have access to magic",LogLevel.Warn);
                     return;
                 }
-                else
+                Game1.player.eventsSeen.Add("RS.0");
+                Monitor.Log("Added magic",LogLevel.Info);
+                if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
                 {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{matchList[0].id}");
+                    reqLevel = Math.Clamp(reqLevel, 0, 10);
+                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicLevel"] = (reqLevel).ToString();
+                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicExp"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
+                    this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
+                }
+            }
+    
+            private void SetLevel(string command, string[] args)
+            {
+                if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+                if (args.Length == 0)
+                {
+                    this.Monitor.Log("Specify a magic level to apply",LogLevel.Error);
+                    return;
+                }
+            
+                if (int.TryParse(args[0], out int reqLevel))
+                {
+                    reqLevel = Math.Clamp(reqLevel, 0, 10);
+                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicLevel"] = (reqLevel).ToString();
+                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicExp"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
+                    this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
+                }
+            }
+        
+            private void SetExp(string command, string[] args)
+            {
+                if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+                if (args.Length == 0)
+                {
+                    this.Monitor.Log("Specify an amount of exp to set to",LogLevel.Error);
+                    return;
+                }
+            
+                if (int.TryParse(args[0], out int reqExp))
+                {
+                    reqExp = Math.Clamp(reqExp, 0, 15000);
+                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicLevel"] = "0";
+                    ModAssets.IncrementMagicExperience(Game1.player, reqExp);
+                    this.Monitor.Log($"Set experience to {reqExp}",LogLevel.Info);
+                }
+            }
+        
+            private void AddExp(string command, string[] args)
+            {
+                if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+                if (args.Length == 0)
+                {
+                    this.Monitor.Log("Specify an amount of exp to add",LogLevel.Error);
+                    return;
+                }
+            
+                if (int.TryParse(args[0], out int reqAddExp))
+                {
+                    reqAddExp = Math.Clamp(reqAddExp, 0, Farmer.getBaseExperienceForLevel(10) - ModAssets.GetFarmerExperience(Game1.player));
+                    ModAssets.IncrementMagicExperience(Game1.player, reqAddExp);
+                    this.Monitor.Log($"Added {reqAddExp} experience to player",LogLevel.Info);
+                }
+            }
+        
+            private void ResetPerks(string command, string[] args)
+            {
+                if (HasNoWorldContextReady() || HasNoMagic()){return;}
+            
+                Game1.player.modData["Tofu.RunescapeSpellbook_MagicProf1"] = "-1";
+                Game1.player.modData["Tofu.RunescapeSpellbook_MagicProf2"] = "-1";
+            
+                this.Monitor.Log($"Removed assigned perks",LogLevel.Info);
+            }
+        
+            private void PlayerInfo(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
+
+                foreach (Farmer farmerRoot in ModAssets.GetFarmers())
+                {
+                    Monitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Info);
+                    Monitor.Log($"HasMagic: {ModAssets.HasMagic(farmerRoot)}",LogLevel.Info);
+                    Monitor.Log($"Level: {ModAssets.GetFarmerMagicLevel(farmerRoot)}",LogLevel.Info);
+                    Monitor.Log($"Exp: {farmerRoot.modData["Tofu.RunescapeSpellbook_MagicExp"]}",LogLevel.Info);
+                
+                    List<int> perkIDs = ModAssets.PerksAssigned(farmerRoot);
+                    int perkIndex = 1;
+                    foreach (int id in perkIDs)
+                    {
+                        string perkName = id == -1 ? "Unassigned" : ModAssets.perks.Where(x=>x.perkID==id).Select(x=>x.perkName).First();
+                        Monitor.Log($"Perk Slot {perkIndex}: {perkName}",LogLevel.Info);
+                    }
+                }
+            }
+            private void GrantRunes(string command, string[] args)
+            {
+                if(HasNoWorldContextReady()){return;}
+            
+                string runeReq = args.Length == 0 ? "default" : args[0].ToLower();
+
+                List<int> runeReqs;
+            
+                if (runeReq == "default")
+                {
+                    runeReqs = new List<int>() { -429, -431, -430 };
+                }
+                else if (runeReq == "elemental" || runeReq == "elem")
+                {
+                    runeReqs = new List<int>() { -429 };
+                }
+                else if (runeReq == "catalytic" || runeReq == "cat" || runeReq == "cata")
+                {
+                    runeReqs = new List<int>() { -431, -430 };
+                }
+                else if (runeReq == "teleport" || runeReq == "tele")
+                {
+                    runeReqs = new List<int>() { -429};
+                
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneLaw");
                     item.Stack = 255;
                     Game1.player.addItemToInventory(item);
                 }
-                return;
+                else if (runeReq == "utility" || runeReq == "util")
+                {
+                    runeReqs = new List<int>() { -429,-431};
+                }
+                else if (runeReq == "combat" || runeReq == "comb")
+                {
+                    runeReqs = new List<int>() { -429,-430};
+                }
+                else if (runeReq == "combat2" || runeReq == "com2" || runeReq == "comb2")
+                {
+                    runeReqs = new List<int>() { -429,-430};
                 
-            }
-            foreach (string id in ModAssets.modItems.Where(x => runeReqs.Contains(x.Value.Category)).Select(y=>y.Key))
-            {
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O){id}");
-                item.Stack = 255;
-                Game1.player.addItemToInventory(item);
-            }
+                    StardewValley.Object cosmRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneCosmic");
+                    cosmRune.Stack = 255;
+                    Game1.player.addItemToInventory(cosmRune);
+                
+                    StardewValley.Object astRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneAstral");
+                    astRune.Stack = 255;
+                    Game1.player.addItemToInventory(astRune);
+                }
+                else
+                {
+                    List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.DisplayName.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
+                    if (matchList.Count == 0)
+                    {
+                        this.Monitor.Log($"Invalid rune set to grant {runeReq}",LogLevel.Error);
+                        return;
+                    }
+                    else
+                    {
+                        StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{matchList[0].id}");
+                        item.Stack = 255;
+                        Game1.player.addItemToInventory(item);
+                    }
+                    return;
+                
+                }
+                foreach (string id in ModAssets.modItems.Where(x => runeReqs.Contains(x.Value.Category)).Select(y=>y.Key))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O){id}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
             
-            this.Monitor.Log($"Granted runes from set {runeReq}",LogLevel.Info);
-        }
+                this.Monitor.Log($"Granted runes from set {runeReq}",LogLevel.Info);
+            }
         
-        private void GrantAmmo(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-            
-            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SlingshotItem).Select(y=>y.Value))
+            private void GrantAmmo(string command, string[] args)
             {
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                item.Stack = 255;
-                Game1.player.addItemToInventory(item);
-            }
+                if (HasNoWorldContextReady()){return;}
             
-            this.Monitor.Log($"Granted all ammos",LogLevel.Info);
-        }
-        private void GrantStaffs(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
+                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SlingshotItem).Select(y=>y.Value))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                    item.Stack = 255;
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all ammos",LogLevel.Info);
+            }
+            private void GrantStaffs(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
 
-            foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
-            {
-                MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id);
-                Game1.player.addItemToInventory(item);
+                foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
+                {
+                    MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id);
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all staves",LogLevel.Info);
             }
-            
-            this.Monitor.Log($"Granted all staves",LogLevel.Info);
-        }
         
-        private void GrantTreasures(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-            
-            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is TreasureObjects and not PackObject).Select(y=>y.Value))
+            private void GrantTreasures(string command, string[] args)
             {
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                item.Stack = 20;
-                Game1.player.addItemToInventory(item);
+                if (HasNoWorldContextReady()){return;}
+            
+                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is TreasureObjects and not PackObject).Select(y=>y.Value))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                    item.Stack = 20;
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all treasures",LogLevel.Info);
             }
-            
-            this.Monitor.Log($"Granted all treasures",LogLevel.Info);
-        }
         
-        private void DebugCommand(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-        }
-        
-        private void DebugPosition(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-            
-            Farmer player = Game1.player;
-            Monitor.Log($"{player.currentLocation.Name}\n x: {player.Tile.X}\n y: {player.Tile.Y}",LogLevel.Info);
-        }
-        
-        private void GrantPacks(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-            
-            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PackObject).Select(y=>y.Value))
+            private void DebugCommand(string command, string[] args)
             {
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                item.Stack = 20;
-                Game1.player.addItemToInventory(item);
+                if (HasNoWorldContextReady()){return;}
             }
-            
-            this.Monitor.Log($"Granted all packs",LogLevel.Info);
-        }
         
-        private void GrantFish(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-            
-            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value))
+            private void DebugPosition(string command, string[] args)
             {
-                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                item.Stack = 20;
-                Game1.player.addItemToInventory(item);
-            }
+                if (HasNoWorldContextReady()){return;}
             
-            this.Monitor.Log($"Granted all fish",LogLevel.Info);
-        }
+                Farmer player = Game1.player;
+                Monitor.Log($"{player.currentLocation.Name}\n x: {player.Tile.X}\n y: {player.Tile.Y}",LogLevel.Info);
+            }
+        
+            private void GrantPacks(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
+            
+                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PackObject).Select(y=>y.Value))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                    item.Stack = 20;
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all packs",LogLevel.Info);
+            }
+        
+            private void GrantFish(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
+            
+                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                    item.Stack = 20;
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all fish",LogLevel.Info);
+            }
     }
 }

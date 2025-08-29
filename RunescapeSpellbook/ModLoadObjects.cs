@@ -45,7 +45,7 @@ public static class ModAssets
         {"Tofu.RunescapeSpellbook_AmmoFire",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoFire","Fire Orb","Enchanted ammo that burns enemies in a radius around a hit enemy. Fire cannot finish off enemies.",30,15,2)},
         {"Tofu.RunescapeSpellbook_AmmoEarth",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoEarth","Earth Orb","Enchanted ammo that explodes and poisons enemies in a radius around a hit enemy. Poison cannot finish off enemies.",31,25,1,true)},
         
-        {"Tofu.RunescapeSpellbook_TreasureElemental",new TreasureObjects("Tofu.RunescapeSpellbook_TreaasureElemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
+        {"Tofu.RunescapeSpellbook_TreasureElemental",new TreasureObjects("Tofu.RunescapeSpellbook_TreasureElemental","Elemental Geode","Contains some elemental Runes. A blacksmith might be able to open it.",19,
             new()
             {
                 new ItemDrop("Tofu.RunescapeSpellbook_RuneAir", 10, 12, 1),
@@ -273,7 +273,7 @@ public static class ModAssets
             13,1.4f,"",0,0,0,0.05f),
         new StaffWeaponData("Tofu.RunescapeSpellbook_StaffAhrims", "Ahrims Staff", "Ahrim the Blighted's quarterstaff", 30, 45, 17,
             15,1.6f),
-        new StaffWeaponData("Tofu.RunescapeSpellbook_BlueMoon", "Blue Moon Spear",
+        new StaffWeaponData("Tofu.RunescapeSpellbook_StaffBlueMoon", "Blue Moon Spear",
             "An ancient battlestaff that doubles as a spear", 70, 90, 18,
             15,1.5f)
     };
@@ -591,7 +591,7 @@ public static class ModAssets
     public static List<LoadableText> loadableText = new()
     {
         {
-            new LoadableMail("RSSpellMailGet","Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
+            new LoadableMail("Tofu.RunescapeSpellbook_SpellMail","Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff." +
               "^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. " +
               "^^   -M. Rasmodius, Wizard[letterbg 2]" +
               "%item object Tofu.RunescapeSpellbook_StaffMagic 1 %%" +
@@ -764,7 +764,7 @@ public static class ModAssets
                     "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
                     "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
                     "/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"" +
-                    "/stopMusic /itemAboveHead Tofu.RunescapeSpellbook_RuneSpellbook /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail RSSpellMailGet" +
+                    "/stopMusic /itemAboveHead Tofu.RunescapeSpellbook_RuneSpellbook /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail Tofu.RunescapeSpellbook_SpellMail" +
                     "/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600" +
                     "/speak Wizard \"Well, that was all. I'll be on my way now.\"" +
                     "/pause 300/end"
@@ -775,7 +775,7 @@ public static class ModAssets
             "Data/Events/ArchaeologyHouse", new()
             {
                 {
-                    "RS.1/n RSRunesFound",
+                    "RS.1/n Tofu.RunescapeSpellbook_RunesFound",
                     "continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3" +
                     "/skippable /pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"" +
                     "/speak Marlon \"This is an antique! I've been using this blade for decades now!\"" +
@@ -870,14 +870,14 @@ public static class ModAssets
 
     public static bool HasMagic(Farmer farmer)
     {
-        if (farmer.mailReceived.Contains("TofuHasUnlockedMagic"))
+        if (farmer.mailReceived.Contains("Tofu.RunescapeSpellbook_HasUnlockedMagic"))
         {
             return true;
         }
         
         if (farmer.eventsSeen.Contains("RS.0"))
         {
-            farmer.mailReceived.Add("TofuHasUnlockedMagic");
+            farmer.mailReceived.Add("Tofu.RunescapeSpellbook_HasUnlockedMagic");
             return true;
         }
         return false;
@@ -885,14 +885,14 @@ public static class ModAssets
     public static int GetFarmerMagicLevel(Farmer farmer)
     {
         int level = -1;
-        int.TryParse(farmer.modData["TofuMagicLevel"],out level);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicLevel"],out level);
         return level;
     }
     
     public static int GetFarmerExperience(Farmer farmer)
     {
         int experience = -1;
-        int.TryParse(farmer.modData["TofuMagicExperience"],out experience);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicExp"],out experience);
         return experience;
     }
 
@@ -903,7 +903,7 @@ public static class ModAssets
         if (experience != -1 && experience <= Farmer.getBaseExperienceForLevel(10)) //If our exp should still be tracked then increment it
         {
             int newTotalExperience = (experience + gainedExperience);
-            farmer.modData["TofuMagicExperience"] = newTotalExperience.ToString();
+            farmer.modData["Tofu.RunescapeSpellbook_MagicExp"] = newTotalExperience.ToString();
             int currentLevel = GetFarmerMagicLevel(farmer);
             int expTilNextLevel = Farmer.getBaseExperienceForLevel(currentLevel + 1);
 
@@ -925,7 +925,7 @@ public static class ModAssets
                     }
                 }
                 
-                farmer.modData["TofuMagicLevel"] = (currentLevel).ToString();
+                farmer.modData["Tofu.RunescapeSpellbook_MagicLevel"] = (currentLevel).ToString();
                 Game1.player.playNearbySoundLocal("RunescapeSpellbook.MagicLevel");
             }
             
@@ -944,14 +944,14 @@ public static class ModAssets
     {
         List<int> perkIDs = new();
         int id1 = -1;
-        int.TryParse(farmer.modData["TofuMagicProfession1"],out id1);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"],out id1);
         if (id1 != -1)
         {
             perkIDs.Add(id1);
         }
         
         int id2 = -1;
-        int.TryParse(farmer.modData["TofuMagicProfession2"],out id2);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"],out id2);
         if (id2 != -1)
         {
             perkIDs.Add(id2);
@@ -963,9 +963,9 @@ public static class ModAssets
     public static bool HasPerk(Farmer farmer, int perkID)
     {
         int id1 = -1;
-        int.TryParse(farmer.modData["TofuMagicProfession1"],out id1);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"],out id1);
         int id2 = -1;
-        int.TryParse(farmer.modData["TofuMagicProfession2"],out id2);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"],out id2);
         
         return (perkID == id1 || perkID == id2);
     }
@@ -973,9 +973,9 @@ public static class ModAssets
     public static bool GrantPerk(Farmer farmer, int perkID)
     {
         int id1 = -1;
-        int.TryParse(farmer.modData["TofuMagicProfession1"],out id1);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"],out id1);
         int id2 = -1;
-        int.TryParse(farmer.modData["TofuMagicProfession2"],out id2);
+        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"],out id2);
 
         if (id1 == perkID || id2 == perkID)
         {
@@ -985,12 +985,12 @@ public static class ModAssets
         bool successfulAssignment = false;
         if (id1 == -1)
         {
-            farmer.modData["TofuMagicProfession1"] = perkID.ToString();
+            farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"] = perkID.ToString();
             successfulAssignment = true;
         }
         else if (id2 == -1)
         {
-            farmer.modData["TofuMagicProfession2"] = perkID.ToString();
+            farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"] = perkID.ToString();
             successfulAssignment = true;
         }
         
