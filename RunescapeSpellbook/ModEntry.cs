@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
@@ -29,10 +30,13 @@ namespace RunescapeSpellbook
 {
     internal sealed class ModEntry : Mod
     {
+        //public static ModEntry Instance;
         public override void Entry(IModHelper helper)
         {
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll();
+
+            //Instance = this;
 
             ModAssets.Load(helper);
             
@@ -1194,12 +1198,12 @@ namespace RunescapeSpellbook
                 if (__instance.itemId != null && (__instance.damagesMonsters.Value && n is Monster))
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);
-
-                    if (ModAssets.modItems.TryGetValue(__instance.itemId.Value, out ModLoadObjects objItem) &&
+                    
+                    //BasicProjectile ItemIDs are Qualified (will always be (O) in this case) so if we skip the first 3 values we should get an unqualified ID 
+                    if (ModAssets.modItems.TryGetValue(__instance.itemId.Value.Substring(3), out ModLoadObjects objItem) &&
                         objItem is SlingshotItem ammoItem)
                     {
                         HitMonster(__instance, n as Monster, location, player, ammoItem.debuffType);
-                        n.currentLocation.playSound("explosion", n.Tile, null);
 
                         if (ammoItem.explodes) //Earth Ammo
                         {
@@ -1227,26 +1231,9 @@ namespace RunescapeSpellbook
 
                     if (monsterEffected.mineMonster.Value)
                     {
-                        ModAssets.BroadcastSprite(monsterEffected.currentLocation,
-                            new TemporaryAnimatedSprite(362, Game1.random.Next(15, 50), 6, 1,
-                                monsterEffected.Position - new Vector2(32 + Game1.random.Next(-21, 21) - 32,
-                                    32 + Game1.random.Next(-21, 21)), flicker: false, Game1.random.NextBool())
-                            {
-                                scale = 0.5f,
-                                delayBeforeAnimationStart = 100,
-                                alpha = 0.5f
-                            });
-
-                        if (!monsterEffected.isGlowing)
-                        {
-                            monsterEffected.startGlowing(debuffType == 2 ? Color.Red : Color.Green, false, 0.05f);
-                        }
-
-                        for (int i = 1; i <= DEBUFFHITS + 1; i++)
-                        {
-                            DelayedAction.functionAfterDelay(() => ApplyPoisonEffect(monsterEffected, debuffType),
-                                i * DEBUFFDELAY);
-                        }
+                        monsterEffected.startGlowing(debuffType == 2 ? Color.Red : Color.Green, false, 0.05f);
+                        
+                        DelayedAction.functionAfterDelay(() => ApplyPoisonEffect(monsterEffected, debuffType,DEBUFFHITS), DEBUFFDELAY);
                     }
 
                     if (!n.IsInvisible)
@@ -1256,33 +1243,49 @@ namespace RunescapeSpellbook
                 }
             }
 
-            private static readonly int DEBUFFHITS = 10;
-            private static readonly int DEBUFFDELAY = 1000;
-
-            private static void ApplyPoisonEffect(Monster target, int debuffIndex)
+            private static readonly int DEBUFFHITS = 5;
+            private static readonly int DEBUFFDELAY = 3000;
+            private static void ApplyPoisonEffect(Monster target, int debuffIndex, int hitsRemaining)
             {
-                if (target != null && target.Health > 1 && !target.isInvincible())
+                if (target.Health <= 1 || target.isInvincible())
                 {
-                    bool isFire = debuffIndex == 2;
-                    int hitDamage = isFire ? 30 : 50;
-
-                    int realDamage = target.Health - hitDamage <= 0 ? target.Health - 1 : hitDamage;
-
-                    Rectangle monsterBox = target.GetBoundingBox();
-                    target.currentLocation.playSound(
-                        isFire ? "RunescapeSpellbook.FireBurn" : "RunescapeSpellbook.Liquid", target.Tile,
-                        null);
-                    target.currentLocation.debris.Add(new Debris(realDamage,
-                        new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y),
-                        isFire ? Color.Orange : Color.Purple,
-                        1.25f, target));
-                    target.Health -= realDamage;
-
-                    if (!target.isGlowing)
+                    if (target.isGlowing)
                     {
-                        target.startGlowing(isFire ? Color.Red : Color.Green, false, 0.05f);
+                        target.stopGlowing();
+                    }
+                    return;
+                }
+                
+                bool isFire = debuffIndex == 2;
+                int hitDamage = isFire ? 30 : 50;
+                int realDamage = (target.Health - hitDamage <= 0 ? target.Health - 1 : hitDamage) + target.resilience.Value;
+                
+                target.takeDamage(realDamage, 0, 0, false, 100, isFire ? "RunescapeSpellbook.FireBurn" : "RunescapeSpellbook.Liquid");
+                
+                Rectangle monsterBox = target.GetBoundingBox();
+                target.currentLocation.debris.Add(new Debris(realDamage,
+                    new Vector2(monsterBox.Center.X + 16, monsterBox.Center.Y),
+                    isFire ? Color.Orange : Color.Purple,
+                    1.25f, target));
+
+                if (!target.isGlowing)
+                {
+                    target.startGlowing(isFire ? Color.Red : Color.Green, false, 0.05f);
+                }
+                
+                if (hitsRemaining > 0 && target.Health > 1 && !target.isInvincible())
+                {
+                    DelayedAction.functionAfterDelay(() => ApplyPoisonEffect(target, debuffIndex,hitsRemaining - 1), DEBUFFDELAY);
+                }
+                else
+                {
+                    if (target.isGlowing)
+                    {
+                        target.stopGlowing();
                     }
                 }
+                
+                
             }
         }
 

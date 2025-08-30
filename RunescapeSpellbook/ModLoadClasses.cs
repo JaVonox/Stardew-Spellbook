@@ -86,6 +86,8 @@ public class SlingshotItem : ModLoadObjects
     public SlingshotItem(string id, string displayName, string description, int spriteID, int extraDamage, int debuffType, bool explodes = false, Dictionary<string, PrefType>? characterPreferences = null) : 
         base(id,displayName,description,spriteID,characterPreferences,"Basic",-2)
     {
+        this.debuffType = debuffType;
+        this.explodes = explodes;
         this.extraDamage = extraDamage;
     }
 }
