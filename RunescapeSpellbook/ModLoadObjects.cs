@@ -565,18 +565,18 @@ public static class ModAssets
     {
         {"AdventureShop", new()
         {
-            new ShopListings("RS_Marlon_Battlestaff","(W)Tofu.RunescapeSpellbook_StaffMagic",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("RS_Marlon_Battlestaff","(W)Tofu.RunescapeSpellbook_StaffMagic",2000,2,-1,-1,"PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0")
         }},
         {"DesertTrade", new()
         {
-            new ShopListings("RS_Desert_AirRunes","(O)Tofu.RunescapeSpellbook_RuneAir","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current RS.0")
+            new ShopListings("RS_Desert_AirRunes","(O)Tofu.RunescapeSpellbook_RuneAir","(O)60",1,4,40,40,"PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0")
         }},
         {"Sandy", new()
         {
-            new ShopListings("RS_Seed_Harralander","(O)Tofu.RunescapeSpellbook_SeedHarra",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3"),
-            new ShopListings("RS_Seed_Lantadyme","(O)Tofu.RunescapeSpellbook_SeedLanta",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8"),
-            new ShopListings("RS_Recipe_Hunter","(O)Tofu.RunescapeSpellbook_PotHunter",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
-            new ShopListings("RS_Recipe_Battlemage","(O)Tofu.RunescapeSpellbook_PotBattlemage",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current RS.0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
+            new ShopListings("RS_Seed_Harralander","(O)Tofu.RunescapeSpellbook_SeedHarra",100,4,-1,-1,"PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0, PLAYER_BASE_FARMING_LEVEL Current 3"),
+            new ShopListings("RS_Seed_Lantadyme","(O)Tofu.RunescapeSpellbook_SeedLanta",300,5,-1,-1,"PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0, PLAYER_BASE_FARMING_LEVEL Current 8"),
+            new ShopListings("RS_Recipe_Hunter","(O)Tofu.RunescapeSpellbook_PotHunter",8000,6,-1,-1,"PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0, PLAYER_BASE_FARMING_LEVEL Current 3",true),
+            new ShopListings("RS_Recipe_Battlemage","(O)Tofu.RunescapeSpellbook_PotBattlemage",8000,7,-1,-1,"PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0, PLAYER_BASE_FARMING_LEVEL Current 8",true),
         }},
         {"Blacksmith", new()
         {
@@ -584,10 +584,6 @@ public static class ModAssets
         }}
     };
     
-    /// <summary>
-    /// mail + notes to load into the game
-    /// <remarks>bool: true is mail, false is secret note</remarks>
-    /// </summary>
     public static List<LoadableText> loadableText = new()
     {
         {
@@ -630,33 +626,6 @@ public static class ModAssets
              "^^   -Tofu" +
              "%item object Tofu.RunescapeSpellbook_HardCasket 1 %%" +
              "[#]Letter For Someone Else")
-        },
-        {
-            new LoadableSecret(419,"In a past life, the men of the desert practiced runic magic." +
-              "^^Their Flesh inherited their strength." +
-              "^^Their Souls inherited their wisdom." +
-              "^^Their Visage, sealed within the crypt of death, inherited the light of the stars." +
-              "^^Their Shadows, those who escaped the jaws of the ancient beasts, stole away the secrets of the world.")
-        },
-        {
-            new LoadableSecret(429,"Once, the great druid brought balance to the world." +
-              "^^As he slept, the world splintered, and the spirits became restless." +
-              "^^The spirits sought those with those whom they shared affinity." +
-              "^^The great snakes of the desert were granted mastery of the winds." +
-              "^^The spiders of the sea spread the ocean inland." +
-              "^^The men learned to till the soil, in exchange for their dead."+
-              "^^The flame spread to the depths and tropics, creating life where there was none."+
-              "^^That what remained found refuge in the primordial slurry, which became the slime.")
-        },
-        {
-            new LoadableSecret(438,"The ancient men, blessed with the power of creation, made tools of war." +
-              "^^When the ancient empires fell, their weapons became scattered." +
-              "^^The first casket hid the cornucopia of elements." +
-              "^^Stone Golem, Skeleton, Metal Head, Serpent, Pepper Rex, Haunted Skull." + 
-              "^^The second casket contained the secrets of the elements and the symbol of their lord."+
-              "^^Mummy, Iridium Bat, Haunted Skull."+
-              "^^The final casket held the forbidden knowledge of the god slayer, granted to his wights."+
-              "^^High Level Casket, Dwarvish Sentry, Magma Duggy.")
         },
         {
             new Gobcast(21,Season.Spring,1, new()
@@ -759,7 +728,7 @@ public static class ModAssets
             "Data/Events/Farm", new()
             {
                 {
-                    "RS.0/f Wizard 1000/t 600 1200",
+                    "Tofu.RunescapeSpellbook_Event0/f Wizard 1000/t 600 1200",
                     "continue/64 15/farmer 64 16 2 Wizard 64 18 0" +
                     "/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"" +
                     "/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"" +
@@ -775,7 +744,7 @@ public static class ModAssets
             "Data/Events/ArchaeologyHouse", new()
             {
                 {
-                    "RS.1/n Tofu.RunescapeSpellbook_RunesFound",
+                    "Tofu.RunescapeSpellbook_Event1/n Tofu.RunescapeSpellbook_RunesFound",
                     "continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3" +
                     "/skippable /pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"" +
                     "/speak Marlon \"This is an antique! I've been using this blade for decades now!\"" +
@@ -875,7 +844,7 @@ public static class ModAssets
             return true;
         }
         
-        if (farmer.eventsSeen.Contains("RS.0"))
+        if (farmer.eventsSeen.Contains("Tofu.RunescapeSpellbook_Event0"))
         {
             farmer.mailReceived.Add("Tofu.RunescapeSpellbook_HasUnlockedMagic");
             return true;

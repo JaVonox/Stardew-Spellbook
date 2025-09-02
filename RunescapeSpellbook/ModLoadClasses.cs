@@ -612,11 +612,6 @@ public class LoadableMail : LoadableText
     public LoadableMail(string mailID, string contents) : base(mailID, contents) { }
 }
 
-public class LoadableSecret : LoadableText
-{
-    public LoadableSecret(int id, string contents) : base(id.ToString(), contents){}
-}
-
 public abstract class LoadableTV : LoadableText
 {
     protected abstract string introText { get; }

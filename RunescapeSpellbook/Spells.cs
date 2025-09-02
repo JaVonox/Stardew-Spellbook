@@ -580,7 +580,7 @@ public class CombatSpell : Spell
                 generatedProjectiles.Add(generatedProjectile);
             }
 
-            if (generatedProjectiles.Count > 0 || (caster.hasBuff("Tofu.RunescapeSpellbook_BuffBattlemage") && Game1.random.NextDouble() <= 0.1f))
+            if (generatedProjectiles.Count > 0 && !(caster.hasBuff("Tofu.RunescapeSpellbook_BuffBattlemage") && Game1.random.NextDouble() <= 0.1f))
             {
                 RemoveRunes(castingWeapon.providesRune);
                 AddExperience();

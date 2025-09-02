@@ -55,6 +55,9 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addtreasures", "Gives the player treasures.\n\nUsage: rs_addtreasures", this.GrantTreasures);
             helper.ConsoleCommands.Add("rs_addpacks", "Gives the player packs.\n\nUsage: rs_addpacks", this.GrantPacks);
             helper.ConsoleCommands.Add("rs_addfish", "Gives the player fish.\n\nUsage: rs_addfish", this.GrantFish);
+            helper.ConsoleCommands.Add("rs_addseeds", "Gives the player seeds.\n\nUsage: rs_addseeds", this.GrantSeeds);
+            helper.ConsoleCommands.Add("rs_addcrops", "Gives the player crops.\n\nUsage: rs_addcrops", this.GrantCrops);
+            helper.ConsoleCommands.Add("rs_addpots", "Gives the player potions.\n\nUsage: rs_addpots", this.GrantPotions);
             helper.ConsoleCommands.Add("rs_debug_misc", "Runs a command left in for testing. Do not use. \n\nUsage: rs_debug_misc", this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", "Reports the position of the local player \n\nUsage: rs_debug_position", this.DebugPosition);
         }
@@ -352,51 +355,6 @@ namespace RunescapeSpellbook
                     }
                 );
             }
-
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/SecretNotes"))
-            {
-                e.Edit(asset =>
-                {
-                    var notesDict = asset.AsDictionary<int, string>().Data;
-                    foreach (LoadableSecret newNote in ModAssets.loadableText.Where(x => x is LoadableSecret))
-                    {
-                        int noteKey = int.Parse(newNote.id);
-                        string noteVal = newNote.contents[0];
-
-                        while (true) //Loop until we get a valid assignment for mail
-                        {
-                            try
-                            {
-                                //This removes the mail if it overlaps with another mail - such as if a new mail is added on a date the mod uses or if a future update adds the same key
-                                if (notesDict.TryAdd(noteKey, noteVal))
-                                {
-                                    break;
-                                }
-                                else
-                                {
-                                    Monitor.Log(
-                                        $"Duplicate mail key: {noteKey}. Attempting to access next available ID",
-                                        LogLevel.Warn);
-                                    if (noteKey + 1 > 1000)
-                                    {
-                                        throw new Exception($"Couldn't find a new year for {noteKey} before 1000");
-                                    }
-
-                                    noteKey++;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Monitor.Log(ex.Message,
-                                    LogLevel
-                                        .Error); //reports mail error if the mail delim method failed. this should be rare, and only should occur with non-dated mail
-                                break;
-                            }
-                        }
-                    }
-                });
-            }
-            
 
             if (e.NameWithoutLocale.IsEquivalentTo("Data/NPCGiftTastes"))
             {
@@ -767,20 +725,27 @@ namespace RunescapeSpellbook
                     //Get how many times we go over the healthbar
                     int healthDepth = (1 + ModAssets.localFarmerData.bonusHealth / Game1.player.maxHealth);
                     
-                    DrawBonusHealthBar(healthDepth - 1,Game1.player.maxHealth);
-                    DrawBonusHealthBar(healthDepth,ModAssets.localFarmerData.bonusHealth % Game1.player.maxHealth);
+                    Vector2 topOfBar = new Vector2(Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Right - 48 - 8, Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (int)((float)(Game1.player.MaxStamina - 270) * 0.625f));
+                    topOfBar.X -= 56;
+                    topOfBar.Y = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (Game1.player.maxHealth - 100);
+                    int barFullHeight = 168 + (Game1.player.maxHealth - 100);
+                    
+                    DrawBonusHealthBar(healthDepth - 1,Game1.player.maxHealth,topOfBar,barFullHeight);
+                    DrawBonusHealthBar(healthDepth,ModAssets.localFarmerData.bonusHealth % Game1.player.maxHealth,topOfBar,barFullHeight);
+                    
+                    //Extra health draw code
+                    /*
+                    string bonusHealth = $"+{ModAssets.localFarmerData.bonusHealth}";
+                    Vector2 stringSize = Game1.dialogueFont.MeasureString(bonusHealth);
+                    Game1.drawWithBorder(bonusHealth, Color.Black * 0f, healthTiers[1], new Vector2(topOfBar.X - stringSize.X, barFullHeight + 128f + stringSize.Y));
+                    */
                 }
             }
 
-            private static void DrawBonusHealthBar(int colorIndex, int healthAmount)
+            private static void DrawBonusHealthBar(int colorIndex, int healthAmount, Vector2 topOfBar, int barFullHeight)
             {
-                Vector2 topOfBar = new Vector2(Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Right - 48 - 8, Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (int)((float)(Game1.player.MaxStamina - 270) * 0.625f));
-                topOfBar.X -= 56;
-                topOfBar.Y = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (Game1.player.maxHealth - 100);
-                int bar_full_height = 168 + (Game1.player.maxHealth - 100);
-                int height = (int)((float)healthAmount / (float)Game1.player.maxHealth * (float)bar_full_height);
-                    
-                Rectangle health_bar_rect = new Microsoft.Xna.Framework.Rectangle((int)topOfBar.X + 12, (int)topOfBar.Y + 16 + 32 + bar_full_height - height, 24, height);
+                int height = (int)((float)healthAmount / (float)Game1.player.maxHealth * (float)barFullHeight);
+                Rectangle health_bar_rect = new Microsoft.Xna.Framework.Rectangle((int)topOfBar.X + 12, (int)topOfBar.Y + 48 + barFullHeight - height, 24, height);
                 Game1.spriteBatch.Draw(Game1.staminaRect, health_bar_rect, Game1.staminaRect.Bounds, healthTiers[colorIndex % healthTiers.Count], 0f, Vector2.Zero, SpriteEffects.None, 0f);
             }
         }
@@ -1445,7 +1410,7 @@ namespace RunescapeSpellbook
                     this.Monitor.Log("You already have access to magic",LogLevel.Warn);
                     return;
                 }
-                Game1.player.eventsSeen.Add("RS.0");
+                Game1.player.eventsSeen.Add("Tofu.RunescapeSpellbook_Event0");
                 Monitor.Log("Added magic",LogLevel.Info);
                 if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
                 {
@@ -1696,6 +1661,48 @@ namespace RunescapeSpellbook
                 }
             
                 this.Monitor.Log($"Granted all fish",LogLevel.Info);
+            }
+            
+            private void GrantSeeds(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
+            
+                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SeedObject).Select(y=>y.Value))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                    item.Stack = 20;
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all seeds",LogLevel.Info);
+            }
+            
+            private void GrantCrops(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
+            
+                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is CropObject).Select(y=>y.Value))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                    item.Stack = 20;
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all crops",LogLevel.Info);
+            }
+            
+            private void GrantPotions(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
+            
+                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PotionObject).Select(y=>y.Value))
+                {
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                    item.Stack = 20;
+                    Game1.player.addItemToInventory(item);
+                }
+            
+                this.Monitor.Log($"Granted all potions",LogLevel.Info);
             }
     }
 }
