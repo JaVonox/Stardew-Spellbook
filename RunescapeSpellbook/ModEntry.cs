@@ -8,6 +8,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
+using StardewValley.Buffs;
 using StardewValley.Extensions;
 using StardewValley.GameData;
 using StardewValley.GameData.BigCraftables;
@@ -970,16 +971,16 @@ namespace RunescapeSpellbook
                 }
             }
         }
-
-        [HarmonyPatch(typeof(Farmer), "hasBuff")]
+        
+        [HarmonyPatch(typeof(BuffManager), "IsApplied")]
         [HarmonyPatch(new Type[] { typeof(string) })]
-        public class FarmerhasBuffPatcher
+        public class BuffIsAppliedPatcher
         {
-            public static void Postfix(ref bool __result, Farmer __instance, string id)
+            public static void Postfix(ref bool __result, BuffManager __instance, string id)
             {
-                if (id == "24") //If we are searching for 24 - the monster musk bonus - and we do not find it, also check for dark lure buff
+                if (!__result && id == "24") //If we are searching for 24 - the monster musk bonus - and we do not find it, also check for dark lure buff
                 {
-                    __result |= __instance.buffs.IsApplied("Tofu.RunescapeSpellbook_BuffDark");
+                    __result = __instance.AppliedBuffIds.Contains("Tofu.RunescapeSpellbook_BuffDark");
                 }
             }
         }

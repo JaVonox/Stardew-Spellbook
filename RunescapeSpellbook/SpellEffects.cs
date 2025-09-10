@@ -136,18 +136,32 @@ public class SpellEffects : BaseSpellEffects
         return new KeyValuePair<bool, string>(true, "");
     }
     
+    public static KeyValuePair<bool, string> LowAlchemy(ref Item? itemArgs)
+    {
+        int postCastStackSize = itemArgs.Stack - 1;
+        Game1.player.Money += (int)Math.Floor(itemArgs.sellToStorePrice(-1L) * 1.1f);
+        Game1.player.playNearbySoundAll("purchaseRepeat", null);
+        itemArgs.ConsumeStack(1);
+        if (postCastStackSize == 0)
+        {
+            itemArgs = null;
+        }
+
+        return new KeyValuePair<bool, string>(true, "");
+    }
+    
     public static Dictionary<string,int> redGemsEnchants = new()
     {
-        {"64",20}, //Ruby
-        {"82",10}, //Fire Quartz
+        {"64",30}, //Ruby
+        {"82",3}, //Fire Quartz
         {"74",50}, //Prismatic Shard
-        {"547",15}, //Helvite
-        {"563",15}, //Jasper
-        {"562",5}, //Tigerseye
-        {"540",5}, //Baryte
-        {"554",5}, //Lemon Stone
-        {"556",5}, //Orpiment
-        {"537",5}, //Magma Geode
+        {"547",45}, //Helvite
+        {"563",45}, //Jasper
+        {"562",45}, //Tigerseye
+        {"540",45}, //Baryte
+        {"554",45}, //Lemon Stone
+        {"556",45}, //Orpiment
+        {"537",10}, //Magma Geode
         {"749",10}, //Omni Geode
         {"848",15}, //Cinder Shard
     };
@@ -176,16 +190,16 @@ public class SpellEffects : BaseSpellEffects
     
     public static Dictionary<string,int> greenGemsEnchants = new()
     {
-        {"60",10}, //Emerald
-        {"70",20}, //Jade
-        {"74",30}, //Prismatic Shard
-        {"548",10}, //Jamborite
-        {"552",10}, //Malachite
-        {"557",10}, //Petrified Slime
-        {"560",10}, //Ocean Stone
+        {"60",20}, //Emerald
+        {"70",10}, //Jade
+        {"74",50}, //Prismatic Shard
+        {"548",30}, //Jamborite
+        {"552",30}, //Malachite
+        {"557",30}, //Petrified Slime
+        {"560",30}, //Ocean Stone
         {"909",5}, //Radioactive Ore
         {"910",25}, //Radioactive Bar
-        {"749",5}, //Omni Geode
+        {"749",10}, //Omni Geode
     };
     public static KeyValuePair<bool, string> EnchantEmeraldBolt(ref Item? itemArgs)
     {
@@ -322,13 +336,15 @@ public class SpellEffects : BaseSpellEffects
 
         int stackSizeRequired = furnaceRule.Triggers.First(x => x.RequiredItemId == itemId).RequiredCount;
         string itemReturn = furnaceRule.OutputItem[0].ItemId;
+        int amountRet = furnaceRule.OutputItem[0].MinStack != -1 ? furnaceRule.OutputItem[0].MinStack : 1;
 
         if (itemArgs.Stack >= stackSizeRequired) //If we have enough of the item
         {
             int postCastStackSize = itemArgs.Stack - stackSizeRequired;
 
             StardewValley.Object furnaceItem = ItemRegistry.Create<StardewValley.Object>($"{itemReturn}");
-
+            furnaceItem.Stack = amountRet;
+            
             Utility.CollectOrDrop(furnaceItem);
             Game1.player.playNearbySoundAll("furnace", null);
             itemArgs.ConsumeStack(stackSizeRequired);
