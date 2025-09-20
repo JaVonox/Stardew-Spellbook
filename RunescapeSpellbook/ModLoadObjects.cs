@@ -106,7 +106,9 @@ public static class ModAssets
                 new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",10,15,0.5),
                 new ItemDrop("Tofu.RunescapeSpellbook_PotHunter",1,3,0.3),
                 new ItemDrop("Tofu.RunescapeSpellbook_PotBattlemage",1,3,0.3),
-                new ItemDrop("Tofu.RunescapeSpellbook_PotGuthix",1,3,0.3),
+                new ItemDrop("Tofu.RunescapeSpellbook_PotGuthix",1,3,0.1,2),
+                new ItemDrop("Tofu.RunescapeSpellbook_PotGuthix",1,3,0.1,1),
+                new ItemDrop("Tofu.RunescapeSpellbook_PotGuthix",1,3,0.1,0),
                 
                 new ItemDrop("Tofu.RunescapeSpellbook_StaffMysticAir",1,1,0.6),
                 new ItemDrop("Tofu.RunescapeSpellbook_StaffMysticWater",1,1,0.6),
@@ -120,7 +122,10 @@ public static class ModAssets
         {"Tofu.RunescapeSpellbook_BarrowsCasket",new TreasureObjects("Tofu.RunescapeSpellbook_BarrowsCasket","Barrows Casket","Contains some very valuable magical goodies. A blacksmith might be able to open it.",23,
             new()
             {
-                new ItemDrop("Tofu.RunescapeSpellbook_PotSara",2,6,0.3),
+                new ItemDrop("Tofu.RunescapeSpellbook_PotSara",1,3,0.1,4),
+                new ItemDrop("Tofu.RunescapeSpellbook_PotSara",1,4,0.1,2),
+                new ItemDrop("Tofu.RunescapeSpellbook_PotSara",2,5,0.1,1),
+                new ItemDrop("Tofu.RunescapeSpellbook_PotSara",2,6,0.1,0),
                 
                 new ItemDrop("Tofu.RunescapeSpellbook_StaffAncient",1,1,1),
                 new ItemDrop("Tofu.RunescapeSpellbook_StaffAhrims",1,1,0.5),
@@ -248,9 +253,9 @@ public static class ModAssets
             new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Harvey",PrefType.Like},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
         {"Tofu.RunescapeSpellbook_PotSara", new PotionObject("Tofu.RunescapeSpellbook_PotSara","Saradomin Brew","A relaxing cup of tea that restores a lot of health. Can heal over your maximum health.",44,550,0.6f,0.25f,"Tofu.RunescapeSpellbook_CropLanta",6000,
             new(){{"Caroline",PrefType.Love},{"Lewis",PrefType.Love},{"Sandy",PrefType.Love},{"Harvey",PrefType.Like},{"Jas",PrefType.Hate},{"Vincent",PrefType.Hate}})},
-        {"Tofu.RunescapeSpellbook_PotHarraDye", new PotionObject("Tofu.RunescapeSpellbook_PotHarraDye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"Tofu.RunescapeSpellbook_CropHarra",4000,"colour_green",
+        {"Tofu.RunescapeSpellbook_PotHarraDye", new PotionObject("Tofu.RunescapeSpellbook_PotHarraDye","Harralander Dye","A green dye made from harralander. Prized by artists.",41,250,"Tofu.RunescapeSpellbook_CropHarra",4000,"color_green",
             new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Leah",PrefType.Like}})},
-        {"Tofu.RunescapeSpellbook_PotLantaDye", new PotionObject("Tofu.RunescapeSpellbook_PotLantaDye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"Tofu.RunescapeSpellbook_CropLanta",4000,"color_dark_blue",
+        {"Tofu.RunescapeSpellbook_PotLantaDye", new PotionObject("Tofu.RunescapeSpellbook_PotLantaDye","Lantadyme Dye","A blue dye made from lantadyme. Prized by artists.",45,350,"Tofu.RunescapeSpellbook_CropLanta",4000,"color_blue",
             new(){{"Emily",PrefType.Love},{"Elliott",PrefType.Love},{"Sebastian",PrefType.Love},{"Leah",PrefType.Like}})},
         {"Tofu.RunescapeSpellbook_PotHunter", new PotionObject("Tofu.RunescapeSpellbook_PotHunter","Hunter Potion","A potion that imbues the user with the power of a hunter. Adds a second smaller bar to fishing that gives 1.5x progress",43,300,"Tofu.RunescapeSpellbook_CropHarra 1 300 1 881 5",new(){"Tofu.RunescapeSpellbook_BuffHunters"},
             new(){{"Willy",PrefType.Like},{"Linus",PrefType.Like},{"Penny",PrefType.Hate}})},
@@ -803,7 +808,7 @@ public static class ModAssets
         new CustomBuff("Tofu.RunescapeSpellbook_BuffCharge", "Charge", "Combat spells will produce extra projectiles", 60_000, 0),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffDark", "Dark lure", "Spawns more monsters and makes them aggressive towards you", 180_000, 1),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffHunters", "Hunter's Call", "Second bar while fishing which provides 1.5x progress", 300_000, 2),
-        new CustomBuff("Tofu.RunescapeSpellbook_BuffBattlemage", "Battlemage's Spark", "Combat spells have a 10% chance of not costing any runes", 120_000, 3),
+        new CustomBuff("Tofu.RunescapeSpellbook_BuffBattlemage", "Battlemage's Spark", "Combat spells have a 10% chance of not costing any runes", 540_000, 3),
     };
     public static bool CheckHasPerkByName(Farmer farmer,string perkName)
     {

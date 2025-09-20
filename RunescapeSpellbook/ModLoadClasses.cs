@@ -19,6 +19,8 @@ public struct ItemDrop
 
     public int minAmount;
     public int maxAmount;
+
+    public int quality = 0;
     public ItemDrop(string itemID, int amount, double chance = 1.0)
     {
         this.itemID = itemID;
@@ -28,14 +30,16 @@ public struct ItemDrop
         this.minAmount = amount;
         this.maxAmount = amount;
     }
-    public ItemDrop(string itemID, int minAmount, int maxAmount, double weight = 1.0) 
+    public ItemDrop(string itemID, int minAmount, int maxAmount, double weight = 1.0, int quality = 0) 
     {
         this.itemID = itemID;
         this.amount = minAmount;
         this.minAmount = minAmount;
         this.maxAmount = maxAmount;
         this.chance = weight;
+        this.quality = quality;
     }
+    
 }
 public enum PrefType
 {
@@ -110,6 +114,7 @@ public class TreasureObjects : ModLoadObjects
 
             geodeItem.MinStack = item.minAmount;
             geodeItem.MaxStack = item.maxAmount;
+            geodeItem.Quality = item.quality;
             
             geodeItem.Chance = BalanceItemPercentage(itemDrops,dropID,totalWeight);
             geodeItem.Precedence = 0;
@@ -387,8 +392,6 @@ public class PotionObject : ModLoadObjects
 {
     public float healPercent = 0;
     public float extraHealthPerQuality = 0;
-    public int grantBuffID = 0;
-    public int duration = 0;
     
     /// <summary>
     /// 0 is Craftable, 1 is Keg, 2 is Preserve
@@ -458,7 +461,7 @@ public class PotionObject : ModLoadObjects
         MachineItemOutput newMachineOutput = new MachineItemOutput();
         newMachineOutput.ItemId =  $"(O){base.id}";
         newMachineOutput.Id = $"RS_{base.Name}";
-        newMachineOutput.CopyQuality = true;
+        newMachineOutput.CopyQuality = false;
 
         MachineOutputRule newOutputRule = new MachineOutputRule();
         newOutputRule.Id = $"RS_{base.Name}";
