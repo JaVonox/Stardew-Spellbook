@@ -70,6 +70,8 @@ namespace RunescapeSpellbook
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
+            try
+            {
             var configMenuAPI =
                 this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
             if (configMenuAPI is not null) //Configmenu setup
@@ -99,18 +101,33 @@ namespace RunescapeSpellbook
 
                 configMenuAPI.AddParagraph(this.ModManifest, () => "If you modify the spellbook style you'll need to relaunch your menu for the changes to take effect");
             }
-
-            BetterGameMenuApi = this.Helper.ModRegistry.GetApi<IBetterGameMenuApi>("leclair.bettergamemenu");
-            if (BetterGameMenuApi is not null) //BetterGameMenu setup
-            {
-                //TODO betterGameMenu doesn't seem to properly handle a spellbook tab style being keybind only with my current setup. Should fix later.
-                BetterGameMenuApi.RegisterTab("RSspellbook",159,()=> "Runescape Spellbook",
-                    () => (BetterGameMenuApi.CreateDraw(ModAssets.extraTextures, new Rectangle(0, 0, 16, 16),4),false),0,
-                    menu => new SpellbookPage(menu.xPositionOnScreen,menu.yPositionOnScreen,menu.width - 64 - 16 ,menu.height),
-                    onResize: input => new SpellbookPage(input.Menu.xPositionOnScreen,input.Menu.yPositionOnScreen,input.Menu.width - 64 - 16,input.Menu.height));
-                
             }
-            
+            catch (Exception exception)
+            {
+                Instance.Monitor.Log($"Runescape Spellbook failed to setup GenericModConfigMenuAPI: {exception.Message}",LogLevel.Error);
+            }
+
+            try
+            {
+                BetterGameMenuApi = this.Helper.ModRegistry.GetApi<IBetterGameMenuApi>("leclair.bettergamemenu");
+                if (BetterGameMenuApi is not null) //BetterGameMenu setup
+                {
+                    //TODO betterGameMenu doesn't seem to properly handle a spellbook tab style being keybind only with my current setup. Should fix later.
+                    BetterGameMenuApi.RegisterTab("RSspellbook", 159, () => "Runescape Spellbook",
+                        () => (BetterGameMenuApi.CreateDraw(ModAssets.extraTextures, new Rectangle(0, 0, 16, 16), 4),
+                            false), 0,
+                        menu => new SpellbookPage(menu.xPositionOnScreen, menu.yPositionOnScreen, menu.width - 64 - 16,
+                            menu.height),
+                        onResize: input => new SpellbookPage(input.Menu.xPositionOnScreen, input.Menu.yPositionOnScreen,
+                            input.Menu.width - 64 - 16, input.Menu.height));
+
+                }
+            }
+            catch (Exception exception)
+            {
+                Instance.Monitor.Log($"Runescape Spellbook failed to setup BetterGameMenuAPI: {exception.Message}",LogLevel.Error);
+            }
+
             if (!Config.LockSpellbookStyle && BetterGameMenuApi is null)
             {
                 bool loadedRiskyMod = false;
