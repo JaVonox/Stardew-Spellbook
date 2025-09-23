@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 
@@ -866,7 +867,53 @@ public static class ModAssets
         
         return farmers;
     }
+    
+    public static void SetupModDataKeys(Farmer farmerInstance)
+    {
+        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicLevel"))
+        {
+            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicLevel", "0");
+        }
 
+        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicExp"))
+        {
+            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicExp","0");
+        }
+        
+        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicProf1"))
+        {
+            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicProf1","-1");
+        }
+        
+        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicProf2"))
+        {
+            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicProf2","-1");
+        }
+    }
+    public static string TryGetModVariable(Farmer farmer, string dataKey)
+    {
+        string retVal;
+        if (!farmer.modData.TryGetValue(dataKey, out retVal))
+        {
+            SetupModDataKeys(farmer);
+            farmer.modData.TryGetValue(dataKey, out retVal);
+        }
+        
+        return retVal;
+    }
+
+    public static void TrySetModVariable(Farmer farmer, string dataKey, string newValue)
+    {
+        if (!farmer.modData.ContainsKey(dataKey))
+        {
+            SetupModDataKeys(farmer);
+        }
+
+        if (farmer.modData.ContainsKey(dataKey))
+        {
+            farmer.modData[dataKey] = newValue;
+        }
+    }
     public static bool HasMagic(Farmer farmer)
     {
         if (farmer.mailReceived.Contains("Tofu.RunescapeSpellbook_HasUnlockedMagic"))
@@ -884,14 +931,14 @@ public static class ModAssets
     public static int GetFarmerMagicLevel(Farmer farmer)
     {
         int level = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicLevel"],out level);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicLevel"),out level);
         return level;
     }
     
     public static int GetFarmerExperience(Farmer farmer)
     {
         int experience = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicExp"],out experience);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp"),out experience);
         return experience;
     }
 
@@ -902,7 +949,7 @@ public static class ModAssets
         if (experience != -1 && experience <= Farmer.getBaseExperienceForLevel(10)) //If our exp should still be tracked then increment it
         {
             int newTotalExperience = (experience + gainedExperience);
-            farmer.modData["Tofu.RunescapeSpellbook_MagicExp"] = newTotalExperience.ToString();
+            TrySetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp",newTotalExperience.ToString());
             int currentLevel = GetFarmerMagicLevel(farmer);
             int expTilNextLevel = Farmer.getBaseExperienceForLevel(currentLevel + 1);
 
@@ -923,8 +970,8 @@ public static class ModAssets
                         messageTier = messageTier != 2 ? 1 : 0;
                     }
                 }
-                
-                farmer.modData["Tofu.RunescapeSpellbook_MagicLevel"] = (currentLevel).ToString();
+
+                TrySetModVariable(farmer, "Tofu.RunescapeSpellbook_MagicLevel", (currentLevel).ToString());
                 Game1.player.playNearbySoundLocal("RunescapeSpellbook.MagicLevel");
             }
             
@@ -943,14 +990,14 @@ public static class ModAssets
     {
         List<int> perkIDs = new();
         int id1 = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"],out id1);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf1"),out id1);
         if (id1 != -1)
         {
             perkIDs.Add(id1);
         }
         
         int id2 = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"],out id2);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf2"),out id2);
         if (id2 != -1)
         {
             perkIDs.Add(id2);
@@ -962,9 +1009,9 @@ public static class ModAssets
     public static bool HasPerk(Farmer farmer, int perkID)
     {
         int id1 = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"],out id1);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf1"),out id1);
         int id2 = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"],out id2);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf2"),out id2);
         
         return (perkID == id1 || perkID == id2);
     }
@@ -972,9 +1019,9 @@ public static class ModAssets
     public static bool GrantPerk(Farmer farmer, int perkID)
     {
         int id1 = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"],out id1);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf1"),out id1);
         int id2 = -1;
-        int.TryParse(farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"],out id2);
+        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf2"),out id2);
 
         if (id1 == perkID || id2 == perkID)
         {
@@ -984,12 +1031,12 @@ public static class ModAssets
         bool successfulAssignment = false;
         if (id1 == -1)
         {
-            farmer.modData["Tofu.RunescapeSpellbook_MagicProf1"] = perkID.ToString();
+            TrySetModVariable(farmer, "Tofu.RunescapeSpellbook_MagicProf1", perkID.ToString());
             successfulAssignment = true;
         }
         else if (id2 == -1)
         {
-            farmer.modData["Tofu.RunescapeSpellbook_MagicProf2"] = perkID.ToString();
+            TrySetModVariable(farmer, "Tofu.RunescapeSpellbook_MagicProf2", perkID.ToString());
             successfulAssignment = true;
         }
         
@@ -1012,4 +1059,11 @@ public class PlayerLocalData
         bonusHealth = 0;
     }
     
+}
+
+public sealed class ModConfig
+{
+    public KeybindList SpellbookKey = KeybindList.Parse("J");
+    public bool LockSpellbookStyle = false;
+    public string SpellbookTabStyle = "Tab and Keybind";
 }

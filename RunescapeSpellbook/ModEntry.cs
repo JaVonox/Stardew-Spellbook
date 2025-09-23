@@ -1,12 +1,13 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
-using System.Security.Cryptography;
 using System.Text;
+using GenericModConfigMenu;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
+using Leclair.Stardew.BetterGameMenu;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Buffs;
 using StardewValley.Extensions;
@@ -31,18 +32,22 @@ namespace RunescapeSpellbook
 {
     internal sealed class ModEntry : Mod
     {
-        //public static ModEntry Instance;
+        public static ModEntry Instance;
+        private ModConfig Config;
+        internal IBetterGameMenuApi? BetterGameMenuApi;
         public override void Entry(IModHelper helper)
         {
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll();
 
-            //Instance = this;
+            Instance = this;
 
             ModAssets.Load(helper);
+            Config = helper.ReadConfig<ModConfig>();
             
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             
             helper.ConsoleCommands.Add("rs_grantmagic", "Gives the player magic.\n\nUsage: rs_grantmagic <value>\n\n value: the level to set to", this.GrantMagic);
             helper.ConsoleCommands.Add("rs_setlevel", "Sets the players magic level.\n\nUsage: rs_setlevel <value>\n\n value: the level to set to", this.SetLevel);
@@ -63,25 +68,106 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_debug_position", "Reports the position of the local player \n\nUsage: rs_debug_position", this.DebugPosition);
         }
 
-        private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
+        private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
+        {
+            var configMenuAPI =
+                this.Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            if (configMenuAPI is not null) //Configmenu setup
+            {
+                configMenuAPI.Register(this.ModManifest, () => this.Config = new ModConfig(),
+                    () => this.Helper.WriteConfig(this.Config));
+
+                configMenuAPI.AddKeybindList(
+                    this.ModManifest, () => this.Config.SpellbookKey, value => this.Config.SpellbookKey = value,
+                    () => "Open/Close Spellbook Keys",
+                    () => "The button that opens the spellbook from the menu instantly");
+                
+                configMenuAPI.AddParagraph(this.ModManifest, ()=> 
+                    "Certain mods may add new tabs in a way that conflicts with the spellbook tab. By default, if mods are detected that are known to do this," +
+                    " the Spellbook will set itself to 'Only Keybind' mode on startup. you can reset this behaviour here. If Lock Spellbook Style is set, behaviour will not longer be " +
+                    " automatically changed on startup");
+
+                configMenuAPI.AddBoolOption(
+                    this.ModManifest, () => this.Config.LockSpellbookStyle, value => this.Config.LockSpellbookStyle = value,
+                    () => "Lock Spellbook Style",
+                    () => "Selecting this as true will prevent any automatic toggling of the spellbook tab style if certain mods are detected");
+                
+                configMenuAPI.AddTextOption(this.ModManifest, () => this.Config.SpellbookTabStyle,
+                    value => this.Config.SpellbookTabStyle = value,
+                    () => "Spellbook Tab Style", ()=> "Which style should be used for button to access the spellbook",
+                    new string[] { "Tab and Keybind", "Only Keybind" });
+
+                configMenuAPI.AddParagraph(this.ModManifest, () => "If you modify the spellbook style you'll need to relaunch your menu for the changes to take effect");
+            }
+
+            BetterGameMenuApi = this.Helper.ModRegistry.GetApi<IBetterGameMenuApi>("leclair.bettergamemenu");
+            if (BetterGameMenuApi is not null) //BetterGameMenu setup
+            {
+                //TODO betterGameMenu doesn't seem to properly handle a spellbook tab style being keybind only with my current setup. Should fix later.
+                BetterGameMenuApi.RegisterTab("RSspellbook",159,()=> "Runescape Spellbook",
+                    () => (BetterGameMenuApi.CreateDraw(ModAssets.extraTextures, new Rectangle(0, 0, 16, 16),4),false),0,
+                    menu => new SpellbookPage(menu.xPositionOnScreen,menu.yPositionOnScreen,menu.width - 64 - 16 ,menu.height),
+                    onResize: input => new SpellbookPage(input.Menu.xPositionOnScreen,input.Menu.yPositionOnScreen,input.Menu.width - 64 - 16,input.Menu.height));
+                
+            }
+            
+            if (!Config.LockSpellbookStyle && BetterGameMenuApi is null)
+            {
+                bool loadedRiskyMod = false;
+                
+                if (this.Helper.ModRegistry.IsLoaded("Annosz.UiInfoSuite2"))
+                {
+                    loadedRiskyMod = true;
+                    Config.SpellbookTabStyle = "Only Keybind";
+                }
+
+                if (loadedRiskyMod)
+                {
+                    Instance.Monitor.Log("RunescapeSpellbook has discovered one or more mods are enabled that might cause UI overlaps.",LogLevel.Warn);
+                    Instance.Monitor.Log("The Runescape Spellbook menu tab has been set to 'Keybind Only' mode to prevent UI problems.", LogLevel.Warn);
+                    Instance.Monitor.Log("You can reenable the spellbook tab by setting the Spellbook Tab Style in the config, but relaunching the game with these mods enabled will automatically set you into 'Only Keybind' Mode again unless you set 'Lock Spellbook Style' to true",LogLevel.Warn);
+                    Instance.Monitor.Log($"Your current spellbook keybind is set to {Config.SpellbookKey.Keybinds[0].ToString()}",LogLevel.Warn);
+                }
+            }
+            
+        }
+        private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
         {
             if (!Context.IsWorldReady)
             {
                 return;
             }
 
-            //On J keybutton press we open or close the spell menu
-            if (e.Button == SButton.J)
+            //On spellbookKeybind we open the spellbook menu
+            if (Config.SpellbookKey.JustPressed())
             {
                 if (Game1.activeClickableMenu == null && Game1.CanShowPauseMenu())
                 {
+                    IClickableMenu menu;
                     Game1.PushUIMode();
-                    Game1.activeClickableMenu = new GameMenu(10);
+                    
+                    if (BetterGameMenuApi is not null)
+                    {
+                        menu = BetterGameMenuApi.CreateMenu("RSspellbook", true);
+                    }
+                    else
+                    {
+                        menu = new GameMenu(0);
+                        ((GameMenu)menu).changeTab(((GameMenu)menu).getTabNumberFromName("RSspellbook"));
+                    }
+                    
+                    Game1.activeClickableMenu = menu;
                     Game1.PopUIMode();
+
                 }
-                else if (Game1.activeClickableMenu is GameMenu menu && menu.currentTab == 10)
+                else if (Game1.activeClickableMenu != null && ((BetterGameMenuApi is not null && BetterGameMenuApi.IsMenu(Game1.activeClickableMenu) && BetterGameMenuApi.ActiveMenu != null && BetterGameMenuApi.ActiveMenu.CurrentTab == "RSspellbook")
+                         || (Game1.activeClickableMenu is GameMenu menu && menu.currentTab == menu.getTabNumberFromName("RSspellbook"))))
                 {
                     Game1.activeClickableMenu.exitThisMenu();
+                }
+                else
+                {
+                    Game1.showRedMessage("I should finish what I'm doing before I open my spellbook");
                 }
             }
         }
@@ -90,27 +176,27 @@ namespace RunescapeSpellbook
         {
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.itemsprites"))
             {
-                e.LoadFromModFile<Texture2D>("Assets/itemsprites", AssetLoadPriority.Medium);
+                e.LoadFromModFile<Texture2D>("assets/itemsprites", AssetLoadPriority.Medium);
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.spellanimations"))
             {
-                e.LoadFromModFile<Texture2D>("Assets/spellanimations", AssetLoadPriority.Medium);
+                e.LoadFromModFile<Texture2D>("assets/spellanimations", AssetLoadPriority.Medium);
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modplants"))
             {
-                e.LoadFromModFile<Texture2D>("Assets/modplants", AssetLoadPriority.Medium);
+                e.LoadFromModFile<Texture2D>("assets/modplants", AssetLoadPriority.Medium);
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.buffsprites"))
             {
-                e.LoadFromModFile<Texture2D>("Assets/buffsprites", AssetLoadPriority.Medium);
+                e.LoadFromModFile<Texture2D>("assets/buffsprites", AssetLoadPriority.Medium);
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Mods.RunescapeSpellbook.Assets.modmachines"))
             {
-                e.LoadFromModFile<Texture2D>("Assets/modmachines", AssetLoadPriority.Medium);
+                e.LoadFromModFile<Texture2D>("assets/modmachines", AssetLoadPriority.Medium);
             }
             
             if (e.NameWithoutLocale.IsEquivalentTo("Data/AudioChanges"))
@@ -130,7 +216,7 @@ namespace RunescapeSpellbook
                             data.Add($"{audioTrack}", new AudioCueData() {
                                 Id = $"RunescapeSpellbook.{audioTrack}",
                                 Category = "Sound",
-                                FilePaths = new() { Path.Combine(Helper.DirectoryPath, "Assets/Audio", $"{audioTrack}.ogg") },
+                                FilePaths = new() { Path.Combine(Helper.DirectoryPath, "assets/Audio", $"{audioTrack}.ogg") },
                             });
                         }
                     }
@@ -437,7 +523,7 @@ namespace RunescapeSpellbook
             {
                 if (name == "RSspellbook")
                 {
-                    __result = 10;
+                    __result = __instance.tabs.FindIndex(x => x.name == "RSspellbook");
                     return false; //effectively a break
                 }
 
@@ -452,29 +538,42 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(GameMenu __instance, bool playOpeningSound = true)
             {
-                //Move the options and exit tags right two to fit in spellbook page
-                //exit tab
-                __instance.tabs[^1].bounds = new Rectangle(__instance.xPositionOnScreen + 704,
-                    __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
-                __instance.tabs[^1].myID = 12351;
-                __instance.tabs[^1].leftNeighborID = 12350;
+                bool isOnlyKeybind = Instance.Config.SpellbookTabStyle == "Only Keybind";
+                //If we are not on only keybind, move the spellbook tab to be left of the game menu
+                if (!isOnlyKeybind)
+                {
+                    //Move the options and exit tags right two to fit in spellbook page
+                    //exit tab
+                    __instance.tabs[^1].bounds = new Rectangle(__instance.xPositionOnScreen + 704,
+                        __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
+                    __instance.tabs[^1].myID = 12351;
+                    __instance.tabs[^1].leftNeighborID = 12350;
                 
-                //options tab
-                __instance.tabs[^2].bounds = new Rectangle(__instance.xPositionOnScreen + 640,
-                    __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
-                __instance.tabs[^2].myID = 12350;
-                __instance.tabs[^2].leftNeighborID = 12349;
-
+                    //options tab
+                    __instance.tabs[^2].bounds = new Rectangle(__instance.xPositionOnScreen + 640,
+                        __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
+                    __instance.tabs[^2].myID = 12350;
+                    __instance.tabs[^2].leftNeighborID = 12349;
+                    
+                }
+                
                 //spellbook tab
-                __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width - 64 - 16, __instance.height));
-                __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 576, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), "RSspellbook", "Spellbook")
+                __instance.tabs.Add(new ClickableComponent(
+                    new Rectangle(__instance.xPositionOnScreen + 576,
+                        __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64),
+                    "RSspellbook", "Runescape Spellbook")
                 {
                     myID = 12349,
                     downNeighborID = 9,
                     leftNeighborID = 12348,
                     tryDefaultIfNoDownNeighborExists = true,
-                    fullyImmutable = true
+                    fullyImmutable = true,
+                    visible = !isOnlyKeybind,
                 });
+
+                //spellbook page
+                __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen,
+                    __instance.width - 64 - 16, __instance.height));
             }
         }
 
@@ -484,20 +583,22 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(GameMenu __instance, SpriteBatch b)
             {
-                if(!__instance.invisible)
+                if(!__instance.invisible && Instance.Config.SpellbookTabStyle != "Only Keybind")
                 {
-
-                    //this is used to ensure that we dont overlap any big menus like 
+                    //this is used to ensure that we dont overlap any big menus
                     if ((__instance.pages[__instance.currentTab] as CollectionsPage)?.letterviewerSubMenu == null)
                     {
                         ClickableComponent c = __instance.tabs.First(x=>x.name == "RSspellbook");
-                        
-                        b.Draw(ModAssets.extraTextures,
-                            new Vector2(c.bounds.X,
-                                c.bounds.Y +
-                                ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)),
-                            new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None,
-                            0.0001f);
+
+                        if (c.visible)
+                        {
+                            b.Draw(ModAssets.extraTextures,
+                                new Vector2(c.bounds.X,
+                                    c.bounds.Y +
+                                    ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)),
+                                new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None,
+                                0.0001f);
+                        }
                     }
 
                     if (!__instance.hoverText.Equals(""))
@@ -928,7 +1029,7 @@ namespace RunescapeSpellbook
             
         }
         
-        //This patch runs
+        //Setup Variables and farmerData 
         [HarmonyPatch(typeof(Farmer), "farmerInit")]
         public class SetupModVariablesPatcher
         {
@@ -936,14 +1037,7 @@ namespace RunescapeSpellbook
             {
                 if (!Context.IsMultiplayer || (Context.IsMultiplayer && __instance.IsLocalPlayer))
                 {
-                    if (!__instance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicLevel"))
-                    {
-                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicLevel","0");
-                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicExp","0");
-                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicProf1","-1");
-                        __instance.modData.Add("Tofu.RunescapeSpellbook_MagicProf2","-1");
-                    }
-                    
+                    ModAssets.SetupModDataKeys(__instance);
                     ModAssets.localFarmerData.Reset();
                 }
             }
@@ -1416,8 +1510,8 @@ namespace RunescapeSpellbook
                 if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
                 {
                     reqLevel = Math.Clamp(reqLevel, 0, 10);
-                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicLevel"] = (reqLevel).ToString();
-                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicExp"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
+                    ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicLevel",reqLevel.ToString());
+                    ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicExp",(Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
                     this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
                 }
             }
@@ -1435,8 +1529,8 @@ namespace RunescapeSpellbook
                 if (int.TryParse(args[0], out int reqLevel))
                 {
                     reqLevel = Math.Clamp(reqLevel, 0, 10);
-                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicLevel"] = (reqLevel).ToString();
-                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicExp"] = (Farmer.getBaseExperienceForLevel(reqLevel)).ToString();
+                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", (reqLevel).ToString());
+                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", (Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
                     this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
                 }
             }
@@ -1454,7 +1548,7 @@ namespace RunescapeSpellbook
                 if (int.TryParse(args[0], out int reqExp))
                 {
                     reqExp = Math.Clamp(reqExp, 0, 15000);
-                    Game1.player.modData["Tofu.RunescapeSpellbook_MagicLevel"] = "0";
+                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", "0");
                     ModAssets.IncrementMagicExperience(Game1.player, reqExp);
                     this.Monitor.Log($"Set experience to {reqExp}",LogLevel.Info);
                 }
@@ -1482,9 +1576,8 @@ namespace RunescapeSpellbook
             {
                 if (HasNoWorldContextReady() || HasNoMagic()){return;}
             
-                Game1.player.modData["Tofu.RunescapeSpellbook_MagicProf1"] = "-1";
-                Game1.player.modData["Tofu.RunescapeSpellbook_MagicProf2"] = "-1";
-            
+                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf1","-1");
+                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf2","-1");
                 this.Monitor.Log($"Removed assigned perks",LogLevel.Info);
             }
         
@@ -1497,7 +1590,7 @@ namespace RunescapeSpellbook
                     Monitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Info);
                     Monitor.Log($"HasMagic: {ModAssets.HasMagic(farmerRoot)}",LogLevel.Info);
                     Monitor.Log($"Level: {ModAssets.GetFarmerMagicLevel(farmerRoot)}",LogLevel.Info);
-                    Monitor.Log($"Exp: {farmerRoot.modData["Tofu.RunescapeSpellbook_MagicExp"]}",LogLevel.Info);
+                    Monitor.Log($"Exp: {ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_MagicExp")}",LogLevel.Info);
                 
                     List<int> perkIDs = ModAssets.PerksAssigned(farmerRoot);
                     int perkIndex = 1;

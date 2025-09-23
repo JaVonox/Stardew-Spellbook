@@ -1,7 +1,7 @@
 {
   "Name": "RunescapeSpellbook",
   "Author": "Tofu",
-  "Version": "1.0.0",
+  "Version": "1.0.1",
   "Description": "Runescape based spellbook mod",
   "UniqueID": "Tofu.RunescapeSpellbook",
   "EntryDll": "RunescapeSpellbook.dll",
