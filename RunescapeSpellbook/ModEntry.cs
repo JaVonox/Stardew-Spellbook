@@ -44,6 +44,7 @@ namespace RunescapeSpellbook
 
             ModAssets.Load(helper);
             Config = helper.ReadConfig<ModConfig>();
+            ModAssets.GetSpellBaseExpMultiplier = () => Config.SpellBaseExpMultiplier;
             
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
@@ -78,13 +79,16 @@ namespace RunescapeSpellbook
             {
                 configMenuAPI.Register(this.ModManifest, () => this.Config = new ModConfig(),
                     () => this.Helper.WriteConfig(this.Config));
+                
+                configMenuAPI.AddSectionTitle(this.ModManifest,()=>"General");
 
                 configMenuAPI.AddKeybindList(
                     this.ModManifest, () => this.Config.SpellbookKey, value => this.Config.SpellbookKey = value,
                     () => "Open/Close Spellbook Keys",
                     () => "The button that opens the spellbook from the menu instantly");
                 
-                configMenuAPI.AddParagraph(this.ModManifest, ()=> 
+                /*
+                configMenuAPI.AddParagraph(this.ModManifest, ()=>
                     "Certain mods may add new tabs in a way that conflicts with the spellbook tab. By default, if mods are detected that are known to do this," +
                     " the Spellbook will set itself to 'Only Keybind' mode on startup. you can reset this behaviour here. If Lock Spellbook Style is set, behaviour will not longer be " +
                     " automatically changed on startup");
@@ -93,13 +97,40 @@ namespace RunescapeSpellbook
                     this.ModManifest, () => this.Config.LockSpellbookStyle, value => this.Config.LockSpellbookStyle = value,
                     () => "Lock Spellbook Style",
                     () => "Selecting this as true will prevent any automatic toggling of the spellbook tab style if certain mods are detected");
+                */
                 
                 configMenuAPI.AddTextOption(this.ModManifest, () => this.Config.SpellbookTabStyle,
                     value => this.Config.SpellbookTabStyle = value,
                     () => "Spellbook Tab Style", ()=> "Which style should be used for button to access the spellbook",
                     new string[] { "Tab and Keybind", "Only Keybind" });
-
+                
                 configMenuAPI.AddParagraph(this.ModManifest, () => "If you modify the spellbook style you'll need to relaunch your menu for the changes to take effect");
+                
+                configMenuAPI.AddSectionTitle(this.ModManifest,()=>"Modifiers");
+
+                configMenuAPI.AddParagraph(this.ModManifest, ()=> "Modifiers can be applied to all new characters or for specific characters. " +
+                    (Context.IsWorldReady ? $"You are currently playing as {Game1.player.Name}, so any changes will be applied solely to this specific character" 
+                        : "You do not currently have a character selected. Any changes made will only be applied to new characters"));
+                
+                configMenuAPI.AddNumberOption(this.ModManifest,
+                    () => !Context.IsWorldReady ? this.Config.SpellBaseExpMultiplier : 
+                        (int.Parse(ModAssets.TryGetModVariable(Game1.player,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier"))) , 
+                    value => 
+                    {
+                        if (!Context.IsWorldReady)
+                        {
+                            this.Config.SpellBaseExpMultiplier = value;
+                        }
+                        else
+                        {
+                            ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier",$"{value}");
+                        }
+                    },
+                    () => !Context.IsWorldReady ? "Default Exp Multiplier " : $"Character Exp Multiplier",
+                    () => !Context.IsWorldReady ? "A multiplier for the magic experience gained by new characters. Individual values can be modified in game" : $"A multiplier for the magic experienced gained by this character", 20,
+                    200, 5,
+                    (num) => $"{num}%");
+                
             }
             }
             catch (Exception exception)
@@ -130,21 +161,31 @@ namespace RunescapeSpellbook
 
             if (!Config.LockSpellbookStyle && BetterGameMenuApi is null)
             {
-                bool loadedRiskyMod = false;
+                //bool loadedRiskyMod = false;
+                
                 
                 if (this.Helper.ModRegistry.IsLoaded("Annosz.UiInfoSuite2"))
                 {
+                    Instance.Monitor.Log("RunescapeSpellbook has discovered one or more mods are enabled that might cause UI overlaps",LogLevel.Warn);
+                    Instance.Monitor.Log("You might find that certain UI Elements conflict. If this causes you issues, please set the Spellbook to 'Only Keybind' in the mod settings", LogLevel.Warn);
+                    Instance.Monitor.Log("If you are having trouble accessing the spellbook, you can always access it via the associated keybind (Configurable in the Config)",LogLevel.Warn);
+                    Instance.Monitor.Log($"Your current Spellbook keybind is set to {Config.SpellbookKey.Keybinds[0].ToString()}",LogLevel.Warn);
+                    
+                    /*
                     loadedRiskyMod = true;
                     Config.SpellbookTabStyle = "Only Keybind";
+                    */
                 }
 
+                /*
                 if (loadedRiskyMod)
                 {
                     Instance.Monitor.Log("RunescapeSpellbook has discovered one or more mods are enabled that might cause UI overlaps.",LogLevel.Warn);
-                    Instance.Monitor.Log("The Runescape Spellbook menu tab has been set to 'Keybind Only' mode to prevent UI problems.", LogLevel.Warn);
+                    Instance.Monitor.Log("The Runescape Spellbook menu tab has been set to 'Only Keybind' mode to prevent UI problems.", LogLevel.Warn);
                     Instance.Monitor.Log("You can reenable the spellbook tab by setting the Spellbook Tab Style in the config, but relaunching the game with these mods enabled will automatically set you into 'Only Keybind' Mode again unless you set 'Lock Spellbook Style' to true",LogLevel.Warn);
                     Instance.Monitor.Log($"Your current spellbook keybind is set to {Config.SpellbookKey.Keybinds[0].ToString()}",LogLevel.Warn);
                 }
+                */
             }
             
         }
@@ -1562,11 +1603,12 @@ namespace RunescapeSpellbook
                     return;
                 }
             
-                if (int.TryParse(args[0], out int reqExp))
+                if (double.TryParse(args[0], out double reqExp))
                 {
-                    reqExp = Math.Clamp(reqExp, 0, 15000);
+                    reqExp = Math.Clamp(reqExp, 0, Farmer.getBaseExperienceForLevel(10));
                     ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", "0");
-                    ModAssets.IncrementMagicExperience(Game1.player, reqExp);
+                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", "0");
+                    ModAssets.IncrementMagicExperience(Game1.player, reqExp,false);
                     this.Monitor.Log($"Set experience to {reqExp}",LogLevel.Info);
                 }
             }
@@ -1581,10 +1623,10 @@ namespace RunescapeSpellbook
                     return;
                 }
             
-                if (int.TryParse(args[0], out int reqAddExp))
+                if (double.TryParse(args[0], out double reqAddExp))
                 {
                     reqAddExp = Math.Clamp(reqAddExp, 0, Farmer.getBaseExperienceForLevel(10) - ModAssets.GetFarmerExperience(Game1.player));
-                    ModAssets.IncrementMagicExperience(Game1.player, reqAddExp);
+                    ModAssets.IncrementMagicExperience(Game1.player, reqAddExp,false);
                     this.Monitor.Log($"Added {reqAddExp} experience to player",LogLevel.Info);
                 }
             }
@@ -1608,7 +1650,8 @@ namespace RunescapeSpellbook
                     Monitor.Log($"HasMagic: {ModAssets.HasMagic(farmerRoot)}",LogLevel.Info);
                     Monitor.Log($"Level: {ModAssets.GetFarmerMagicLevel(farmerRoot)}",LogLevel.Info);
                     Monitor.Log($"Exp: {ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_MagicExp")}",LogLevel.Info);
-                
+                    Monitor.Log($"Spell Exp Multiplier: {ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier")}",LogLevel.Info);
+                    
                     List<int> perkIDs = ModAssets.PerksAssigned(farmerRoot);
                     int perkIndex = 1;
                     foreach (int id in perkIDs)

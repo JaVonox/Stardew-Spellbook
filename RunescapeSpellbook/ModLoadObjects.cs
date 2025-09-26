@@ -20,6 +20,9 @@ public static class ModAssets
     
     public const int animFrames = 4; 
     
+    //Config getters
+    public static Func<int> GetSpellBaseExpMultiplier { get; set; }
+    
     public static Dictionary<string,ModLoadObjects> modItems = new(){
         {"Tofu.RunescapeSpellbook_RuneSpellbook",new RunesObjects("Tofu.RunescapeSpellbook_RuneSpellbook","Spellbook","Debug object.",0,-999)},
         {"Tofu.RunescapeSpellbook_RuneAir",new RunesObjects("Tofu.RunescapeSpellbook_RuneAir","Air Rune","One of the 4 basic elemental Runes",1,-429,
@@ -380,7 +383,7 @@ public static class ModAssets
             new() { {"Tofu.RunescapeSpellbook_RuneNature", 3},{"Tofu.RunescapeSpellbook_RuneDeath",3},{"Tofu.RunescapeSpellbook_RuneAir",3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("Tofu.RunescapeSpellbook_BuffDark")),SpellEffects.DarkLure, 9,"DarkLure","I'm already luring monsters!"),
         
         new CombatSpell(14,"Combat_Wind","Wind Strike","A basic air missile",0,
-            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 1},{"Tofu.RunescapeSpellbook_RuneAir",1}}, 1,40,15,0,Color.White,"WindStrike"),
+            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 1},{"Tofu.RunescapeSpellbook_RuneAir",1}}, 1.1f,40,15,0,Color.White,"WindStrike"),
        
         new CombatSpell(15,"Combat_Water","Water Bolt","A low level water missile",2,
             new() { {"Tofu.RunescapeSpellbook_RuneChaos", 2},{"Tofu.RunescapeSpellbook_RuneAir",2},{"Tofu.RunescapeSpellbook_RuneWater",2}},2, 70,16,1,Color.DarkCyan,"WaterBolt"),
@@ -889,6 +892,11 @@ public static class ModAssets
         {
             farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicProf2","-1");
         }
+        
+        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier"))
+        {
+            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier",GetSpellBaseExpMultiplier().ToString());
+        }
     }
     public static string TryGetModVariable(Farmer farmer, string dataKey)
     {
@@ -935,21 +943,26 @@ public static class ModAssets
         return level;
     }
     
-    public static int GetFarmerExperience(Farmer farmer)
+    public static double GetFarmerExperience(Farmer farmer)
     {
-        int experience = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp"),out experience);
+        double experience = -1;
+        double.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp"),out experience);
         return experience;
     }
 
-    public static void IncrementMagicExperience(Farmer farmer, int gainedExperience)
+    public static void IncrementMagicExperience(Farmer farmer, double gainedExperience, bool shouldUseMultiplier = true)
     {
-        int experience = GetFarmerExperience(farmer);
+        double experience = GetFarmerExperience(farmer);
         
         if (experience != -1 && experience <= Farmer.getBaseExperienceForLevel(10)) //If our exp should still be tracked then increment it
         {
-            int newTotalExperience = (experience + gainedExperience);
-            TrySetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp",newTotalExperience.ToString());
+            int expMultiplier = 100;
+            int.TryParse(TryGetModVariable(Game1.player, "Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier"),
+                out expMultiplier);
+            double multiplier = shouldUseMultiplier ? expMultiplier / 100.0 : 1.0;
+            double newTotalExperience = (experience + (gainedExperience * multiplier));
+            
+            TrySetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp",Math.Round(newTotalExperience,4).ToString());
             int currentLevel = GetFarmerMagicLevel(farmer);
             int expTilNextLevel = Farmer.getBaseExperienceForLevel(currentLevel + 1);
 
@@ -1066,4 +1079,5 @@ public sealed class ModConfig
     public KeybindList SpellbookKey = KeybindList.Parse("J");
     public bool LockSpellbookStyle = false;
     public string SpellbookTabStyle = "Tab and Keybind";
+    public int SpellBaseExpMultiplier = 100;
 }

@@ -17,14 +17,14 @@ public class Spell
     public string description;
     public int magicLevelRequirement;
     public Dictionary<string,int> requiredItems; //Set of IDs for the required runes
-    public int expReward;
+    public double expReward;
     public string audioID;
     
     /// <summary>
     /// the offset from 16 y in the spellanimations.xnb to use for the inventory spell
     /// </summary>
     public int spellAnimOffset;
-    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string,int> requiredItems, int expReward, int spellAnimOffset, string audioID = "HighAlch")
+    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string,int> requiredItems, double expReward, int spellAnimOffset, string audioID = "HighAlch")
     {
         this.id = id;
         this.name = name;
@@ -117,7 +117,7 @@ public class TeleportSpell : Spell
     /// the island has not yet been unlocked </summary>
     /// <returns>True if the requirements for the teleport are met</returns>
     private Predicate<Farmer>? extraTeleportReqs;
-    public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward,
+    public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward,
         string location, int xPos = 0, int yPos = 0, int dir = 2, Predicate<Farmer>? extraTeleportReqs = null):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,4,"Teleport")
     {
@@ -214,7 +214,7 @@ public class TilesSpell : Spell
 {
     private int baseSize;
     private string noTilesMessage;
-    private float perTileExp;
+    private double perTileExp;
     
     ///<summary>Requirements for selecting the specific terrain that the spell will impact - such as if the spot is unwatered for humidity</summary>
     ///<returns>True if the requirements for the teleport are met</returns>
@@ -222,7 +222,7 @@ public class TilesSpell : Spell
     
     ///<summary>Specifies a function to be ran with the set of tiles collected via the terrainReqs predicate</summary>
     private TilesMethod doAction; 
-    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, float perTileExp, TilesMethod doAction, int baseSize, int spellAnimOffset, string AudioID = "HighAlch",
+    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double perTileExp, TilesMethod doAction, int baseSize, int spellAnimOffset, string AudioID = "HighAlch",
         Predicate<TerrainFeature>? terrainReqs = null, string noTilesMessage = "Couldn't find any tiles to cast on"):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0,spellAnimOffset,AudioID)
     {
@@ -284,7 +284,7 @@ public class TilesSpell : Spell
     
     protected void AddExperiencePerTile(int tileCount)
     {
-        ModAssets.IncrementMagicExperience(Game1.player,Math.Max(2,(int)Math.Floor(perTileExp * (float)tileCount)));
+        ModAssets.IncrementMagicExperience(Game1.player,perTileExp * ((double)tileCount));
     }
 }
 ///<summary> Subclass of spell which opens a new menu, allowing a user to specify which item the spell will be applied upon </summary>
@@ -301,7 +301,7 @@ public class InventorySpell : Spell
     ///<summary>Description placed on the side menu to detail specific mechanics</summary>
     public string longDescription;
     
-    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset, string AudioID = "HighAlch"):
+    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset, string AudioID = "HighAlch"):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.highlightPredicate = highlightPredicate;
@@ -372,7 +372,7 @@ public class BuffSpell : Spell
     
     ///<summary>The message to display when a player does not meet the requirements for the spell specified in the farmerConditions predicate</summary>
     private string buffInvalidMessage;
-    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, int spellAnimOffset,string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
+    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, int spellAnimOffset,string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
         base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.farmerConditions = farmerConditions;
@@ -432,7 +432,7 @@ public class CombatSpell : Spell
 
     //Sprite rotation offset is the amount of rotation we need to have to make it point upwards in the projectile (in degrees)
     public CombatSpell(int id, string name, string displayName, string description,
-        int magicLevelRequirement, Dictionary<string, int> requiredItems, int expReward,
+        int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward,
         int damage,float velocity,int projectileSpriteID, Color projectileColor,string firingSound = "HighAlch", CombatExtraMethod? combatEffect = null)
         : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,projectileSpriteID,firingSound)
     {

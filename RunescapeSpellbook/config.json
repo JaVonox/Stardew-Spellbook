@@ -1,5 +1,6 @@
 {
   "OpenSpellbookKeybind": "J",
   "LockSpellbookStyle": false,
-  "SpellbookTabStyle" : "Tab and Keybind"
+  "SpellbookTabStyle" : "Tab and Keybind",
+  "SpellBaseExpMultiplier": 100
 }
