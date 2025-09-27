@@ -2,19 +2,21 @@
 
 namespace RunescapeSpellbook;
 
-public class StaffWeaponData : WeaponData
+public class StaffWeaponData : WeaponData, ITranslatable
 {
     public string id;
     public float projectileDamageModifier;
     public string? providesRune; //Which rune ID to grant infinite of for the sake of spells
     public int level;
+    protected string translationKey;
     
-    public StaffWeaponData(string id, string displayName, string description, int minSwingDamage, int maxSwingDamage, int spriteIndex, int level = 10, float projectileDamageModifier = 1.0f,
+    public StaffWeaponData(string id, string translationKey, int minSwingDamage, int maxSwingDamage, int spriteIndex, int level = 10, float projectileDamageModifier = 1.0f,
         string providesRune = "", int speedMod = 0, int precision = 0, int defenseMod = 0, float critChanceMod = 0.02f, float critDamageMod = 3f)
     {
         base.Name = id;
-        base.DisplayName = displayName;
-        base.Description = description;
+        this.translationKey = translationKey;
+        base.DisplayName = translationKey;
+        base.Description = translationKey;
         base.MinDamage = minSwingDamage;
         base.MaxDamage = maxSwingDamage;
         base.Speed = speedMod;
@@ -33,6 +35,12 @@ public class StaffWeaponData : WeaponData
         this.projectileDamageModifier = projectileDamageModifier;
         this.providesRune = providesRune;
         this.level = level;
+    }
+    
+    public virtual void ApplyTranslations()
+    {
+        base.DisplayName = KeyTranslator.GetTranslation($"weapon.{this.translationKey}.display-name");
+        base.Description = KeyTranslator.GetTranslation($"weapon.{this.translationKey}.description");
     }
     
 }

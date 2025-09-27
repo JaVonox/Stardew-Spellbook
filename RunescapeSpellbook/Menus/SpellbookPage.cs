@@ -137,25 +137,25 @@ public class SpellbookPage : IClickableMenu
 
     //Creates the tooltip for the hovered spell
     public const int runesOffset = 15;
-    private void GenerateHoverBoxSpell(SpriteBatch b, KeyValuePair<bool,string> canCast)
+    private void GenerateHoverBoxSpell(SpriteBatch b, SpellResponse canCast)
     {
         if(!hasMagic){return;}
         int x = Game1.getOldMouseX() + 32;
         int y = Game1.getOldMouseY() + 32;
         Spell hoveredSpell = ModAssets.modSpells[hoverSpellID];
 
-        string levelReqText = $"Requires Lvl. {hoveredSpell.magicLevelRequirement}";
+        string levelReqText = KeyTranslator.GetTranslation("ui.RequiresLevel.text",new {MagicLevel = hoveredSpell.magicLevelRequirement});
         string damageText = "";
         if (hoveredSpell.GetType() == typeof(CombatSpell))
         {
-            damageText = $"{Math.Floor((float)((CombatSpell)hoveredSpell).damage * 0.8f)}-{Math.Floor((float)((CombatSpell)hoveredSpell).damage * 1.2f)} Damage";
+            damageText = KeyTranslator.GetTranslation("ui.SpellDamage.text",new {LowDamage = Math.Floor((float)((CombatSpell)hoveredSpell).damage * 0.8f), HighDamage = Math.Floor((float)((CombatSpell)hoveredSpell).damage * 1.2f)});
         }
         
         //Find the required size of the tooltip box
         int requiredWidth = (int)Math.Ceiling(
             Math.Max((damageText != "" ? Game1.smallFont.MeasureString(damageText).X + 52 + 16 : 0),
             Math.Max(Game1.smallFont.MeasureString(levelReqText).X + 16,
-            Math.Max(Game1.smallFont.MeasureString(canCast.Value).X + 16,
+            Math.Max(Game1.smallFont.MeasureString(canCast.translatedResponse).X + 16,
                 Math.Max(
                     Math.Max(Game1.dialogueFont.MeasureString(hoveredSpell.displayName).X,(float)(hoveredSpell.requiredItems.Count * ((16 * 4) + runesOffset))),
                     Game1.smallFont.MeasureString(hoveredSpell.description).X + 16)))
@@ -166,9 +166,9 @@ public class SpellbookPage : IClickableMenu
         int descHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(hoveredSpell.description).Y);
         int levelHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(levelReqText).Y);
         int damageHeight = damageText != "" ? (int)Math.Ceiling(Math.Max(10,Game1.smallFont.MeasureString(damageText).Y)) + 4 : 0;
-        int errorHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(canCast.Value).Y);
+        int errorHeight = (int)Math.Ceiling(Game1.smallFont.MeasureString(canCast.translatedResponse).Y);
         
-        int requiredHeight = 4 + titleHeight + 4 + descHeight + levelHeight + damageHeight + 4 + 36 + (16 * 4) + (!canCast.Key ? errorHeight : 0); //Adjust to add error message;
+        int requiredHeight = 4 + titleHeight + 4 + descHeight + levelHeight + damageHeight + 4 + 36 + (16 * 4) + (!canCast.wasSpellSuccessful ? errorHeight : 0); //Adjust to add error message;
         requiredHeight = requiredHeight < 50 ? 66 : 16 + requiredHeight;
 
         RepositionHoverBox(requiredWidth, requiredHeight, ref x, ref y);
@@ -191,9 +191,9 @@ public class SpellbookPage : IClickableMenu
             nextYOffset += damageHeight;
         }
 
-        if (!canCast.Key)
+        if (!canCast.wasSpellSuccessful)
         {
-            b.DrawString(Game1.smallFont, canCast.Value, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Color.Red);
+            b.DrawString(Game1.smallFont, canCast.translatedResponse, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Color.Red);
             nextYOffset += errorHeight;
         }
         
@@ -220,8 +220,8 @@ public class SpellbookPage : IClickableMenu
         bool isHoveredPerkAssigned = ModAssets.HasPerk(Game1.player, hoveredPerk.perkID);
 
         string hoveredPerkText = isHoveredPerkAssigned
-            ? "I have this perk"
-            : (!hasPerkPoints ? "I don't have any perk points to spend" : "Click to buy this perk");
+            ? KeyTranslator.GetTranslation("ui.AlreadyHavePerk.text")
+            : (!hasPerkPoints ? KeyTranslator.GetTranslation("ui.NoPerkPoints.text") : KeyTranslator.GetTranslation("ui.BuyPerk.text"));
 
         bool perkHasLine2 = hoveredPerk.perkDescriptionLine2 != "";
         Vector2 perkTitleSizes = Game1.dialogueFont.MeasureString(hoveredPerk.perkDisplayName);
@@ -262,14 +262,14 @@ public class SpellbookPage : IClickableMenu
         if (hoverSpellID != -1)
         {
             Item? nullItem = null;
-            KeyValuePair<bool,string> castReturn = ModAssets.modSpells[hoverSpellID].SelectSpell(); //This may either cast the spell or run alternate effects like opening a new menu
-            if (castReturn.Key)
+            SpellResponse castReturn = ModAssets.modSpells[hoverSpellID].SelectSpell(); //This may either cast the spell or run alternate effects like opening a new menu
+            if (castReturn.wasSpellSuccessful)
             {
                 exitThisMenu();
             }
             else
             {
-                Game1.showRedMessage(castReturn.Value, true);
+                Game1.showRedMessage(castReturn.translatedResponse);
             }
         }
         else if (hoverPerkID != -1)
@@ -278,11 +278,11 @@ public class SpellbookPage : IClickableMenu
             {
                 if (ModAssets.HasPerk(Game1.player, hoverPerkID))
                 {
-                    Game1.showRedMessage("I already have this perk", true);
+                    Game1.showRedMessage(KeyTranslator.GetTranslation("ui.AlreadyHavePerk.text"));
                 }
                 else
                 {
-                    Game1.showRedMessage("I don't have enough perk points to do this", true);
+                    Game1.showRedMessage(KeyTranslator.GetTranslation("ui.NoPerkPoints.text"));
                 }
                 return;
             }
@@ -295,7 +295,7 @@ public class SpellbookPage : IClickableMenu
             }
             else
             {
-                Game1.showRedMessage("Couldn't assign perk", true);
+                Game1.showRedMessage(KeyTranslator.GetTranslation("ui.NoAssign.text"));
             }
         }
     }
@@ -307,9 +307,9 @@ public class SpellbookPage : IClickableMenu
 
         if (!hasMagic)
         {
-            const string messageLine1 = "I don't know any runic spells yet";
-            const string messageLine2 = "I might be able to learn some if I reach level 4";
-            const string messageLine3 = "friendship with someone with experience in magic";
+            string messageLine1 = KeyTranslator.GetTranslation("ui.NotMagic.text-1");
+            string messageLine2 = KeyTranslator.GetTranslation("ui.NotMagic.text-2");
+            string messageLine3 = KeyTranslator.GetTranslation("ui.NotMagic.text-3");
             
             Vector2 message1Size = Game1.dialogueFont.MeasureString(messageLine1);
             Vector2 message2Size = Game1.smallFont.MeasureString(messageLine2);
@@ -328,7 +328,7 @@ public class SpellbookPage : IClickableMenu
         }
         foreach (ClickableComponent c in spellIcons)
         {
-            bool canCast = ModAssets.modSpells[c.myID].CanCastSpell().Key;
+            bool canCast = ModAssets.modSpells[c.myID].CanCastSpell().wasSpellSuccessful;
 
             b.Draw(ModAssets.extraTextures, c.bounds,
                 new Rectangle(canCast ? 0 : ModAssets.spellsSize,
@@ -349,9 +349,9 @@ public class SpellbookPage : IClickableMenu
 
         //Magic Level
         magicIcon.draw(b);
-        string levelText = $"Level {magicLevel}";
+        string levelText = KeyTranslator.GetTranslation("ui.LevelDisplay.text",new {MagicLevel = magicLevel});
         int spacing = (int)(magicIcon.bounds.Width - Game1.dialogueFont.MeasureString(levelText).X) / 2;
-        b.DrawString(Game1.dialogueFont, $"Level {magicLevel}",
+        b.DrawString(Game1.dialogueFont, levelText,
             new Vector2(magicIcon.bounds.X + spacing, magicIcon.bounds.Y + 90), Game1.textColor);
 
         foreach (ClickableTextureComponent perk in perkIcons)

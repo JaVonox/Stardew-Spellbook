@@ -64,7 +64,7 @@ public class BaseSpellEffects
 /// </summary>
 public class SpellEffects : BaseSpellEffects
 {
-    public static KeyValuePair<bool, string> Humidify(List<TerrainFeature> tiles, int animOffset)
+    public static SpellResponse Humidify(List<TerrainFeature> tiles, int animOffset)
     {
         Farmer player = Game1.player;
         GameLocation currentLoc = player.currentLocation;
@@ -91,11 +91,11 @@ public class SpellEffects : BaseSpellEffects
             }
         }, "RunescapeSpellbook.Humidify", 800,animOffset);
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
 
     }
 
-    public static KeyValuePair<bool, string> CurePlant(List<TerrainFeature> tiles, int animOffset)
+    public static SpellResponse CurePlant(List<TerrainFeature> tiles, int animOffset)
     {
 
         Farmer player = Game1.player;
@@ -104,7 +104,7 @@ public class SpellEffects : BaseSpellEffects
 
         if (Game1.season == Season.Winter && player.currentLocation is not IslandLocation)
         {
-            return new KeyValuePair<bool, string>(false, "It is too cold to plant things here!");
+            return new SpellResponse(false, "spell-error.CurePlantTooCold.text");
         }
         
         PlayAnimation(() =>
@@ -120,9 +120,9 @@ public class SpellEffects : BaseSpellEffects
             }
         }, "RunescapeSpellbook.Cure", 800,animOffset);
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
-    public static KeyValuePair<bool, string> HighAlchemy(ref Item? itemArgs)
+    public static SpellResponse HighAlchemy(ref Item? itemArgs)
     {
         int postCastStackSize = itemArgs.Stack - 1;
         Game1.player.Money += (int)Math.Floor(itemArgs.sellToStorePrice(-1L) * 1.5f);
@@ -133,10 +133,10 @@ public class SpellEffects : BaseSpellEffects
             itemArgs = null;
         }
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
     
-    public static KeyValuePair<bool, string> LowAlchemy(ref Item? itemArgs)
+    public static SpellResponse LowAlchemy(ref Item? itemArgs)
     {
         int postCastStackSize = itemArgs.Stack - 1;
         Game1.player.Money += (int)Math.Floor(itemArgs.sellToStorePrice(-1L) * 1.1f);
@@ -147,7 +147,7 @@ public class SpellEffects : BaseSpellEffects
             itemArgs = null;
         }
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
     
     public static Dictionary<string,int> redGemsEnchants = new()
@@ -165,7 +165,7 @@ public class SpellEffects : BaseSpellEffects
         {"749",10}, //Omni Geode
         {"848",15}, //Cinder Shard
     };
-    public static KeyValuePair<bool, string> EnchantRubyBolts(ref Item? itemArgs)
+    public static SpellResponse EnchantRubyBolts(ref Item? itemArgs)
     {
         if (redGemsEnchants.ContainsKey(itemArgs.ItemId))
         {
@@ -182,10 +182,10 @@ public class SpellEffects : BaseSpellEffects
         }
         else
         {
-            return new KeyValuePair<bool, string>(false, "I can't convert this into ammo!");
+            return new SpellResponse(false, "spell-error.MenuEnchantFail.text");
         }
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
     
     public static Dictionary<string,int> greenGemsEnchants = new()
@@ -201,7 +201,7 @@ public class SpellEffects : BaseSpellEffects
         {"910",25}, //Radioactive Bar
         {"749",10}, //Omni Geode
     };
-    public static KeyValuePair<bool, string> EnchantEmeraldBolt(ref Item? itemArgs)
+    public static SpellResponse EnchantEmeraldBolt(ref Item? itemArgs)
     {
         if (greenGemsEnchants.ContainsKey(itemArgs.ItemId))
         {
@@ -218,12 +218,12 @@ public class SpellEffects : BaseSpellEffects
         }
         else
         {
-            return new KeyValuePair<bool, string>(false, "I can't convert this into ammo!");
+            return new SpellResponse(false, "spell-error.MenuEnchantFail.text");
         }
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
-    public static KeyValuePair<bool, string> PlankMake(ref Item? itemArgs)
+    public static SpellResponse PlankMake(ref Item? itemArgs)
     {
         int postCastStackSize;
         
@@ -231,7 +231,7 @@ public class SpellEffects : BaseSpellEffects
         {
             if (itemArgs.Stack < 15)
             {
-                return new KeyValuePair<bool, string>(false, "I need atleast 15 wood to make hardwood");
+                return new SpellResponse(false, "spell-error.MenuPlankWoodInsufficent.text");
             }
             postCastStackSize = itemArgs.Stack - 15;
             
@@ -286,7 +286,7 @@ public class SpellEffects : BaseSpellEffects
             }
             catch (Exception ex)
             {
-                return new KeyValuePair<bool, string>(false, $"An unexpected error occured");
+                return new SpellResponse(false, $"spell-error.GeneralFail.text");
             }
         }
 
@@ -295,11 +295,11 @@ public class SpellEffects : BaseSpellEffects
             itemArgs = null;
         }
         
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
 
 
-    public static KeyValuePair<bool, string> SuperheatItem(ref Item? itemArgs)
+    public static SpellResponse SuperheatItem(ref Item? itemArgs)
     {
         string itemId = itemArgs.QualifiedItemId;
 
@@ -318,11 +318,11 @@ public class SpellEffects : BaseSpellEffects
                 {
                     itemArgs = null;
                 }
-                return new KeyValuePair<bool, string>(true, "");
+                return new SpellResponse(true);
             }
             else
             {
-                return new KeyValuePair<bool, string>(false, $"I need atleast 5 {itemArgs.DisplayName}");
+                return new SpellResponse(false, $"spell-error.MenuSuperheatInsufficent.text", new {itemName = itemArgs.DisplayName, stackSize = 5});
             }
         }
         
@@ -331,7 +331,7 @@ public class SpellEffects : BaseSpellEffects
 
         if (furnaceRule == null)
         {
-            return new KeyValuePair<bool, string>(false, "This item can't be smelted");
+            return new SpellResponse(false, "spell-error.MenuSuperheatNoSmelt.text");
         }
 
         int stackSizeRequired = furnaceRule.Triggers.First(x => x.RequiredItemId == itemId).RequiredCount;
@@ -356,13 +356,13 @@ public class SpellEffects : BaseSpellEffects
         }
         else
         {
-            return new KeyValuePair<bool, string>(false, $"I need atleast {stackSizeRequired} {itemArgs.DisplayName}");
+            return new SpellResponse(false, $"spell-error.MenuSuperheatInsufficent.text", new {itemName = itemArgs.DisplayName, stackSize = stackSizeRequired});
         }
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
 
-    public static KeyValuePair<bool, string> VileVigour(int animOffset)
+    public static SpellResponse VileVigour(int animOffset)
     {
         Farmer caster = Game1.player;
 
@@ -372,10 +372,10 @@ public class SpellEffects : BaseSpellEffects
             caster.stamina = caster.MaxStamina;
         }, "RunescapeSpellbook.Vile", 500,animOffset);
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
 
-    public static KeyValuePair<bool, string> BakePie(int animOffset)
+    public static SpellResponse BakePie(int animOffset)
     {
         CraftingRecipe? selectedRecipe = Game1.player.cookingRecipes.Keys
             .Select(x => new CraftingRecipe(x, true))
@@ -383,7 +383,7 @@ public class SpellEffects : BaseSpellEffects
 
         if (selectedRecipe == null)
         {
-            return new KeyValuePair<bool, string>(false, "I can't cook anything with these ingredients");
+            return new SpellResponse(false, "spell-error.BuffPieMakeNoRecipe.text");
         }
 
         PlayAnimation(() =>
@@ -394,10 +394,10 @@ public class SpellEffects : BaseSpellEffects
 
         }, "RunescapeSpellbook.BakePie", 800,animOffset);
 
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
 
-    public static KeyValuePair<bool, string> Charge(int animOffset)
+    public static SpellResponse Charge(int animOffset)
     {
         PlayAnimation(() =>
         {
@@ -405,10 +405,10 @@ public class SpellEffects : BaseSpellEffects
 
         }, "RunescapeSpellbook.Charge", 800,animOffset);
         
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
     
-    public static KeyValuePair<bool, string> DarkLure(int animOffset)
+    public static SpellResponse DarkLure(int animOffset)
     {
         PlayAnimation(() =>
         {
@@ -416,7 +416,7 @@ public class SpellEffects : BaseSpellEffects
 
         }, "RunescapeSpellbook.DarkLure", 800,animOffset);
         
-        return new KeyValuePair<bool, string>(true, "");
+        return new SpellResponse(true);
     }
 
     private static readonly string[] undeadMonsters = {

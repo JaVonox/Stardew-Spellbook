@@ -50,23 +50,23 @@ namespace RunescapeSpellbook
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             
-            helper.ConsoleCommands.Add("rs_grantmagic", "Gives the player magic.\n\nUsage: rs_grantmagic <value>\n\n value: the level to set to", this.GrantMagic);
-            helper.ConsoleCommands.Add("rs_setlevel", "Sets the players magic level.\n\nUsage: rs_setlevel <value>\n\n value: the level to set to", this.SetLevel);
-            helper.ConsoleCommands.Add("rs_setexp", "Sets the players experience level.\n\nUsage: rs_setexp <value>\n\n value: the experience to set to", this.SetExp);
-            helper.ConsoleCommands.Add("rs_addexp", "Adds to the players experience level.\n\nUsage: rs_addexp <value>\n\n value: the experience to add", this.AddExp);
-            helper.ConsoleCommands.Add("rs_clearperks", "Clears a players perks.\n\nUsage: rs_clearperks", this.ResetPerks);
-            helper.ConsoleCommands.Add("rs_info", "Dumps some info about all players to console.\n\nUsage: rs_info", this.PlayerInfo);
-            helper.ConsoleCommands.Add("rs_addrunes", "Gives the player some runes.\n\nUsage: rs_addrunes <value>\n\n value: default, rune name, elemental, catalytic, teleport, utility, combat, combat2", this.GrantRunes);
-            helper.ConsoleCommands.Add("rs_addweps", "Gives the player staves.\n\nUsage: rs_addweps", this.GrantStaffs);
-            helper.ConsoleCommands.Add("rs_addammo", "Gives the player ammo.\n\nUsage: rs_addammo", this.GrantAmmo);
-            helper.ConsoleCommands.Add("rs_addtreasures", "Gives the player treasures.\n\nUsage: rs_addtreasures", this.GrantTreasures);
-            helper.ConsoleCommands.Add("rs_addpacks", "Gives the player packs.\n\nUsage: rs_addpacks", this.GrantPacks);
-            helper.ConsoleCommands.Add("rs_addfish", "Gives the player fish.\n\nUsage: rs_addfish", this.GrantFish);
-            helper.ConsoleCommands.Add("rs_addseeds", "Gives the player seeds.\n\nUsage: rs_addseeds", this.GrantSeeds);
-            helper.ConsoleCommands.Add("rs_addcrops", "Gives the player crops.\n\nUsage: rs_addcrops", this.GrantCrops);
-            helper.ConsoleCommands.Add("rs_addpots", "Gives the player potions.\n\nUsage: rs_addpots", this.GrantPotions);
-            helper.ConsoleCommands.Add("rs_debug_misc", "Runs a command left in for testing. Do not use. \n\nUsage: rs_debug_misc", this.DebugCommand);
-            helper.ConsoleCommands.Add("rs_debug_position", "Reports the position of the local player \n\nUsage: rs_debug_position", this.DebugPosition);
+            helper.ConsoleCommands.Add("rs_grantmagic", KeyTranslator.GetTranslation("console.grantmagic.text"), this.GrantMagic);
+            helper.ConsoleCommands.Add("rs_setlevel", KeyTranslator.GetTranslation("console.setlevel.text"), this.SetLevel);
+            helper.ConsoleCommands.Add("rs_setexp", KeyTranslator.GetTranslation("console.setexp.text"), this.SetExp);
+            helper.ConsoleCommands.Add("rs_addexp", KeyTranslator.GetTranslation("console.addexp.text"), this.AddExp);
+            helper.ConsoleCommands.Add("rs_clearperks", KeyTranslator.GetTranslation("console.clearperks.text"), this.ResetPerks);
+            helper.ConsoleCommands.Add("rs_info", KeyTranslator.GetTranslation("console.info.text"), this.PlayerInfo);
+            helper.ConsoleCommands.Add("rs_addrunes", KeyTranslator.GetTranslation("console.addrunes.text"), this.GrantRunes);
+            helper.ConsoleCommands.Add("rs_addweps", KeyTranslator.GetTranslation("console.addweps.text"), this.GrantStaffs);
+            helper.ConsoleCommands.Add("rs_addammo", KeyTranslator.GetTranslation("console.addammo.text"), this.GrantAmmo);
+            helper.ConsoleCommands.Add("rs_addtreasures", KeyTranslator.GetTranslation("console.addtreasures.text"), this.GrantTreasures);
+            helper.ConsoleCommands.Add("rs_addpacks", KeyTranslator.GetTranslation("console.addpacks.text"), this.GrantPacks);
+            helper.ConsoleCommands.Add("rs_addfish", KeyTranslator.GetTranslation("console.addfish.text"), this.GrantFish);
+            helper.ConsoleCommands.Add("rs_addseeds", KeyTranslator.GetTranslation("console.addseeds.text"), this.GrantSeeds);
+            helper.ConsoleCommands.Add("rs_addcrops", KeyTranslator.GetTranslation("console.addcrops.text"), this.GrantCrops);
+            helper.ConsoleCommands.Add("rs_addpots", KeyTranslator.GetTranslation("console.addpots.text"), this.GrantPotions);
+            helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
+            helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
         }
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -80,12 +80,12 @@ namespace RunescapeSpellbook
                 configMenuAPI.Register(this.ModManifest, () => this.Config = new ModConfig(),
                     () => this.Helper.WriteConfig(this.Config));
                 
-                configMenuAPI.AddSectionTitle(this.ModManifest,()=>"General");
+                configMenuAPI.AddSectionTitle(this.ModManifest,()=>KeyTranslator.GetTranslation("settings.TitleGeneral.text"));
 
                 configMenuAPI.AddKeybindList(
                     this.ModManifest, () => this.Config.SpellbookKey, value => this.Config.SpellbookKey = value,
-                    () => "Open/Close Spellbook Keys",
-                    () => "The button that opens the spellbook from the menu instantly");
+                    () => KeyTranslator.GetTranslation("settings.SpellbookKeybind.text"),
+                    () => KeyTranslator.GetTranslation("settings.SpellbookKeybind.tooltip"));
                 
                 /*
                 configMenuAPI.AddParagraph(this.ModManifest, ()=>
@@ -101,16 +101,16 @@ namespace RunescapeSpellbook
                 
                 configMenuAPI.AddTextOption(this.ModManifest, () => this.Config.SpellbookTabStyle,
                     value => this.Config.SpellbookTabStyle = value,
-                    () => "Spellbook Tab Style", ()=> "Which style should be used for button to access the spellbook",
+                    () => KeyTranslator.GetTranslation("settings.SpellbookTabStyle.text"), ()=> KeyTranslator.GetTranslation("settings.SpellbookTabStyle.tooltip"),
                     new string[] { "Tab and Keybind", "Only Keybind" });
                 
-                configMenuAPI.AddParagraph(this.ModManifest, () => "If you modify the spellbook style you'll need to relaunch your menu for the changes to take effect");
+                configMenuAPI.AddParagraph(this.ModManifest, () => KeyTranslator.GetTranslation("settings.RelaunchText.text"));
                 
-                configMenuAPI.AddSectionTitle(this.ModManifest,()=>"Modifiers");
+                configMenuAPI.AddSectionTitle(this.ModManifest,()=>KeyTranslator.GetTranslation("settings.TitleModifiers.text"));
 
-                configMenuAPI.AddParagraph(this.ModManifest, ()=> "Modifiers can be applied to all new characters or for specific characters. " +
-                    (Context.IsWorldReady ? $"You are currently playing as {Game1.player.Name}, so any changes will be applied solely to this specific character" 
-                        : "You do not currently have a character selected. Any changes made will only be applied to new characters"));
+                configMenuAPI.AddParagraph(this.ModManifest, ()=> KeyTranslator.GetTranslation("settings.MultiplierParagraph.intro") +
+                    (Context.IsWorldReady ? KeyTranslator.GetTranslation("settings.MultiplierParagraph.in-game-text", new {PlayerName = Game1.player.Name}) 
+                        : KeyTranslator.GetTranslation("settings.MultiplierParagraph.out-game-text")));
                 
                 configMenuAPI.AddNumberOption(this.ModManifest,
                     () => !Context.IsWorldReady ? this.Config.SpellBaseExpMultiplier : 
@@ -126,8 +126,8 @@ namespace RunescapeSpellbook
                             ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier",$"{value}");
                         }
                     },
-                    () => !Context.IsWorldReady ? "Default Exp Multiplier " : $"Character Exp Multiplier",
-                    () => !Context.IsWorldReady ? "A multiplier for the magic experience gained by new characters. Individual values can be modified in game" : $"A multiplier for the magic experienced gained by this character", 20,
+                    () => !Context.IsWorldReady ? KeyTranslator.GetTranslation("settings.Multiplier.out-game-text") : KeyTranslator.GetTranslation("settings.Multiplier.in-game-text"),
+                    () => !Context.IsWorldReady ? KeyTranslator.GetTranslation("settings.Multiplier.out-game-tooltip") : KeyTranslator.GetTranslation("settings.Multiplier.in-game-tooltip"), 20,
                     200, 5,
                     (num) => $"{num}%");
                 
@@ -135,7 +135,7 @@ namespace RunescapeSpellbook
             }
             catch (Exception exception)
             {
-                Instance.Monitor.Log($"Runescape Spellbook failed to setup GenericModConfigMenuAPI: {exception.Message}",LogLevel.Error);
+                Instance.Monitor.Log(KeyTranslator.GetTranslation("log.ModConfigError.text",new{Exception = exception.Message}),LogLevel.Error);
             }
 
             try
@@ -144,7 +144,7 @@ namespace RunescapeSpellbook
                 if (BetterGameMenuApi is not null) //BetterGameMenu setup
                 {
                     //TODO betterGameMenu doesn't seem to properly handle a spellbook tab style being keybind only with my current setup. Should fix later.
-                    BetterGameMenuApi.RegisterTab("RSspellbook", 159, () => "Runescape Spellbook",
+                    BetterGameMenuApi.RegisterTab("RSspellbook", 159, () => KeyTranslator.GetTranslation("ui.TabName.text"),
                         () => (BetterGameMenuApi.CreateDraw(ModAssets.extraTextures, new Rectangle(0, 0, 16, 16), 4),
                             false), 0,
                         menu => new SpellbookPage(menu.xPositionOnScreen, menu.yPositionOnScreen, menu.width - 64 - 16,
@@ -156,7 +156,7 @@ namespace RunescapeSpellbook
             }
             catch (Exception exception)
             {
-                Instance.Monitor.Log($"Runescape Spellbook failed to setup BetterGameMenuAPI: {exception.Message}",LogLevel.Error);
+                Instance.Monitor.Log(KeyTranslator.GetTranslation("log.GameMenuAPIError.text",new{Exception = exception.Message}),LogLevel.Error);
             }
 
             if (!Config.LockSpellbookStyle && BetterGameMenuApi is null)
@@ -166,10 +166,14 @@ namespace RunescapeSpellbook
                 
                 if (this.Helper.ModRegistry.IsLoaded("Annosz.UiInfoSuite2"))
                 {
-                    Instance.Monitor.Log("RunescapeSpellbook has discovered one or more mods are enabled that might cause UI overlaps",LogLevel.Warn);
-                    Instance.Monitor.Log("You might find that certain UI Elements conflict. If this causes you issues, please set the Spellbook to 'Only Keybind' in the mod settings", LogLevel.Warn);
-                    Instance.Monitor.Log("If you are having trouble accessing the spellbook, you can always access it via the associated keybind (Configurable in the Config)",LogLevel.Warn);
-                    Instance.Monitor.Log($"Your current Spellbook keybind is set to {Config.SpellbookKey.Keybinds[0].ToString()}",LogLevel.Warn);
+                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-1"),LogLevel.Warn);
+                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-2"), LogLevel.Warn);
+                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-3"),LogLevel.Warn);
+                    string firstKey = Config.SpellbookKey.Keybinds.Length > 0
+                        ? Config.SpellbookKey.Keybinds[0].ToString()
+                        : "Unbound";
+                    
+                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-4", new {Keybind = firstKey}),LogLevel.Warn);
                     
                     /*
                     loadedRiskyMod = true;
@@ -225,7 +229,7 @@ namespace RunescapeSpellbook
                 }
                 else
                 {
-                    Game1.showRedMessage("I should finish what I'm doing before I open my spellbook");
+                    Game1.showRedMessage(KeyTranslator.GetTranslation("ui.BlockSpellbookOpen.text"));
                 }
             }
         }
@@ -447,10 +451,10 @@ namespace RunescapeSpellbook
                 {
                     var eventDict = asset.AsDictionary<string, string>().Data;
 
-                    foreach (KeyValuePair<string, string> eventData in ModAssets.loadableEvents[
+                    foreach (LoadableEvent eventData in ModAssets.loadableEvents[
                                  e.NameWithoutLocale.Name])
                     {
-                        eventDict.Add(eventData.Key, eventData.Value);
+                        eventDict.Add(eventData.id, eventData.contents[0]);
                     }
                 });
             }
@@ -619,7 +623,7 @@ namespace RunescapeSpellbook
                 __instance.tabs.Add(new ClickableComponent(
                     new Rectangle(__instance.xPositionOnScreen + 576,
                         __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64),
-                    "RSspellbook", "Runescape Spellbook")
+                    "RSspellbook", KeyTranslator.GetTranslation("ui.TabName.text"))
                 {
                     myID = 12349,
                     downNeighborID = 9,
@@ -972,9 +976,9 @@ namespace RunescapeSpellbook
                             return;
                         }
                         
-                        KeyValuePair<bool, string> castReturn = spell.CreateCombatProjectile(who, staffWepData, mouseX, mouseY, out List<MagicProjectile> generatedProjectiles);
+                        SpellResponse castReturn = spell.CreateCombatProjectile(who, staffWepData, mouseX, mouseY, out List<MagicProjectile> generatedProjectiles);
 
-                        if (castReturn.Key && generatedProjectiles.Count > 0)
+                        if (castReturn.wasSpellSuccessful && generatedProjectiles.Count > 0)
                         {
                             foreach (MagicProjectile projectile in generatedProjectiles)
                             {
@@ -983,12 +987,12 @@ namespace RunescapeSpellbook
                         }
                         else
                         {
-                            Game1.showRedMessage(castReturn.Value);
+                            Game1.showRedMessage(castReturn.translatedResponse);
                         }
                     }
                     else
                     {
-                        Game1.showRedMessage(ModAssets.HasMagic(Game1.player) ? "No Selected Spell" : "I don't know how to use this");
+                        Game1.showRedMessage(KeyTranslator.GetTranslation(ModAssets.HasMagic(Game1.player) ? "ui.NoSpellSelected.text" : "ui.NoBattlestaffKnowledge.text"));
                     }
                 }
                 
@@ -1018,8 +1022,9 @@ namespace RunescapeSpellbook
                 if (__instance.type.Value == 429) //Staff type
                 {
                     StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-                    
-                    __result = $"Level {staffWeaponData.level} Battlestaff";
+
+                    __result = KeyTranslator.GetTranslation("ui.BattlestaffDescription.text",
+                        new { StaffLevel = staffWeaponData.level });
                 }
             }
         }
@@ -1067,7 +1072,7 @@ namespace RunescapeSpellbook
                         Utility.drawWithShadow(spriteBatch, ModAssets.extraTextures,
                             new Vector2(x + 16 + 4, y + 16 + 4), new Rectangle(16, 0, 10, 10), Color.White, 0f,
                             Vector2.Zero, 4f, flipped: false, 1f);
-                        Utility.drawTextWithShadow(spriteBatch, $"{staffWeaponData.projectileDamageModifier}x Spell Damage", font,
+                        Utility.drawTextWithShadow(spriteBatch, KeyTranslator.GetTranslation("ui.BattlestaffMultiplier.text", new {Multiplier = staffWeaponData.projectileDamageModifier}), font,
                             new Vector2(x + 16 + 52, y + 16 + 12), c3 * 0.9f * alpha);
                         y += extraSize;
                     }
@@ -1077,7 +1082,7 @@ namespace RunescapeSpellbook
                         Utility.drawWithShadow(spriteBatch, ModAssets.extraTextures,
                             new Vector2(x + 16 + 4, y + 16 + 4), new Rectangle(26, 0, 10, 10), Color.White, 0f,
                             Vector2.Zero, 4f, flipped: false, 1f);
-                        Utility.drawTextWithShadow(spriteBatch, $"{ModAssets.modItems[staffWeaponData.providesRune].DisplayName}", font,
+                        Utility.drawTextWithShadow(spriteBatch, KeyTranslator.GetTranslation("ui.BattlestaffRune.text", new {RuneName =  ModAssets.modItems[staffWeaponData.providesRune].DisplayName}), font,
                             new Vector2(x + 16 + 52, y + 16 + 12), c3 * 0.9f * alpha);
                         y += extraSize;
                     }
@@ -1168,7 +1173,7 @@ namespace RunescapeSpellbook
                     {
                         Game1.drawObjectDialogue(new List<string>
                         {
-                            "Your hands tingle as you pick up the mysterious object. Maybe the archaeologist will know something about this?"
+                            KeyTranslator.GetTranslation("minievent.FindRunePack.text")
                         });
                         who.completelyStopAnimatingOrDoingAction();
                         return false;
@@ -1248,13 +1253,13 @@ namespace RunescapeSpellbook
                 switch (category)
                 {
                     case -429:
-                        __result = "Elemental Rune";
+                        __result = KeyTranslator.GetTranslation("ui.CategoryElemental.text");
                         break;
                     case -430:
-                        __result = "Combat Rune";
+                        __result = KeyTranslator.GetTranslation("ui.CategoryCombat.text");
                         break;
                     case -431:
-                        __result = "Catalytic Rune";
+                        __result = KeyTranslator.GetTranslation("ui.CategoryCatalytic.text");
                         break;
                 } 
             }
@@ -1469,7 +1474,7 @@ namespace RunescapeSpellbook
                     foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
                                  x is LoadableTV tvChannel && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season && Game1.year >= tvChannel.firstYear))
                     {
-                        string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : " (Rerun)");
+                        string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : KeyTranslator.GetTranslation("ui.Rerun.text"));
                         channels.Insert(channels.Count - 1, new Response($"RS_{addChannel.id}", channelName));
                     }
                 }

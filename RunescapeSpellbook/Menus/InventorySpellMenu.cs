@@ -21,7 +21,7 @@ public class InventorySpellMenu : MenuWithInventory
     private int currentFrame;
     private bool isAnimatingCast;
     
-    private TemporaryAnimatedSpriteList fluffSprites = new TemporaryAnimatedSpriteList();
+    private TemporaryAnimatedSpriteList fluffSprites = new();
     private TemporaryAnimatedSprite castAnim;
 
     private string spellDescriptionText;
@@ -67,7 +67,7 @@ public class InventorySpellMenu : MenuWithInventory
 
     private void reevaluateCannotCast()
     {
-        cannotCast = inputSpot.item == null || !targetSpell.CanCastSpell().Key;
+        cannotCast = inputSpot.item == null || !targetSpell.CanCastSpell().wasSpellSuccessful;
     }
 
     private const int MAX_FLUFF_SPRITES = 10;
@@ -158,9 +158,9 @@ public class InventorySpellMenu : MenuWithInventory
             reevaluateCannotCast();
             if (!cannotCast)
             {
-                KeyValuePair<bool, string> castReturn = targetSpell.CastSpell(ref inputSpot.item); //Cast the specified spell
+                SpellResponse castReturn = targetSpell.CastSpell(ref inputSpot.item); //Cast the specified spell
 
-                if (castReturn.Key)
+                if (castReturn.wasSpellSuccessful)
                 {
                     isAnimatingCast = true;
 
@@ -173,7 +173,8 @@ public class InventorySpellMenu : MenuWithInventory
                 }
                 else
                 {
-                    Game1.showRedMessage(castReturn.Value, true);
+                    //This message will be post translation because 
+                    Game1.showRedMessage(castReturn.translatedResponse);
                 }
             }
         }

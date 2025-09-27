@@ -11,54 +11,18 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Shops;
 
 namespace RunescapeSpellbook;
-public struct ItemDrop
-{
-    public string itemID;
-    public int amount;
-    public double chance;
-
-    public int minAmount;
-    public int maxAmount;
-
-    public int quality = 0;
-    public ItemDrop(string itemID, int amount, double chance = 1.0)
-    {
-        this.itemID = itemID;
-        this.amount = amount;
-        this.chance = chance;
-        
-        this.minAmount = amount;
-        this.maxAmount = amount;
-    }
-    public ItemDrop(string itemID, int minAmount, int maxAmount, double weight = 1.0, int quality = 0) 
-    {
-        this.itemID = itemID;
-        this.amount = minAmount;
-        this.minAmount = minAmount;
-        this.maxAmount = maxAmount;
-        this.chance = weight;
-        this.quality = quality;
-    }
-    
-}
-public enum PrefType
-{
-    Hate,
-    Dislike,
-    Neutral,
-    Like,
-    Love
-}
-public class ModLoadObjects : ObjectData
+public class ModLoadObjects : ObjectData, ITranslatable
 {
     public string id;
     public Dictionary<string, PrefType>? characterPreferences;
-    public ModLoadObjects(string id, string displayName, string description, int spriteIndex, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
+    protected string translationKey;
+    public ModLoadObjects(string id, string translationKey, int spriteIndex, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
     {
         this.id = id;
         base.Name = id;
-        base.DisplayName = displayName;
-        base.Description = description;
+        this.translationKey = translationKey;
+        base.DisplayName = translationKey;
+        base.Description = translationKey;
         base.Type = type;
         base.Texture = "Mods.RunescapeSpellbook.Assets.itemsprites";
         base.SpriteIndex = spriteIndex;
@@ -68,6 +32,12 @@ public class ModLoadObjects : ObjectData
         base.Price = 1;
     }
 
+    public virtual void ApplyTranslations()
+    {
+        base.DisplayName = KeyTranslator.GetTranslation($"item.{this.translationKey}.display-name");
+        base.Description = KeyTranslator.GetTranslation($"item.{this.translationKey}.description");
+    }
+    
     public void AppendObject(IDictionary<string,ObjectData> ObjectsSet)
     {
         ObjectsSet[$"{id}"] = this;
@@ -75,8 +45,8 @@ public class ModLoadObjects : ObjectData
 }
 public class RunesObjects : ModLoadObjects
 {
-    public RunesObjects(string id,string displayName, string description, int spriteIndex,int category,Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",category)
+    public RunesObjects(string id,string translationKey, int spriteIndex,int category,Dictionary<string, PrefType>? characterPreferences = null) : 
+        base(id,translationKey,spriteIndex,characterPreferences,"Basic",category)
     {
         base.Price = 2;
     }
@@ -87,8 +57,8 @@ public class SlingshotItem : ModLoadObjects
     public int extraDamage = 0;
     public int debuffType = 0;
     public bool explodes = false;
-    public SlingshotItem(string id, string displayName, string description, int spriteID, int extraDamage, int debuffType, bool explodes = false, Dictionary<string, PrefType>? characterPreferences = null) : 
-        base(id,displayName,description,spriteID,characterPreferences,"Basic",0)
+    public SlingshotItem(string id, string translationKey, int spriteID, int extraDamage, int debuffType, bool explodes = false, Dictionary<string, PrefType>? characterPreferences = null) : 
+        base(id,translationKey,spriteID,characterPreferences,"Basic",0)
     {
         this.debuffType = debuffType;
         this.explodes = explodes;
@@ -97,9 +67,9 @@ public class SlingshotItem : ModLoadObjects
 }
 public class TreasureObjects : ModLoadObjects
 {
-    public TreasureObjects(string id,  string displayName, string description, int spriteID,
+    public TreasureObjects(string id,  string translationKey, int spriteID,
         List<ItemDrop> itemDrops, int sellprice = 35, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id, displayName, description,spriteID,characterPreferences, "Basic", -28)
+        base(id, translationKey,spriteID,characterPreferences, "Basic", -28)
     {
         List<ObjectGeodeDropData> objects = new();
 
@@ -128,8 +98,8 @@ public class TreasureObjects : ModLoadObjects
     }
 
 
-    public TreasureObjects(string id, string displayName, string description, int spriteID, Dictionary<string, PrefType>? characterPreferences) : 
-        base(id,displayName,description,spriteID,characterPreferences,"Basic",-28)
+    public TreasureObjects(string id, string translationKey, int spriteID, Dictionary<string, PrefType>? characterPreferences) : 
+        base(id,translationKey,spriteID,characterPreferences,"Basic",-28)
     {
         List<ObjectGeodeDropData> objects = new();
         
@@ -184,11 +154,14 @@ public class PackObject : TreasureObjects
     public static readonly int PACK_BASE_MULT = 7;
     public static readonly double[] PACK_CHANCES = {1.5,0.5,0.2};
     public static readonly int[] PACK_TIERED_MULTIPLIERS = { 1, 2, 4, 5 };
-    public PackObject(string id, string displayName, string description, int spriteID, string packItem, int packBaseIncrease = 0) :
-        base(id, displayName, description, spriteID,null)
+
+    private string packItemTranslationKey;
+    public PackObject(string id, string packItemTranslationKey, int spriteID, string packItem, int packBaseIncrease = 0) :
+        base(id, "TreasurePack", spriteID,null)
     {
         this.packItem = packItem;
         this.packBaseIncrease = packBaseIncrease;
+        this.packItemTranslationKey = packItemTranslationKey;
         List<ItemDrop> itemDrops = GetItemRanges();
 
         for (int i = 0; i < PACK_CHANCES.Length;i++)
@@ -221,6 +194,19 @@ public class PackObject : TreasureObjects
         base.GeodeDrops = objects;
     }
 
+    public override void ApplyTranslations()
+    {
+        base.DisplayName = KeyTranslator.GetTranslation($"item.TreasurePack.display-name",new
+        {
+            RuneDisplayName = KeyTranslator.GetTranslation($"item.{this.packItemTranslationKey}.display-name")
+        });
+        
+        base.Description = KeyTranslator.GetTranslation($"item.TreasurePack.description",new
+        {
+            RunePluralDisplayName = KeyTranslator.GetTranslation($"item.{this.packItemTranslationKey}.plural-display-name")
+        });
+    }
+
     public List<ItemDrop> GetItemRanges()
     {
         List<ItemDrop> itemDrops = new List<ItemDrop>();
@@ -249,10 +235,10 @@ public class FishObject : ModLoadObjects
     private int minLength;
     private int maxLength;
     
-    public FishObject(string id,string displayName, string description, int spriteID, int dartChance, int minDayTime, 
+    public FishObject(string id,string translationKey, int spriteID, int dartChance, int minDayTime, 
         int maxDayTime, List<Season> seasons, string weather, List<string> locations, int catchChance, int minFishingLevel, int price, int edibility, int spawnTime,
         Color waterColour, string roeColour, int minLength, int maxLength, Dictionary<int, List<string>> populationGates, Dictionary<int, ItemDrop> rewards, Dictionary<string,PrefType> characterPrefs = null)
-        : base(id, displayName, description,spriteID,characterPrefs,"Basic",-4)
+        : base(id, translationKey,spriteID,characterPrefs,"Basic",-4)
     {
         this.dartChance = dartChance;
         this.minDayTime = minDayTime;
@@ -341,7 +327,7 @@ public class FishObject : ModLoadObjects
 }
 public class SeedObject : ModLoadObjects
 {
-    public SeedObject(string id, string displayName, string description, int spriteIndex, int price, Dictionary<string, PrefType>? characterPreferences = null) : base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-74)
+    public SeedObject(string id, string translationKey, int spriteIndex, int price, Dictionary<string, PrefType>? characterPreferences = null) : base(id,translationKey,spriteIndex,characterPreferences,"Basic",-74)
     {
         base.Price = price;
     }
@@ -356,9 +342,9 @@ public class CropObject : ModLoadObjects
     private float harvestIncPerFarmLevel;
     private int harvestAmount;
     private HarvestMethod harvestMethod;
-    public CropObject(string harvestItemId, string displayName, string description, string seedId, List<Season> growableSeasons, int daysPerPhase, int growthSpriteRow,
+    public CropObject(string harvestItemId, string translationKey, string seedId, List<Season> growableSeasons, int daysPerPhase, int growthSpriteRow,
         int spriteID, int price, int edibility, string colour, int category = -75, int harvestAmount = 1, float harvestIncPerFarmLevel = 0, Dictionary<string,PrefType>? characterPreferences = null, HarvestMethod harvestMethod = HarvestMethod.Grab)
-    : base(harvestItemId,displayName,description,spriteID,characterPreferences,"Basic",category)
+    : base(harvestItemId,translationKey,spriteID,characterPreferences,"Basic",category)
     {
         this.seedID = seedId;
         this.growableSeasons = growableSeasons;
@@ -405,8 +391,8 @@ public class PotionObject : ModLoadObjects
     public int creationTime = 180;
         
     //Keg item (Usable)
-    public PotionObject(string id, string displayName, string description, int spriteIndex, int price, float healPercent, float extraHealthPerQuality, string kegItemID, int creationTime, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-26)
+    public PotionObject(string id, string translationKey, int spriteIndex, int price, float healPercent, float extraHealthPerQuality, string kegItemID, int creationTime, Dictionary<string, PrefType>? characterPreferences = null) :
+        base(id,translationKey,spriteIndex,characterPreferences,"Basic",-26)
     {
         this.healPercent = healPercent;
         this.extraHealthPerQuality = extraHealthPerQuality;
@@ -419,8 +405,8 @@ public class PotionObject : ModLoadObjects
     }
     
     //Preservable (Unusable)
-    public PotionObject(string id, string displayName, string description, int spriteIndex, int price, string preserveItemID, int creationTime, string colour, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-26)
+    public PotionObject(string id, string translationKey, int spriteIndex, int price, string preserveItemID, int creationTime, string colour, Dictionary<string, PrefType>? characterPreferences = null) :
+        base(id,translationKey,spriteIndex,characterPreferences,"Basic",-26)
     {
         this.craftType = 2;
         this.creationString = preserveItemID;
@@ -431,8 +417,8 @@ public class PotionObject : ModLoadObjects
     }
     
     //Cooking (Usable)
-    public PotionObject(string id, string displayName, string description, int spriteIndex, int price, string cookingRecipe, List<string> buffs, Dictionary<string, PrefType>? characterPreferences = null) :
-        base(id,displayName,description,spriteIndex,characterPreferences,"Basic",-7)
+    public PotionObject(string id, string translationKey, int spriteIndex, int price, string cookingRecipe, List<string> buffs, Dictionary<string, PrefType>? characterPreferences = null) :
+        base(id,translationKey,spriteIndex,characterPreferences,"Basic",-7)
     {
         this.craftType = 0;
         this.creationString = cookingRecipe;
@@ -478,23 +464,26 @@ public class PotionObject : ModLoadObjects
     }
 }
 
-public class MachinesObject : BigCraftableData
+public class MachinesObject : BigCraftableData, ITranslatable
 {
     public string id;
     private Dictionary<string, string> inToOut;
+    private string translationKey;
     private int inputAmount;
     private Func<string,List<ItemDrop>> amountReturnMethod;
     private string? additionalItemRequired;
-    private string? failMessage;
+    private string? failTranslationKey;
     private int returnRolls;
     
     public string? creationString;
-    public MachinesObject(string id, string displayname, string description, int price, int spriteIndex, Dictionary<string,string> inToOut, int inputAmount, Func<string,List<ItemDrop>> amountReturnMethod, string craftingRecipe, int returnRolls = 1,string? additionalItemRequired = null, string? failMessage = "")
+    public MachinesObject(string id, string translationKey, int price, int spriteIndex, Dictionary<string,string> inToOut, int inputAmount, Func<string,List<ItemDrop>> amountReturnMethod, string craftingRecipe, int returnRolls = 1,string? additionalItemRequired = null, string? failTranslationKey = "")
     {
         this.id = id;
         base.Name = id;
-        base.DisplayName = displayname;
-        base.Description = description;
+        this.translationKey = translationKey;
+        base.DisplayName = this.translationKey;
+        base.Description = this.translationKey;
+        
         base.Price = price;
         base.Texture = "Mods.RunescapeSpellbook.Assets.modmachines";
         base.SpriteIndex = spriteIndex;
@@ -503,8 +492,14 @@ public class MachinesObject : BigCraftableData
         this.amountReturnMethod = amountReturnMethod;
         this.additionalItemRequired = additionalItemRequired;
         this.creationString = craftingRecipe;
-        this.failMessage = failMessage;
+        this.failTranslationKey = failTranslationKey;
         this.returnRolls = returnRolls;
+    }
+    
+    public virtual void ApplyTranslations()
+    {
+        base.DisplayName = KeyTranslator.GetTranslation($"machine.{this.translationKey}.display-name");
+        base.Description = KeyTranslator.GetTranslation($"machine.{this.translationKey}.description");
     }
     
     public void AddMachineRules(IDictionary<string,MachineData> machineDict)
@@ -575,7 +570,7 @@ public class MachinesObject : BigCraftableData
         {
             MachineItemAdditionalConsumedItems newAddItem = new MachineItemAdditionalConsumedItems();
             newAddItem.ItemId = additionalItemRequired;
-            newAddItem.InvalidCountMessage = failMessage;
+            newAddItem.InvalidCountMessage = KeyTranslator.GetTranslation($"machine-error.{this.failTranslationKey}.text");
             targetMachineData.AdditionalConsumedItems = new List<MachineItemAdditionalConsumedItems>(){newAddItem};
         }
         
@@ -587,12 +582,20 @@ public class MachinesObject : BigCraftableData
         craftingDict[base.Name] = $"{this.creationString}/1 /{this.id}";
     }
 }
-public abstract class LoadableText
+public abstract class LoadableText : ITranslatable
 {
     public string id;
     public List<string> contents;
     public LoadableText()
     {
+    }
+
+    public virtual void ApplyTranslations()
+    {
+        for (int i = 0; i < contents.Count; i++)
+        {
+            contents[i] = KeyTranslator.GetTranslation(contents[i]);
+        }
     }
 
     public LoadableText(string id, List<string> contents)
@@ -612,13 +615,21 @@ public class LoadableMail : LoadableText
 {
     public LoadableMail(int day, Season season, int reqYear, string contents) : base(
         $"{season.ToString().ToLower()}_{day}_{reqYear}",contents) { }
-    public LoadableMail(string mailID, string contents) : base(mailID, contents) { }
+    public LoadableMail(string mailID, string translationKey) : base(mailID, translationKey) { }
 }
 
+public class LoadableEvent : LoadableText
+{
+    public LoadableEvent(string id, string translationKey) : base(id, new List<string>() { translationKey })
+    {
+        
+    }
+}
 public abstract class LoadableTV : LoadableText
 {
-    protected abstract string introText { get; }
-    public abstract string channelName { get; }
+    protected abstract string introText { get; set; }
+    public abstract string channelName { get; set; }
+    public abstract bool isBasicsTranslated { get; set; }
     
     public int day;
     public Season season;
@@ -639,35 +650,91 @@ public abstract class LoadableTV : LoadableText
         result.AddRange(contents);
         return result;
     }
+    
+    public override void ApplyTranslations()
+    {
+        if (!isBasicsTranslated)
+        {
+            introText = KeyTranslator.GetTranslation(introText);
+            channelName = KeyTranslator.GetTranslation(channelName);
+            isBasicsTranslated = true;
+        }
+
+        for (int i = 0; i < contents.Count; i++)
+        {
+            contents[i] = KeyTranslator.GetTranslation(contents[i]);
+        }
+    }
 }
 
 public class Gobcast : LoadableTV
 {
-    private static readonly string staticIntroText = "Hello! This My Goblin My Goblin and also Grubfoot. Me General Bentnoze. Me joined by General Wartface and also Grubfoot. "+
-                                                     "We solve goblin problems. You send us problems. Grubfoot! Get problem for today."; 
-    protected override string introText => staticIntroText;
+    private static string staticIntroText = "tvchannel.Gobcast.intro"; 
+    protected override string introText
+    {
+        get
+        {
+            return staticIntroText;
+        }
+        set
+        {
+            staticIntroText = value;
+        }
+    }
     
-    private static readonly string staticChannelName = "My Goblin My Goblin and also Grubfoot"; 
-    public override string channelName => staticChannelName;
-    
+    private static string staticChannelName = "tvchannel.Gobcast.channel-name"; 
+    public override string channelName
+    {
+        get
+        {
+            return staticChannelName;
+        }
+        set
+        {
+            staticChannelName = value;
+        }
+    }
+
+    private static bool staticIsBasicsTranslated = false; 
+    public override bool isBasicsTranslated
+    {
+        get
+        {
+            return staticIsBasicsTranslated;
+        }
+        set
+        {
+            staticIsBasicsTranslated = value;
+        }
+    }
+
     private static int channelID = 429;
     public Gobcast(int day, Season season, int firstYear, List<string> contents) :
         base(channelID,day, season, firstYear, contents) { }
 }
-public class PerkData
+public class PerkData : ITranslatable
 {
     public int perkID;
     public string perkName;
+    public string translationKey;
     public string perkDisplayName;
     public string perkDescription;
     public string perkDescriptionLine2;
-    public PerkData(int perkID, string perkName, string perkDisplayName, string perkDescription, string perkDescriptionLine2 = "")
+    public PerkData(int perkID, string perkName, string translationKey)
     {
         this.perkID = perkID;
         this.perkName = perkName;
-        this.perkDisplayName = perkDisplayName;
-        this.perkDescription = perkDescription;
-        this.perkDescriptionLine2 = perkDescriptionLine2;
+        this.translationKey = translationKey;
+        this.perkDisplayName = translationKey;
+        this.perkDescription = translationKey;
+        this.perkDescriptionLine2 = translationKey;
+    }
+
+    public virtual void ApplyTranslations()
+    {
+        this.perkDisplayName = KeyTranslator.GetTranslation($"perk.{this.translationKey}.display-name");
+        this.perkDescription = KeyTranslator.GetTranslation($"perk.{this.translationKey}.description-1");
+        this.perkDescriptionLine2 = KeyTranslator.GetTranslation($"perk.{this.translationKey}.description-2");
     }
 
     public bool HasPerk(Farmer farmer)
@@ -711,19 +778,21 @@ public class ShopListings
     }
 }
 
-public class CustomBuff
+public class CustomBuff : ITranslatable
 {
     private string buffID;
     private string displayName;
     private string description;
+    private string translationKey;
     private int duration;
     private int spriteIndex;
 
-    public CustomBuff(string buffId, string displayName, string description, int duration, int spriteIndex)
+    public CustomBuff(string buffId, string translationKey, int duration, int spriteIndex)
     {
         this.buffID = buffId;
-        this.displayName = displayName;
-        this.description = description;
+        this.translationKey = translationKey;
+        this.displayName = translationKey;
+        this.description = translationKey;
         this.duration = duration;
         this.spriteIndex = spriteIndex;
     }
@@ -737,6 +806,12 @@ public class CustomBuff
         buffInfo.IconTexture = "Mods.RunescapeSpellbook.Assets.buffsprites";
         buffInfo.IconSpriteIndex = spriteIndex;
         buffDict.Add(this.buffID,buffInfo);
+    }
+
+    public void ApplyTranslations()
+    {
+        this.displayName = KeyTranslator.GetTranslation($"buff.{this.translationKey}.display-name");
+        this.description = KeyTranslator.GetTranslation($"buff.{this.translationKey}.description");
     }
 }
 

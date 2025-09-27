@@ -3,18 +3,19 @@ using StardewValley;
 using StardewValley.TerrainFeatures;
 
 namespace RunescapeSpellbook;
-public delegate KeyValuePair<bool, string> TilesMethod(List<TerrainFeature> tiles, int animOffset);
-public delegate KeyValuePair<bool, string> InventoryMethod(ref Item? itemArgs);
-public delegate KeyValuePair<bool, string> BuffMethod(int animOffset);
+public delegate SpellResponse TilesMethod(List<TerrainFeature> tiles, int animOffset);
+public delegate SpellResponse InventoryMethod(ref Item? itemArgs);
+public delegate SpellResponse BuffMethod(int animOffset);
 public delegate void CombatExtraMethod(Farmer caster, NPC target, ref int damage, ref bool isBomb);
 
 ///<summary> Base class for all spells - effectively abstract. Attempting to cast this will always report an error </summary>
-public class Spell
+public class Spell : ITranslatable
 {
     public int id;
     public string name;
     public string displayName;
     public string description;
+    public string translationKey;
     public int magicLevelRequirement;
     public Dictionary<string,int> requiredItems; //Set of IDs for the required runes
     public double expReward;
@@ -24,12 +25,13 @@ public class Spell
     /// the offset from 16 y in the spellanimations.xnb to use for the inventory spell
     /// </summary>
     public int spellAnimOffset;
-    public Spell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string,int> requiredItems, double expReward, int spellAnimOffset, string audioID = "HighAlch")
+    public Spell(int id, string name, string translationKey, int magicLevelRequirement, Dictionary<string,int> requiredItems, double expReward, int spellAnimOffset, string audioID = "HighAlch")
     {
         this.id = id;
         this.name = name;
-        this.displayName = displayName;
-        this.description = description;
+        this.displayName = translationKey;
+        this.description = translationKey;
+        this.translationKey = translationKey;
         this.magicLevelRequirement = magicLevelRequirement;
         this.requiredItems = requiredItems;
         this.expReward = expReward;
@@ -37,25 +39,31 @@ public class Spell
         this.spellAnimOffset = spellAnimOffset;
     }
     
+    public virtual void ApplyTranslations()
+    {
+        this.displayName = KeyTranslator.GetTranslation($"spell.{this.translationKey}.display-name");
+        this.description = KeyTranslator.GetTranslation($"spell.{this.translationKey}.description");
+    }
+
     protected bool HasMagicLevel()
     {
         return ModAssets.GetFarmerMagicLevel(Game1.player) >= magicLevelRequirement;
     }
-    public virtual KeyValuePair<bool,string> CanCastSpell()
+    public virtual SpellResponse CanCastSpell()
     {
         if (!HasMagicLevel())
         {
-            return new KeyValuePair<bool,string>(false, "My magic level is not high enough to perform this spell");;
+            return new SpellResponse(false, "spell-error.LowMagicLevel.text");;
         }
 
         foreach (string runeID in requiredItems.Keys)
         {
             if (!HasRuneCost(runeID))
             {
-                return new KeyValuePair<bool,string>(false, "I do not have enough runes to perform this spell");
+                return new SpellResponse(false, "spell-error.NoRunes.text");
             }
         }
-        return new KeyValuePair<bool,string>(true, "");;
+        return new SpellResponse(true);;
     }
 
     public virtual bool HasRuneCost(string runeID)
@@ -70,9 +78,9 @@ public class Spell
     /// for most spells this will instantly cast the spell, but for some (inventory + combat spells) it has different effects
     /// </summary>
     /// <returns>Bool for if the cast was successful, string for the error message</returns>
-    public virtual KeyValuePair<bool,string> SelectSpell()
+    public virtual SpellResponse SelectSpell()
     {
-        return new KeyValuePair<bool, string>(false,"Spell not yet implemented");
+        return new SpellResponse(false,"spell-error.SpellUnimplemented.text");
     }
     
     /// <summary>
@@ -117,9 +125,9 @@ public class TeleportSpell : Spell
     /// the island has not yet been unlocked </summary>
     /// <returns>True if the requirements for the teleport are met</returns>
     private Predicate<Farmer>? extraTeleportReqs;
-    public TeleportSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward,
+    public TeleportSpell(int id, string name, string translationKey, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward,
         string location, int xPos = 0, int yPos = 0, int dir = 2, Predicate<Farmer>? extraTeleportReqs = null):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,4,"Teleport")
+        base(id, name, translationKey, magicLevelRequirement, requiredItems,expReward,4,"Teleport")
     {
         this.location = location;
         this.xPos = xPos;
@@ -128,14 +136,12 @@ public class TeleportSpell : Spell
         this.extraTeleportReqs = extraTeleportReqs;
     }
     
-    public KeyValuePair<bool,string> Teleport()
+    public SpellResponse Teleport()
     {
-        //return new KeyValuePair<bool, string>(false,$"Location {location} ID {festivalId} {containsKey} loadData {loadData} locationName = {locationName}");
-        
         //Prevent teleporting out of temporary places - event locations
         if (GameLocation.IsTemporaryName(Game1.player.currentLocation.Name))
         {
-            return new KeyValuePair<bool, string>(false,$"I should finish the festival before teleporting");
+            return new SpellResponse(false,"spell-error.TeleportFestivalInside.text");
         }
         
         //Disable teleporting if there is an active festival or event
@@ -144,13 +150,13 @@ public class TeleportSpell : Spell
             bool loadData = Event.tryToLoadFestivalData($"{Utility.getSeasonKey(Game1.season)}{Game1.dayOfMonth}", out var _, out var _, out var eventLocationName, out var _, out var _);
             if (loadData && eventLocationName == location)
             {
-                return new KeyValuePair<bool, string>(false,$"It would be dangerous to teleport there during a festival");
+                return new SpellResponse(false,"spell-error.TeleportFestivalOutside.text");
             }
         }
 
         if (extraTeleportReqs != null && !extraTeleportReqs(Game1.player)) //Check the extra conditions (such as teleport being unlocked)
         {
-            return new KeyValuePair<bool, string>(false,"I don't know how to teleport there");
+            return new SpellResponse(false,"spell-error.TeleportUnknown.text");
         }
 
         string newLoc = location;
@@ -177,17 +183,17 @@ public class TeleportSpell : Spell
             Game1.player.freezePause = 0;
         },"RunescapeSpellbook.Teleport",800,spellAnimOffset);
         
-        return new KeyValuePair<bool, string>(true,"");
+        return new SpellResponse(true);
     }
-    public override KeyValuePair<bool, string> SelectSpell()
+    public override SpellResponse SelectSpell()
     {
-        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        SpellResponse actionResult = CanCastSpell();
 
-        if (actionResult.Key) //First pass of action result checks if we can actually cast the selected spell - either due to level or rune cost etc.
+        if (actionResult.wasSpellSuccessful) //First pass of action result checks if we can actually cast the selected spell - either due to level or rune cost etc.
         {
             actionResult = Teleport();
             
-            if(actionResult.Key) //Second pass checks if there are any spell specific issues - like how teleporting is forbidden on festival days
+            if(actionResult.wasSpellSuccessful) //Second pass checks if there are any spell specific issues - like how teleporting is forbidden on festival days
             {
                 if (!ModAssets.CheckHasPerkByName(Game1.player, "Sapphire")) //Having the sapphire perk means no exp for teleport spells
                 {
@@ -213,7 +219,6 @@ public class TeleportSpell : Spell
 public class TilesSpell : Spell
 {
     private int baseSize;
-    private string noTilesMessage;
     private double perTileExp;
     
     ///<summary>Requirements for selecting the specific terrain that the spell will impact - such as if the spot is unwatered for humidity</summary>
@@ -222,14 +227,13 @@ public class TilesSpell : Spell
     
     ///<summary>Specifies a function to be ran with the set of tiles collected via the terrainReqs predicate</summary>
     private TilesMethod doAction; 
-    public TilesSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double perTileExp, TilesMethod doAction, int baseSize, int spellAnimOffset, string AudioID = "HighAlch",
-        Predicate<TerrainFeature>? terrainReqs = null, string noTilesMessage = "Couldn't find any tiles to cast on"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems, 0,spellAnimOffset,AudioID)
+    public TilesSpell(int id, string name, string translationKey, int magicLevelRequirement, Dictionary<string, int> requiredItems, double perTileExp, TilesMethod doAction, int baseSize, int spellAnimOffset, string AudioID = "HighAlch",
+        Predicate<TerrainFeature>? terrainReqs = null):
+        base(id, name, translationKey, magicLevelRequirement, requiredItems, 0,spellAnimOffset,AudioID)
     {
         this.terrainReqs = terrainReqs;
         this.doAction = doAction;
         this.baseSize = baseSize;
-        this.noTilesMessage = noTilesMessage;
         this.perTileExp = perTileExp;
     }
     public List<TerrainFeature> GetTiles(Vector2 playerTile, GameLocation currentLoc, int size)
@@ -252,22 +256,22 @@ public class TilesSpell : Spell
         return tileLocations;
     }
     
-    public override KeyValuePair<bool, string> SelectSpell()
+    public override SpellResponse SelectSpell()
     {
-        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        SpellResponse actionResult = CanCastSpell();
 
-        if (actionResult.Key)
+        if (actionResult.wasSpellSuccessful)
         {
             List<TerrainFeature> tilesToCastOn = GetTiles(Game1.player.Tile, Game1.player.currentLocation, baseSize).ToList();
             
             if (tilesToCastOn.Count == 0)
             {
-                return new KeyValuePair<bool, string>(false,this.noTilesMessage);
+                return new SpellResponse(false,"spell-error.TilesNoTilesDefault.text");
             }
 
-            KeyValuePair<bool, string> result = doAction(tilesToCastOn,spellAnimOffset);
+            SpellResponse result = doAction(tilesToCastOn,spellAnimOffset);
 
-            if (!result.Key) //Check if we have any additional issues
+            if (!result.wasSpellSuccessful) //Check if we have any additional issues
             {
                 return result;
             }
@@ -275,7 +279,7 @@ public class TilesSpell : Spell
             RemoveRunes();
             AddExperiencePerTile(tilesToCastOn.Count);
             
-            return new KeyValuePair<bool, string>(true,"");
+            return new SpellResponse(true);
             
         }
         
@@ -301,33 +305,39 @@ public class InventorySpell : Spell
     ///<summary>Description placed on the side menu to detail specific mechanics</summary>
     public string longDescription;
     
-    public InventorySpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, string longDescription, int spellAnimOffset, string AudioID = "HighAlch"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
+    public InventorySpell(int id, string name, string translationKey, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward, Predicate<object>? highlightPredicate, InventoryMethod doAction, int spellAnimOffset, string AudioID = "HighAlch"):
+        base(id, name, translationKey, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.highlightPredicate = highlightPredicate;
         this.doAction = doAction;
-        this.longDescription = longDescription;
+        this.longDescription = translationKey;
     }
     
-    public KeyValuePair<bool, string> IsItemValidForOperation(ref Item? itemArgs)
+    public override void ApplyTranslations()
+    {
+        base.ApplyTranslations();
+        this.longDescription = KeyTranslator.GetTranslation($"spell.{this.translationKey}.long-description");
+    }
+    
+    public SpellResponse IsItemValidForOperation(ref Item? itemArgs)
     {
         if (itemArgs == null || !highlightPredicate(itemArgs))
         {
-            return new KeyValuePair<bool, string>(false,$"Invalid Item");
+            return new SpellResponse(false,"spell-error.MenuInvalidItem.text");
         }
         
-        return new KeyValuePair<bool, string>(true,$"");
+        return new SpellResponse(true);
 
     }
     
     ///<summary>This override for the select spell function does not actually cast the spell, instead it opens the menu for the actual spell casting</summary>
     /// <remarks>See CastSpell for the actual spell cast</remarks>
     /// <returns>Bool for if the cast was successful, string for the error message</returns>
-    public override KeyValuePair<bool, string> SelectSpell()
+    public override SpellResponse SelectSpell()
     {
-        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        SpellResponse actionResult = CanCastSpell();
 
-        if (actionResult.Key)
+        if (actionResult.wasSpellSuccessful)
         {
             Game1.activeClickableMenu = new InventorySpellMenu(this, highlightPredicate);
         }
@@ -340,16 +350,16 @@ public class InventorySpell : Spell
     /// </summary>
     /// <param name="itemArgs">The item data for the item put in the input slot</param>
     /// <returns>Bool for if the cast was successful, string for the error message</returns>
-    public KeyValuePair<bool, string> CastSpell(ref Item? itemArgs)
+    public SpellResponse CastSpell(ref Item? itemArgs)
     {
-        KeyValuePair<bool, string> operationReturn = IsItemValidForOperation(ref itemArgs);
-        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        SpellResponse operationReturn = IsItemValidForOperation(ref itemArgs);
+        SpellResponse actionResult = CanCastSpell();
         
-        if (operationReturn.Key && actionResult.Key)
+        if (operationReturn.wasSpellSuccessful && actionResult.wasSpellSuccessful)
         {
             operationReturn = doAction(ref itemArgs);
 
-            if (operationReturn.Key)
+            if (operationReturn.wasSpellSuccessful)
             {
                 RemoveRunes();
                 AddExperience();
@@ -371,37 +381,37 @@ public class BuffSpell : Spell
     private BuffMethod doAction;
     
     ///<summary>The message to display when a player does not meet the requirements for the spell specified in the farmerConditions predicate</summary>
-    private string buffInvalidMessage;
-    public BuffSpell(int id, string name, string displayName, string description, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, int spellAnimOffset,string AudioID = "HighAlch",string buffInvalidMessage = "Couldn't cast spell"):
-        base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
+    private string buffInvalidTranslationKey;
+    public BuffSpell(int id, string name, string translationKey, int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward, Predicate<Farmer> farmerConditions, BuffMethod doAction, int spellAnimOffset,string AudioID = "HighAlch",string buffInvalidTranslationKey = "spell-error.GeneralFail.text"):
+        base(id, name, translationKey, magicLevelRequirement, requiredItems,expReward,spellAnimOffset,AudioID)
     {
         this.farmerConditions = farmerConditions;
-        this.buffInvalidMessage = buffInvalidMessage;
+        this.buffInvalidTranslationKey = buffInvalidTranslationKey;
         this.doAction = doAction;
     }
     
-    public KeyValuePair<bool, string> IsBuffValid(Farmer farmer)
+    public SpellResponse IsBuffValid(Farmer farmer)
     {
         if (!farmerConditions(farmer))
         {
-            return new KeyValuePair<bool, string>(false,$"I can't use this spell right now");
+            return new SpellResponse(false,"spell-error.BuffInvalidBuffDefault.text");
         }
         
-        return new KeyValuePair<bool, string>(true,$"");
+        return new SpellResponse(true,$"");
 
     }
     
-    public override KeyValuePair<bool, string> SelectSpell()
+    public override SpellResponse SelectSpell()
     {
-        KeyValuePair<bool, string> actionResult = CanCastSpell();
+        SpellResponse actionResult = CanCastSpell();
 
-        if (actionResult.Key)
+        if (actionResult.wasSpellSuccessful)
         {
             actionResult = IsBuffValid(Game1.player);
 
-            if (!actionResult.Key)
+            if (!actionResult.wasSpellSuccessful)
             {
-                return new KeyValuePair<bool, string>(false, this.buffInvalidMessage);
+                return new SpellResponse(false, this.buffInvalidTranslationKey);
             }
             else
             {
@@ -431,10 +441,10 @@ public class CombatSpell : Spell
     public CombatExtraMethod? combatEffect;
 
     //Sprite rotation offset is the amount of rotation we need to have to make it point upwards in the projectile (in degrees)
-    public CombatSpell(int id, string name, string displayName, string description,
+    public CombatSpell(int id, string name, string translationKey,
         int magicLevelRequirement, Dictionary<string, int> requiredItems, double expReward,
         int damage,float velocity,int projectileSpriteID, Color projectileColor,string firingSound = "HighAlch", CombatExtraMethod? combatEffect = null)
-        : base(id, name, displayName, description, magicLevelRequirement, requiredItems,expReward,projectileSpriteID,firingSound)
+        : base(id, name, translationKey, magicLevelRequirement, requiredItems,expReward,projectileSpriteID,firingSound)
     {
         this.damage = damage;
         this.projectileSpriteID = projectileSpriteID;
@@ -463,10 +473,10 @@ public class CombatSpell : Spell
 
     ///<summary>This variant of can cast spell checks each step to see if we can cast the spell with our held item, not just from the inventory as
     /// the select spell method does for casting spells</summary>
-    private KeyValuePair<bool, string> CanCastSpell(StaffWeaponData castingWeapon)
+    private SpellResponse CanCastSpell(StaffWeaponData castingWeapon)
     {
-        KeyValuePair<bool, string> canCast = base.CanCastSpell(); //First we check if we can cast using the base (magic level + has runes or any staff weapons in inventory)
-        if (!canCast.Key)
+        SpellResponse canCast = base.CanCastSpell(); //First we check if we can cast using the base (magic level + has runes or any staff weapons in inventory)
+        if (!canCast.wasSpellSuccessful)
         {
             return canCast;
         }
@@ -477,21 +487,21 @@ public class CombatSpell : Spell
             //then the spell cannot be cast (this catches the case where a player has a staff in their inventory that provides infinite runes but is not using it)
             if (castingWeapon.providesRune != runeID && !base.HasRuneCost(runeID))
             {
-                return new KeyValuePair<bool, string>(false,$"I do not have enough runes to cast this spell with this staff");
+                return new SpellResponse(false,"spell-error.CombatWrongStaff.text");
             }
         }
         
-        return new KeyValuePair<bool, string>(true,$"");
+        return new SpellResponse(true,$"");
     }
 
     
     ///<summary> The effects when a player clicks the spell in the spellbook menu - this should set it so that the spell is selected for combat casts </summary>
     /// <returns>Bool for if the cast was successful, string for the error message</returns>
-    public override KeyValuePair<bool, string> SelectSpell()
+    public override SpellResponse SelectSpell()
     {
-        KeyValuePair<bool,string> actionResult = base.CanCastSpell(); //we use the base can cast spell to check if it is selectable - which is using the custom HasRuneCost
+        SpellResponse actionResult = base.CanCastSpell(); //we use the base can cast spell to check if it is selectable - which is using the custom HasRuneCost
         
-        ModAssets.localFarmerData.selectedSpellID = actionResult.Key && ModAssets.localFarmerData.selectedSpellID != this.id ? this.id : -1;
+        ModAssets.localFarmerData.selectedSpellID = actionResult.wasSpellSuccessful && ModAssets.localFarmerData.selectedSpellID != this.id ? this.id : -1;
         
         return actionResult;
     }
@@ -504,11 +514,11 @@ public class CombatSpell : Spell
     const float extraProjectileOffsets = (float)(10 * (Math.PI/180));
     
     ///<summary> Generates the projectile specified by the spell to be spawned elsewhere </summary>
-    public KeyValuePair<bool, string> CreateCombatProjectile(Farmer caster, StaffWeaponData castingWeapon, int x, int y, out List<MagicProjectile> projectile)
+    public SpellResponse CreateCombatProjectile(Farmer caster, StaffWeaponData castingWeapon, int x, int y, out List<MagicProjectile> projectile)
     {
         projectile = null;
-        KeyValuePair<bool, string> actionResult = CanCastSpell(castingWeapon);
-        if (actionResult.Key)
+        SpellResponse actionResult = CanCastSpell(castingWeapon);
+        if (actionResult.wasSpellSuccessful)
         {
             Vector2 mousePos = new Vector2(x, y);
             Vector2 characterPos = caster.getStandingPosition();
