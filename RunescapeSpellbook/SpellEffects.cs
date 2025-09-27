@@ -286,7 +286,7 @@ public class SpellEffects : BaseSpellEffects
             }
             catch (Exception ex)
             {
-                return new SpellResponse(false, $"spell-error.GeneralFail.text");
+                return new SpellResponse(false, "spell-error.GeneralFail.text");
             }
         }
 

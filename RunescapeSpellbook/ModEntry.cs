@@ -482,13 +482,13 @@ namespace RunescapeSpellbook
                                     }
                                     else
                                     {
-                                        Monitor.Log($"Duplicate mail key: {mailKey}. Attempting to access next available year", LogLevel.Warn);
+                                        Monitor.Log(KeyTranslator.GetTranslation("log.DuplicateMailKey.text", new {MailKey = mailKey}), LogLevel.Warn);
                                         string[] mailDelim = mailKey.Split('_');
                                         int newYear = int.Parse(mailDelim[2]) + 1;
                                         
                                         if (newYear > 255)
                                         {
-                                            throw new Exception($"Couldn't find a new year for {mailKey} before 255");
+                                            throw new Exception(KeyTranslator.GetTranslation("log.TooManyMailKeys.text", new {MailKey = mailKey}));
                                         }
                                         
                                         mailKey = mailDelim[0] + "_" + mailDelim[1] + "_" + newYear; //Adds mail to the same date next year. increments year until we get a valid value
@@ -1541,7 +1541,7 @@ namespace RunescapeSpellbook
             {
                 if (!ModAssets.HasMagic(Game1.player))
                 {
-                    this.Monitor.Log("You don't have access to magic, use rs_grantmagic to give magic access",LogLevel.Warn);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.NoMagic.text"),LogLevel.Warn);
                     return true;
                 }
 
@@ -1552,7 +1552,7 @@ namespace RunescapeSpellbook
             {
                 if (!Context.IsWorldReady)
                 {
-                    this.Monitor.Log("World not yet initialised",LogLevel.Warn);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.NoWorld.text"),LogLevel.Warn);
                     return true;
                 }
 
@@ -1565,17 +1565,17 @@ namespace RunescapeSpellbook
             
                 if (ModAssets.HasMagic(Game1.player))
                 {
-                    this.Monitor.Log("You already have access to magic",LogLevel.Warn);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.AlreadyHaveMagic.text"),LogLevel.Warn);
                     return;
                 }
                 Game1.player.eventsSeen.Add("Tofu.RunescapeSpellbook_Event0");
-                Monitor.Log("Added magic",LogLevel.Info);
+                Monitor.Log(KeyTranslator.GetTranslation("log.AddedMagic.text"),LogLevel.Info);
                 if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
                 {
                     reqLevel = Math.Clamp(reqLevel, 0, 10);
                     ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicLevel",reqLevel.ToString());
                     ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicExp",(Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
-                    this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
                 }
             }
     
@@ -1585,7 +1585,7 @@ namespace RunescapeSpellbook
 
                 if (args.Length == 0)
                 {
-                    this.Monitor.Log("Specify a magic level to apply",LogLevel.Error);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyMagicLevel.text"),LogLevel.Error);
                     return;
                 }
             
@@ -1594,7 +1594,7 @@ namespace RunescapeSpellbook
                     reqLevel = Math.Clamp(reqLevel, 0, 10);
                     ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", (reqLevel).ToString());
                     ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", (Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
-                    this.Monitor.Log($"Set magic level to {reqLevel}",LogLevel.Info);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
                 }
             }
         
@@ -1604,7 +1604,7 @@ namespace RunescapeSpellbook
 
                 if (args.Length == 0)
                 {
-                    this.Monitor.Log("Specify an amount of exp to set to",LogLevel.Error);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyExpSet.text"),LogLevel.Error);
                     return;
                 }
             
@@ -1614,7 +1614,7 @@ namespace RunescapeSpellbook
                     ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", "0");
                     ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", "0");
                     ModAssets.IncrementMagicExperience(Game1.player, reqExp,false);
-                    this.Monitor.Log($"Set experience to {reqExp}",LogLevel.Info);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SetExperienceLevel.text", new {RequestedExp = reqExp}),LogLevel.Info);
                 }
             }
         
@@ -1624,7 +1624,7 @@ namespace RunescapeSpellbook
 
                 if (args.Length == 0)
                 {
-                    this.Monitor.Log("Specify an amount of exp to add",LogLevel.Error);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyExpAdd.text"),LogLevel.Error);
                     return;
                 }
             
@@ -1632,7 +1632,7 @@ namespace RunescapeSpellbook
                 {
                     reqAddExp = Math.Clamp(reqAddExp, 0, Farmer.getBaseExperienceForLevel(10) - ModAssets.GetFarmerExperience(Game1.player));
                     ModAssets.IncrementMagicExperience(Game1.player, reqAddExp,false);
-                    this.Monitor.Log($"Added {reqAddExp} experience to player",LogLevel.Info);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.AddExperienceLevel.text", new {RequestedExp = reqAddExp}),LogLevel.Info);
                 }
             }
         
@@ -1642,7 +1642,7 @@ namespace RunescapeSpellbook
             
                 ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf1","-1");
                 ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf2","-1");
-                this.Monitor.Log($"Removed assigned perks",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.RemovePerks.text"),LogLevel.Info);
             }
         
             private void PlayerInfo(string command, string[] args)
@@ -1651,18 +1651,18 @@ namespace RunescapeSpellbook
 
                 foreach (Farmer farmerRoot in ModAssets.GetFarmers())
                 {
-                    Monitor.Log($"Farmer: {farmerRoot.Name}",LogLevel.Info);
-                    Monitor.Log($"HasMagic: {ModAssets.HasMagic(farmerRoot)}",LogLevel.Info);
-                    Monitor.Log($"Level: {ModAssets.GetFarmerMagicLevel(farmerRoot)}",LogLevel.Info);
-                    Monitor.Log($"Exp: {ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_MagicExp")}",LogLevel.Info);
-                    Monitor.Log($"Spell Exp Multiplier: {ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier")}",LogLevel.Info);
+                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-name", new {Value = farmerRoot.Name}),LogLevel.Info);
+                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-hasmagic", new {Value = ModAssets.HasMagic(farmerRoot)}),LogLevel.Info);
+                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-level", new {Value = ModAssets.GetFarmerMagicLevel(farmerRoot)}),LogLevel.Info);
+                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-exp", new {Value = ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_MagicExp")}),LogLevel.Info);
+                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-multiplier",new {Value = ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier")}),LogLevel.Info);
                     
                     List<int> perkIDs = ModAssets.PerksAssigned(farmerRoot);
                     int perkIndex = 1;
                     foreach (int id in perkIDs)
                     {
-                        string perkName = id == -1 ? "Unassigned" : ModAssets.perks.Where(x=>x.perkID==id).Select(x=>x.perkName).First();
-                        Monitor.Log($"Perk Slot {perkIndex}: {perkName}",LogLevel.Info);
+                        string perkName = id == -1 ? KeyTranslator.GetTranslation("log.PlayerInfo.perk-default") : ModAssets.perks.Where(x=>x.perkID==id).Select(x=>x.perkName).First();
+                        Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-perk",new {PerkIndex = perkIndex,PerkName = perkName}),LogLevel.Info);
                     }
                 }
             }
@@ -1719,7 +1719,7 @@ namespace RunescapeSpellbook
                     List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.DisplayName.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
                     if (matchList.Count == 0)
                     {
-                        this.Monitor.Log($"Invalid rune set to grant {runeReq}",LogLevel.Error);
+                        this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantRune.text-fail", new {RuneReq = runeReq}),LogLevel.Error);
                         return;
                     }
                     else
@@ -1738,7 +1738,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted runes from set {runeReq}",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantRune.text-works", new {RuneReq = runeReq}),LogLevel.Info);
             }
         
             private void GrantAmmo(string command, string[] args)
@@ -1752,7 +1752,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all ammos",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedAmmo.text"),LogLevel.Info);
             }
             private void GrantStaffs(string command, string[] args)
             {
@@ -1764,7 +1764,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all staves",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedWeps.text"),LogLevel.Info);
             }
         
             private void GrantTreasures(string command, string[] args)
@@ -1778,7 +1778,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all treasures",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedTreasures.text"),LogLevel.Info);
             }
         
             private void DebugCommand(string command, string[] args)
@@ -1805,7 +1805,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all packs",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantPacks.text"),LogLevel.Info);
             }
         
             private void GrantFish(string command, string[] args)
@@ -1819,7 +1819,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all fish",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantFish.text"),LogLevel.Info);
             }
             
             private void GrantSeeds(string command, string[] args)
@@ -1833,7 +1833,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all seeds",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantSeeds.text"),LogLevel.Info);
             }
             
             private void GrantCrops(string command, string[] args)
@@ -1847,7 +1847,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all crops",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantCrops.text"),LogLevel.Info);
             }
             
             private void GrantPotions(string command, string[] args)
@@ -1861,7 +1861,7 @@ namespace RunescapeSpellbook
                     Game1.player.addItemToInventory(item);
                 }
             
-                this.Monitor.Log($"Granted all potions",LogLevel.Info);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantPots.text"),LogLevel.Info);
             }
     }
 }
