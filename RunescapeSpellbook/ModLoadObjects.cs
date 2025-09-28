@@ -751,7 +751,7 @@ public static class ModAssets
 
     public static void ApplyMassTranslations()
     {
-        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, machineItems, perks,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs  }.SelectMany(x => x);
+        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, staffWeapons, machineItems, perks,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs  }.SelectMany(x => x);
         foreach (var obj in translationTargets)
         {
             obj.ApplyTranslations();
