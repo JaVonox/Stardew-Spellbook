@@ -49,6 +49,7 @@ namespace RunescapeSpellbook
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             
             helper.ConsoleCommands.Add("rs_grantmagic", KeyTranslator.GetTranslation("console.grantmagic.text"), this.GrantMagic);
             helper.ConsoleCommands.Add("rs_setlevel", KeyTranslator.GetTranslation("console.setlevel.text"), this.SetLevel);
@@ -67,6 +68,11 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addpots", KeyTranslator.GetTranslation("console.addpots.text"), this.GrantPotions);
             helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
+        }
+
+        private void OnLocaleChanged(object? sender, LocaleChangedEventArgs e)
+        {
+            ModAssets.ApplyMassTranslations();
         }
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)

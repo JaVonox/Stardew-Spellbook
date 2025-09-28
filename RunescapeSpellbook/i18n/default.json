@@ -1,4 +1,12 @@
 {
+	/*
+	 Hey, if you're looking into this trying to translate it, just a few notes to help out
+	 Old school runescape - the mod this is based on - doesn't have any official translations
+	 Runescape 3 does though - as far as I can tell it supports German, French, Brazilian Portuguese and (Formerly) Latin American Spanish
+	 Unfortunately only Brazilian Portuguese has a wiki translation and I'm unsure how accurate that is.
+	 Either way, there might be some things in here that have different canon names per language - for example, all references to alcohol are removed in Brazilian Portuguese.
+	 If you're looking to make an accurate translation you might have to look into what these objects are called in Runescape 3 (If they exist there) 
+ 	*/
 	"item.RuneSpellbook.display-name":"Spellbook",
 	"item.RuneSpellbook.plural-display-name":"Spellbooks",
 	"item.RuneSpellbook.description":"Debug object",
@@ -245,7 +253,7 @@
 	"tvbroadcast.Gobcast9.text-2":"This last episode, network say they do thing called 'rerun'. Me not understand how they get Goblin that look and talk like me but me not really care. Maybe one day me find imposter and crush him. Have not decided yet.",
 	"tvbroadcast.Gobcast9.text-3":"This all for today. You all terrible. Do not send in questions.",
 
-	"event.GetSpellbook.data":"continue/64 15/farmer 64 16 2 Wizard 64 18 0/pause 1500/speak Wizard \"Greegtings, @. I hope I am not interrupting your work on the farm.\"/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"/stopMusic /itemAboveHead Tofu.RunescapeSpellbook_RuneSpellbook /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail Tofu.RunescapeSpellbook_SpellMail/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600/speak Wizard \"Well, that was all. I'll be on my way now.\"/pause 300/end",
+	"event.GetSpellbook.data":"continue/64 15/farmer 64 16 2 Wizard 64 18 0/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"/stopMusic /itemAboveHead Tofu.RunescapeSpellbook_RuneSpellbook /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail Tofu.RunescapeSpellbook_SpellMail/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600/speak Wizard \"Well, that was all. I'll be on my way now.\"/pause 300/end",
 	"event.RunesFound.data":"continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3/skippable /pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"/speak Marlon \"This is an antique! I've been using this blade for decades now!\"/warp farmer 3 14 /playSound doorClose /pause 1000/move farmer 0 -1 1 /move farmer 3 0 2 /move farmer 0 1 1 /move farmer 5 0 0 /move Marlon 0 0 2 /move farmer 0 -3 0/move Gunther 0 0 2 /speak Gunther \"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"/move Gunther 0 0 0 /pause 500 /jump Gunther 8 /pause 500 /textAboveHead Gunther \"*huff* *puff*\" /pause 2000 /move Gunther 0 0 2/speak Gunther \"Perhaps the books can wait. What do you need today, @?\"/question null \"#I found this underground#Can you tell me about this?\"/speak Gunther \"Let me have a look...\" /pause 1000/speak Gunther \"Hmm... I'm not quite sure what that is... \"/speak Gunther \"The runes aren't any I recognise either...\"/move Marlon 0 0 3 /speak Marlon \"Ah, well isn't that nostalgic.\"/move Gunther 0 0 1 /speak Gunther \"You're familiar with these?\"/speak Marlon \"Not myself, but an old friend of mine used to be obsessed with them.\"/move Marlon 0 0 2 /speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\"/move farmer 1 0 0 /move Marlon 0 0 2 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000/speak Marlon \"As I suspected, these are definitely guthixian runestones. Or rather, they contain guthixian runestones.\"/speak Marlon \"Ol' Ras used to spend hours trying to crack these things open, until I showed up. Turns out a strike with the trusty hammer does the job in seconds.\"/move Marlon 0 1 2 /move Gunther 0 0 2/speak Marlon \"I'd take these down to the blacksmith, If he's worth his prices, he'll be able to open them.\"/speak Marlon \"If you want to actually use the things, you'll have to pry it out of Rasmodius. He's a secretive old man, but get on his good side and he'll talk your ear off.\"/pause 500 /end",
 
 	"minievent.FindRunePack.text":"Your hands tingle as you pick up the mysterious object. Maybe the archaeologist will know something about this?",
@@ -287,6 +295,7 @@
 	
 	"ui.Rerun.text":" (Re-run)",
 	
+	//Unfortunately these wont ever translate, but I kept them in this file for consistency
 	"console.grantmagic.text":"Gives the player magic.\n\nUsage: rs_grantmagic <value>\n\nValue: the level to set to",
 	"console.setlevel.text":"Sets the players magic level.\n\nUsage: rs_setlevel <value>\n\nValue: the level to set to",
 	"console.setexp.text":"Sets the players experience level.\n\nUsage: rs_setexp <value>\n\nValue: the experience to set to",

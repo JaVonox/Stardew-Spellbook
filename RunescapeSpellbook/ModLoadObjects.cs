@@ -730,32 +730,32 @@ public static class ModAssets
 
         KeyTranslator.TranslationFunc = (key, replacementsSet) => helper.Translation.Get(key, replacementsSet);
         
-        //Apply Translations to all objects
+        ApplyMassTranslations();
+        
+        infiniteRuneReferences = new();
+        //Generate the lookup dictionary for determining what weapons give infinite values for each rune
+        foreach (StaffWeaponData weapon in staffWeapons.Where(x=>x.providesRune != null))
+        {
+            if (!infiniteRuneReferences.ContainsKey(weapon.providesRune))
+            {
+                infiniteRuneReferences.Add(weapon.providesRune, new() { weapon.id.ToString() });
+            }
+            else
+            {
+                infiniteRuneReferences[weapon.providesRune].Add(weapon.id.ToString());
+            }
+        }
+        
+        localFarmerData = new PlayerLocalData();
+    }
+
+    public static void ApplyMassTranslations()
+    {
         var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, machineItems, perks,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs  }.SelectMany(x => x);
         foreach (var obj in translationTargets)
         {
             obj.ApplyTranslations();
         }
-        
-        infiniteRuneReferences = new();
-        //Generate the lookup dictionary for determining what weapons give infinite values for each rune
-        foreach (StaffWeaponData weapon in staffWeapons)
-        {
-            weapon.ApplyTranslations();
-            if (weapon.providesRune != null)
-            {
-                if (!infiniteRuneReferences.ContainsKey(weapon.providesRune))
-                {
-                    infiniteRuneReferences.Add(weapon.providesRune, new() { weapon.id.ToString() });
-                }
-                else
-                {
-                    infiniteRuneReferences[weapon.providesRune].Add(weapon.id.ToString());
-                }
-            }
-        }
-        
-        localFarmerData = new PlayerLocalData();
     }
 
     public static void BroadcastSprite(GameLocation location, TemporaryAnimatedSprite sprite)
