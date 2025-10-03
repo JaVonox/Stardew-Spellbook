@@ -501,7 +501,7 @@ public class CombatSpell : Spell
     {
         SpellResponse actionResult = base.CanCastSpell(); //we use the base can cast spell to check if it is selectable - which is using the custom HasRuneCost
         
-        ModAssets.localFarmerData.selectedSpellID = actionResult.wasSpellSuccessful && ModAssets.localFarmerData.selectedSpellID != this.id ? this.id : -1;
+        ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_SelectedSpellID",actionResult.wasSpellSuccessful ? this.id.ToString() : "-1");
         
         return actionResult;
     }

@@ -50,6 +50,8 @@ namespace RunescapeSpellbook
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
+            helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.DayStarted += this.OnNewDay;
             
             helper.ConsoleCommands.Add("rs_grantmagic", KeyTranslator.GetTranslation("console.grantmagic.text"), this.GrantMagic);
             helper.ConsoleCommands.Add("rs_setlevel", KeyTranslator.GetTranslation("console.setlevel.text"), this.SetLevel);
@@ -73,6 +75,17 @@ namespace RunescapeSpellbook
         private void OnLocaleChanged(object? sender, LocaleChangedEventArgs e)
         {
             ModAssets.ApplyMassTranslations();
+        }
+        
+        private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
+        {
+            ModAssets.SetupModDataKeys(Game1.player);
+            ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_SelectedSpellID","-1");
+        }
+        
+        private void OnNewDay(object? sender, DayStartedEventArgs e)
+        {
+            ModAssets.ClearBonusHealth(Game1.player);
         }
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -611,18 +624,19 @@ namespace RunescapeSpellbook
                 if (!isOnlyKeybind)
                 {
                     //Move the options and exit tags right two to fit in spellbook page
-                    //exit tab
-                    __instance.tabs[^1].bounds = new Rectangle(__instance.xPositionOnScreen + 704,
-                        __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
-                    __instance.tabs[^1].myID = 12351;
-                    __instance.tabs[^1].leftNeighborID = 12350;
-                
+                    
                     //options tab
                     __instance.tabs[^2].bounds = new Rectangle(__instance.xPositionOnScreen + 640,
                         __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
-                    __instance.tabs[^2].myID = 12350;
-                    __instance.tabs[^2].leftNeighborID = 12349;
+                    __instance.tabs[^2].myID = 12349;
+                    __instance.tabs[^2].leftNeighborID = 12348;
+                    __instance.tabs[^2].rightNeighborID = 12350;
                     
+                    //exit tab
+                    __instance.tabs[^1].bounds = new Rectangle(__instance.xPositionOnScreen + 704,
+                        __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64);
+                    __instance.tabs[^1].myID = 12350;
+                    __instance.tabs[^1].leftNeighborID = 12349;
                 }
                 
                 //spellbook tab
@@ -631,17 +645,31 @@ namespace RunescapeSpellbook
                         __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64),
                     "RSspellbook", KeyTranslator.GetTranslation("ui.TabName.text"))
                 {
-                    myID = 12349,
+                    myID = isOnlyKeybind ? 42900 : 12348,
                     downNeighborID = 9,
-                    leftNeighborID = 12348,
+                    leftNeighborID = 12347,
+                    rightNeighborID = 12349,
                     tryDefaultIfNoDownNeighborExists = true,
                     fullyImmutable = true,
                     visible = !isOnlyKeybind,
                 });
-
+                
                 //spellbook page
                 __instance.pages.Add(new SpellbookPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen,
                     __instance.width - 64 - 16, __instance.height));
+                
+                //Add spellbook to clickable components for current tab so we can navigate to it without mouse
+                __instance.pages[__instance.currentTab].allClickableComponents.Add(__instance.tabs[^1]);
+
+                if (__instance.currentTab == __instance.getTabNumberFromName("RSspellbook"))
+                {
+                    __instance.pages[__instance.currentTab].populateClickableComponentList();
+                    __instance.AddTabsToClickableComponents(__instance.pages[__instance.currentTab]);
+                    if (Game1.options.SnappyMenus)
+                    {
+                        __instance.snapToDefaultClickableComponent();
+                    }
+                }
             }
         }
 
@@ -709,19 +737,13 @@ namespace RunescapeSpellbook
                 //Handle Bonus Health
                 if (__instance.health > __instance.maxHealth)
                 {
-                    ModAssets.localFarmerData.bonusHealth += __instance.health - __instance.maxHealth;
+                    ModAssets.AddBonusHealth(__instance, __instance.health - __instance.maxHealth);
                     __instance.health = __instance.maxHealth;
                 }
-                else if (ModAssets.localFarmerData.bonusHealth > 0)
+                else if (__instance.health < __instance.maxHealth && ModAssets.GetBonusHealth(__instance) > 0)
                 {
-                    ModAssets.localFarmerData.bonusHealth -= __instance.maxHealth - __instance.health;
-                    __instance.health = __instance.maxHealth;
-                    
-                    if (ModAssets.localFarmerData.bonusHealth < 0)
-                    {
-                        __instance.health -= Math.Abs(ModAssets.localFarmerData.bonusHealth);
-                        ModAssets.localFarmerData.bonusHealth = 0;
-                    }
+                    int newTotal = ModAssets.AddBonusHealth(__instance, -1 * (__instance.maxHealth - __instance.health));
+                    __instance.health = __instance.maxHealth + (newTotal < 0 ? newTotal : 0);
                 }
             }
         }
@@ -747,10 +769,16 @@ namespace RunescapeSpellbook
                         {
                             int addAmount = (int)Math.Floor((float)__instance.maxHealth * (pot.healPercent + ((float)__instance.itemToEat.Quality * pot.extraHealthPerQuality)));
                             int newTotal = __instance.health + addAmount;
+
+                            int currentBonusHealth = ModAssets.GetBonusHealth(__instance);
                             
-                            if (__instance.health + ModAssets.localFarmerData.bonusHealth < newTotal)
+                            if (__instance.health + currentBonusHealth < newTotal)
                             {
-                                ModAssets.localFarmerData.bonusHealth = newTotal <= __instance.maxHealth ? 0 : newTotal - __instance.maxHealth;
+                                ModAssets.AddBonusHealth(__instance,
+                                     (newTotal <= __instance.maxHealth
+                                        ? 0
+                                        : newTotal - __instance.maxHealth) - currentBonusHealth);
+                                
                                 __instance.health = Math.Min(newTotal, __instance.maxHealth);
                             }
                         }
@@ -765,16 +793,6 @@ namespace RunescapeSpellbook
                 }
                 
                 return true;
-            }
-        }
-        
-        [HarmonyPatch(typeof(Farmer), "dayupdate")]
-        [HarmonyPatch(new Type[] { typeof(int)})]
-        public class FarmerSleepPatcher
-        {
-            public static void Prefix(ref Farmer __instance, int timeWentToSleep)
-            {
-                ModAssets.localFarmerData.bonusHealth = 0;
             }
         }
         
@@ -882,18 +900,18 @@ namespace RunescapeSpellbook
 
             public static void Prefix(ref Game1 __instance)
             {
-                if (Game1.hitShakeTimer > 0 && ModAssets.localFarmerData.bonusHealth > 0)
+                if (Game1.hitShakeTimer > 0 && ModAssets.GetBonusHealth(Game1.player) > 0)
                 {
                     Game1.hitShakeTimer = 0;
                 }
             }
-
             public static void Postfix(ref Game1 __instance)
             {
-                if (Game1.showingHealthBar && ModAssets.localFarmerData.bonusHealth > 0)
+                int bonusHealth = ModAssets.GetBonusHealth(Game1.player);
+                if (Game1.showingHealthBar && bonusHealth > 0)
                 {
                     //Get how many times we go over the healthbar
-                    int healthDepth = (1 + ModAssets.localFarmerData.bonusHealth / Game1.player.maxHealth);
+                    int healthDepth = (1 + bonusHealth / Game1.player.maxHealth);
                     
                     Vector2 topOfBar = new Vector2(Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Right - 48 - 8, Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (int)((float)(Game1.player.MaxStamina - 270) * 0.625f));
                     topOfBar.X -= 56;
@@ -901,7 +919,7 @@ namespace RunescapeSpellbook
                     int barFullHeight = 168 + (Game1.player.maxHealth - 100);
                     
                     DrawBonusHealthBar(healthDepth - 1,Game1.player.maxHealth,topOfBar,barFullHeight);
-                    DrawBonusHealthBar(healthDepth,ModAssets.localFarmerData.bonusHealth % Game1.player.maxHealth,topOfBar,barFullHeight);
+                    DrawBonusHealthBar(healthDepth,bonusHealth % Game1.player.maxHealth,topOfBar,barFullHeight);
                     
                     //Extra health draw code
                     /*
@@ -966,10 +984,13 @@ namespace RunescapeSpellbook
             {
                 if(__instance.type.Value == 429)
                 {
-                    if (ModAssets.localFarmerData.selectedSpellID != -1 &&
-                        ModAssets.modSpells[ModAssets.localFarmerData.selectedSpellID].GetType() == typeof(CombatSpell) && ModAssets.HasMagic(Game1.player))
+                    int selectedSpellID = -1;
+                    int.TryParse(ModAssets.TryGetModVariable(who, "Tofu.RunescapeSpellbook_SelectedSpellID"), out selectedSpellID);
+                    
+                    if (selectedSpellID != -1 &&
+                        ModAssets.modSpells[selectedSpellID].GetType() == typeof(CombatSpell) && ModAssets.HasMagic(Game1.player))
                     {
-                        CombatSpell spell = (CombatSpell)ModAssets.modSpells[ModAssets.localFarmerData.selectedSpellID];
+                        CombatSpell spell = (CombatSpell)ModAssets.modSpells[selectedSpellID];
                         Point mousePos = Game1.getMousePosition();
                         int mouseX = mousePos.X + Game1.viewport.X;
                         int mouseY = mousePos.Y + Game1.viewport.Y;
@@ -1096,20 +1117,6 @@ namespace RunescapeSpellbook
             }
         }
             
-        }
-        
-        //Setup Variables and farmerData 
-        [HarmonyPatch(typeof(Farmer), "farmerInit")]
-        public class SetupModVariablesPatcher
-        {
-            public static void Postfix(Farmer __instance)
-            {
-                if (!Context.IsMultiplayer || (Context.IsMultiplayer && __instance.IsLocalPlayer))
-                {
-                    ModAssets.SetupModDataKeys(__instance);
-                    ModAssets.localFarmerData.Reset();
-                }
-            }
         }
         
         //Add monster items

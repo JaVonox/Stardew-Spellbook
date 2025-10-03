@@ -6,8 +6,8 @@ using StardewValley.Menus;
 namespace RunescapeSpellbook;
 
 public class SpellbookPage : IClickableMenu
-{
-    private List<ClickableComponent> spellIcons = new();
+{ 
+    public List<ClickableComponent> spellIcons = new();
     
     private int hoverSpellID = -1;
     private int hoverPerkID = -1;
@@ -19,7 +19,7 @@ public class SpellbookPage : IClickableMenu
     private const int spellsPerRow = 6;
 
     private ClickableTextureComponent magicIcon;
-    List<ClickableTextureComponent> perkIcons = new();
+    public List<ClickableComponent> perkIcons = new();
     private List<int> perksAssigned = new();
     
     private bool hasMagic = false;
@@ -34,29 +34,46 @@ public class SpellbookPage : IClickableMenu
             List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
 
             int spellsPlaced = 0;
+            int spellsCount = orderedSpells.Count;
             foreach (Spell sp in orderedSpells)
             {
                 spellIcons.Add(
                     new ClickableComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPlaced % spellsPerRow) * 90),
                         yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder + 4 - 12 +
                         ((ModAssets.spellsSize + 20) * (spellsPlaced / spellsPerRow)),
-                        ModAssets.spellsSize, ModAssets.spellsSize), name: sp.name)
+                        ModAssets.spellsSize, ModAssets.spellsSize), name: sp.id.ToString())
                     {
-                        myID = sp.id,
-                        fullyImmutable = false
+                        myID = spellsPlaced,
+                        leftNeighborID = spellsPlaced % spellsPerRow == 0 ? -7777 : (spellsPlaced - 1),
+                        rightNeighborID = (spellsPlaced + 1) % spellsPerRow == 0 
+                            ? (spellsPlaced / spellsPerRow < 4 ? 429 : -7777) 
+                            : (spellsPlaced + 1),
+                        upNeighborID =  spellsPlaced <= spellsPerRow ? 12348 : (spellsPlaced - spellsPerRow) % spellsCount,
+                        downNeighborID = spellsPlaced + spellsPerRow <= spellsCount - 1 ? spellsPlaced + spellsPerRow : -7777, 
+                        fullyImmutable = false,
+                        name = sp.id.ToString(),
                     }
                 );
                 spellsPlaced++;
+                
             }
 
             magicIcon = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPerRow) * 90) + 30,
                     yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder - 14, 80, 80),
                 ModAssets.extraTextures, new Rectangle(160, 105, 80, 80), 1f, true);
+            magicIcon.myID = 4290;
 
             magicLevel = ModAssets.GetFarmerMagicLevel(Game1.player);
 
             RefreshPerkData();
         }
+    }
+    
+    public override void snapToDefaultClickableComponent()
+    {
+        base.snapToDefaultClickableComponent();
+        currentlySnappedComponent = getComponentWithID(0);
+        snapCursorToCurrentSnappedComponent();
     }
 
     public void RefreshPerkData()
@@ -68,22 +85,22 @@ public class SpellbookPage : IClickableMenu
 
         hasPerkPoints = newPerkPoints > 0;
         int perksPlaced = 0;
-
+        
         for (int i = 0; i < 4; i++)
         {
-            int yValue = perksAssigned.Contains(i)
-                ? 182 + ((i + 1) * 160)
-                : (newPerkPoints == 0 ? 182 : 262 + (i * 160));
-
+            int upVal = i == 0 ? -7777 : (i - 1) + 429;
+            int downVal = i == 3 ? -7777 : (i + 1) + 429;
             perkIcons.Add(
-                new ClickableTextureComponent(
-                    new Rectangle(magicIcon.bounds.X, magicIcon.bounds.Y + 140 + (perksPlaced * 90), 80, 80),
-                    ModAssets.extraTextures,
-                    new Rectangle(160, yValue, 80, 80),
-                    1f, true)
+                new ClickableComponent(
+                    new Rectangle(magicIcon.bounds.X, magicIcon.bounds.Y + 140 + (perksPlaced * 90),80,80), name: i.ToString())
                 {
-                    myID = i,
-                    fullyImmutable = false
+                    myID = i + 429,
+                    leftNeighborID = upVal,
+                    rightNeighborID = downVal,
+                    upNeighborID = upVal,
+                    downNeighborID =  downVal,
+                    fullyImmutable = false,
+                    name = i.ToString()
                 }
             );
             perksPlaced++;
@@ -98,7 +115,7 @@ public class SpellbookPage : IClickableMenu
         {
             if (c.containsPoint(x, y))
             {
-                hoverSpellID = c.myID;
+                hoverSpellID = int.Parse(c.name);
                 hoverPerkID = -1;
                 return;
             }
@@ -106,11 +123,11 @@ public class SpellbookPage : IClickableMenu
             hoverSpellID = -1;
         }
 
-        foreach (ClickableTextureComponent perk in perkIcons)
+        foreach (ClickableComponent perk in perkIcons)
         {
             if (perk.containsPoint(x, y))
             {
-                hoverPerkID = perk.myID;
+                hoverPerkID = int.Parse(perk.name);
                 return;
             }
             hoverPerkID = -1;
@@ -326,20 +343,25 @@ public class SpellbookPage : IClickableMenu
             b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, null);
             return;
         }
+        
+        int selectedSpellID = -1;
+        int.TryParse(ModAssets.TryGetModVariable(Game1.player, "Tofu.RunescapeSpellbook_SelectedSpellID"), out selectedSpellID);
+        
         foreach (ClickableComponent c in spellIcons)
         {
-            bool canCast = ModAssets.modSpells[c.myID].CanCastSpell().wasSpellSuccessful;
+            int perkSpellID = int.Parse(c.name);
+            bool canCast = ModAssets.modSpells[perkSpellID].CanCastSpell().wasSpellSuccessful;
 
             b.Draw(ModAssets.extraTextures, c.bounds,
                 new Rectangle(canCast ? 0 : ModAssets.spellsSize,
-                    ModAssets.spellsY + (c.myID * ModAssets.spellsSize), ModAssets.spellsSize,
+                    ModAssets.spellsY + (perkSpellID * ModAssets.spellsSize), ModAssets.spellsSize,
                     ModAssets.spellsSize), Color.White);
             b.Draw(ModAssets.extraTextures, c.bounds,
                 new Rectangle(canCast ? 0 : ModAssets.spellsSize,
-                    ModAssets.spellsY + (c.myID * ModAssets.spellsSize), ModAssets.spellsSize,
+                    ModAssets.spellsY + (perkSpellID * ModAssets.spellsSize), ModAssets.spellsSize,
                     ModAssets.spellsSize), Color.White);
 
-            if (c.myID == ModAssets.localFarmerData.selectedSpellID) //If this is the selected spell
+            if (perkSpellID == selectedSpellID) //If this is the selected spell
             {
                 //Draw a box behind the selected spell
                 b.Draw(ModAssets.extraTextures, c.bounds,
@@ -354,9 +376,13 @@ public class SpellbookPage : IClickableMenu
         b.DrawString(Game1.dialogueFont, levelText,
             new Vector2(magicIcon.bounds.X + spacing, magicIcon.bounds.Y + 90), Game1.textColor);
 
-        foreach (ClickableTextureComponent perk in perkIcons)
+        int newPerkPoints = (magicLevel / 5) - perksAssigned.Count;
+        foreach (ClickableComponent perk in perkIcons)
         {
-            perk.draw(b);
+            int iValue = int.Parse(perk.name);
+            int yValue = perksAssigned.Contains(iValue) ? 182 + ((iValue + 1) * 160) : (newPerkPoints == 0 ? 182 : 262 + (iValue * 160));
+            b.Draw(ModAssets.extraTextures, perk.bounds,
+                new Rectangle(160, yValue, 80, 80), Color.White);
         }
 
         //Needs to be at end to prevent overlap

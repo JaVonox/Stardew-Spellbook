@@ -11,8 +11,6 @@ public static class ModAssets
 {
     public static Texture2D extraTextures; //Includes spells + basic icons
     public static Texture2D animTextures;
-
-    public static PlayerLocalData localFarmerData;
     
     public const int spellsY = 16;
     public const int spellsSize = 80;
@@ -745,8 +743,6 @@ public static class ModAssets
                 infiniteRuneReferences[weapon.providesRune].Add(weapon.id.ToString());
             }
         }
-        
-        localFarmerData = new PlayerLocalData();
     }
 
     public static void ApplyMassTranslations()
@@ -807,6 +803,11 @@ public static class ModAssets
         {
             farmerInstance.modData.Add("Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier",GetSpellBaseExpMultiplier().ToString());
         }
+        
+        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_SelectedSpellID"))
+        {
+            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_SelectedSpellID","-1");
+        }
     }
     public static string TryGetModVariable(Farmer farmer, string dataKey)
     {
@@ -830,6 +831,47 @@ public static class ModAssets
         if (farmer.modData.ContainsKey(dataKey))
         {
             farmer.modData[dataKey] = newValue;
+        }
+    }
+
+    public static int GetBonusHealth(Farmer farmer)
+    {
+        if (farmer.modData.TryGetValue("Tofu.RunescapeSpellbook_BonusHealth", out string parseString))
+        {
+            return int.TryParse(parseString, out int result) ? result : 0;
+        }
+        return 0;
+    }
+    public static int AddBonusHealth(Farmer farmer, int amountToAdd)
+    {
+        int newTotal = amountToAdd;
+        bool keyExists = farmer.modData.TryGetValue("Tofu.RunescapeSpellbook_BonusHealth", out string parseString);
+        if (keyExists && int.TryParse(parseString, out int existingValue)) //Value exists
+        {
+            newTotal += existingValue;
+        }
+
+        if (keyExists && newTotal > 0)
+        {
+            farmer.modData["Tofu.RunescapeSpellbook_BonusHealth"] = newTotal.ToString();
+        }
+        else if(newTotal > 0)
+        {
+            farmer.modData.Add("Tofu.RunescapeSpellbook_BonusHealth", newTotal.ToString());
+        }
+        else
+        {
+            farmer.modData.Remove("Tofu.RunescapeSpellbook_BonusHealth");
+        }
+
+        return newTotal;
+    }
+    
+    public static void ClearBonusHealth(Farmer farmer)
+    {
+        if (farmer.modData.ContainsKey("Tofu.RunescapeSpellbook_BonusHealth"))
+        {
+            farmer.modData.Remove("Tofu.RunescapeSpellbook_BonusHealth");
         }
     }
     public static bool HasMagic(Farmer farmer)
@@ -966,24 +1008,6 @@ public static class ModAssets
         return successfulAssignment;
     }
 }
-
-public class PlayerLocalData
-{
-    public int selectedSpellID;
-    public int bonusHealth;
-    public PlayerLocalData()
-    {
-        selectedSpellID = -1;
-        bonusHealth = 0;
-    }
-    public void Reset()
-    {
-        selectedSpellID = -1;
-        bonusHealth = 0;
-    }
-    
-}
-
 public sealed class ModConfig
 {
     public KeybindList SpellbookKey = KeybindList.Parse("J");

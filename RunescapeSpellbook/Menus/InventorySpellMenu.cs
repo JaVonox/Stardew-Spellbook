@@ -7,8 +7,8 @@ using StardewValley.Menus;
 namespace RunescapeSpellbook;
 public class InventorySpellMenu : MenuWithInventory
 {
-    private ClickableTextureComponent inputSpot;
-    private ClickableTextureComponent spellIcon;
+    public ClickableTextureComponent inputSpot;
+    public ClickableTextureComponent spellIcon;
     
     private Texture2D runesTextures;
     private Farmer caster;
@@ -40,24 +40,63 @@ public class InventorySpellMenu : MenuWithInventory
         casterX = xPositionOnScreen + 288;
         
         inventory.highlightMethod = highlightTargets;
-        
-        inputSpot = new ClickableTextureComponent(new Rectangle((casterX - 128), 
-            yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + ((308/2)-36),96,96), ModAssets.extraTextures, new Rectangle(160, 0, 24, 24), 4f);
+
+        inputSpot = new ClickableTextureComponent(new Rectangle((casterX - 128),
+                yPositionOnScreen + IClickableMenu.spaceToClearTopBorder + ((308 / 2) - 36), 96, 96),
+            ModAssets.extraTextures, new Rectangle(160, 0, 24, 24), 4f)
+        {
+            myID = 429,
+            leftNeighborID = -7777,
+            rightNeighborID = 430,
+            downNeighborID = 0
+        };
         
         caster = Game1.player;
 
         spellIcon = new ClickableTextureComponent(new Rectangle(casterX + 80,
                 (centreY - 15) - (ModAssets.spellsSize / 2),
-                ModAssets.spellsSize, ModAssets.spellsSize),ModAssets.extraTextures, new Rectangle(0,ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize),ModAssets.spellsSize,ModAssets.spellsSize), 1f);
+                ModAssets.spellsSize, ModAssets.spellsSize), ModAssets.extraTextures,
+            new Rectangle(0, ModAssets.spellsY + (targetSpell.id * ModAssets.spellsSize), ModAssets.spellsSize,
+                ModAssets.spellsSize), 1f)
+        {
+            myID = 430,
+            leftNeighborID = 429,
+            rightNeighborID = -7777,
+            downNeighborID = 429
+        };
         
         caster.faceDirection(2); //Point caster down
 
         isAnimatingCast = false;
         
         spellDescriptionText = targetSpell.longDescription;
-
+        
+        List<ClickableComponent> list = inventory.inventory;
+        if (list != null && list.Count >= 12)
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                if (inventory.inventory[i] != null)
+                {
+                    inventory.inventory[i].upNeighborID = 429;
+                }
+            }
+        }
+        
+        if (Game1.options.SnappyMenus)
+        {
+            populateClickableComponentList();
+            snapToDefaultClickableComponent();
+        }
     }
 
+    public override void snapToDefaultClickableComponent()
+    {
+        base.snapToDefaultClickableComponent();
+        currentlySnappedComponent = getComponentWithID(0);
+        snapCursorToCurrentSnappedComponent();
+    }
+    
     public bool highlightTargets(Item i)
     {
         return this.selectablePredicate(i);
