@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
-using GenericModConfigMenu;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
-using Leclair.Stardew.BetterGameMenu;
 using Microsoft.Xna.Framework.Graphics;
+using SpaceCore;
+using SpaceShared.APIs;
 using StardewValley.Buffs;
 using StardewValley.Extensions;
 using StardewValley.GameData;
@@ -26,6 +26,8 @@ using StardewValley.Monsters;
 using StardewValley.Objects;
 using StardewValley.Projectiles;
 using StardewValley.Tools;
+using IBetterGameMenuApi = Leclair.Stardew.BetterGameMenu.IBetterGameMenuApi;
+using IGenericModConfigMenuApi = GenericModConfigMenu.IGenericModConfigMenuApi;
 using Object = StardewValley.Object;
 
 namespace RunescapeSpellbook
@@ -81,6 +83,7 @@ namespace RunescapeSpellbook
         {
             ModAssets.SetupModDataKeys(Game1.player);
             ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_SelectedSpellID","-1");
+            LevelsHandler.hasCheckedForMigration = false;
         }
         
         private void OnNewDay(object? sender, DayStartedEventArgs e)
@@ -105,18 +108,6 @@ namespace RunescapeSpellbook
                     this.ModManifest, () => this.Config.SpellbookKey, value => this.Config.SpellbookKey = value,
                     () => KeyTranslator.GetTranslation("settings.SpellbookKeybind.text"),
                     () => KeyTranslator.GetTranslation("settings.SpellbookKeybind.tooltip"));
-                
-                /*
-                configMenuAPI.AddParagraph(this.ModManifest, ()=>
-                    "Certain mods may add new tabs in a way that conflicts with the spellbook tab. By default, if mods are detected that are known to do this," +
-                    " the Spellbook will set itself to 'Only Keybind' mode on startup. you can reset this behaviour here. If Lock Spellbook Style is set, behaviour will not longer be " +
-                    " automatically changed on startup");
-
-                configMenuAPI.AddBoolOption(
-                    this.ModManifest, () => this.Config.LockSpellbookStyle, value => this.Config.LockSpellbookStyle = value,
-                    () => "Lock Spellbook Style",
-                    () => "Selecting this as true will prevent any automatic toggling of the spellbook tab style if certain mods are detected");
-                */
                 
                 configMenuAPI.AddTextOption(this.ModManifest, () => this.Config.SpellbookTabStyle,
                     value => this.Config.SpellbookTabStyle = value,
@@ -177,39 +168,11 @@ namespace RunescapeSpellbook
             {
                 Instance.Monitor.Log(KeyTranslator.GetTranslation("log.GameMenuAPIError.text",new{Exception = exception.Message}),LogLevel.Error);
             }
-
-            if (!Config.LockSpellbookStyle && BetterGameMenuApi is null)
-            {
-                //bool loadedRiskyMod = false;
-                
-                
-                if (this.Helper.ModRegistry.IsLoaded("Annosz.UiInfoSuite2"))
-                {
-                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-1"),LogLevel.Warn);
-                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-2"), LogLevel.Warn);
-                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-3"),LogLevel.Warn);
-                    string firstKey = Config.SpellbookKey.Keybinds.Length > 0
-                        ? Config.SpellbookKey.Keybinds[0].ToString()
-                        : "Unbound";
-                    
-                    Instance.Monitor.Log(KeyTranslator.GetTranslation("log.UsingOverlapMod.line-4", new {Keybind = firstKey}),LogLevel.Warn);
-                    
-                    /*
-                    loadedRiskyMod = true;
-                    Config.SpellbookTabStyle = "Only Keybind";
-                    */
-                }
-
-                /*
-                if (loadedRiskyMod)
-                {
-                    Instance.Monitor.Log("RunescapeSpellbook has discovered one or more mods are enabled that might cause UI overlaps.",LogLevel.Warn);
-                    Instance.Monitor.Log("The Runescape Spellbook menu tab has been set to 'Only Keybind' mode to prevent UI problems.", LogLevel.Warn);
-                    Instance.Monitor.Log("You can reenable the spellbook tab by setting the Spellbook Tab Style in the config, but relaunching the game with these mods enabled will automatically set you into 'Only Keybind' Mode again unless you set 'Lock Spellbook Style' to true",LogLevel.Warn);
-                    Instance.Monitor.Log($"Your current spellbook keybind is set to {Config.SpellbookKey.Keybinds[0].ToString()}",LogLevel.Warn);
-                }
-                */
-            }
+            
+            ISpaceCoreApi SpaceCoreApi = ModEntry.Instance.Helper.ModRegistry.GetApi<ISpaceCoreApi>("spacechase0.SpaceCore");
+            Skills.RegisterSkill(new LevelsHandler.MagicSkill());
+            Monitor.Log($"{SpaceCoreApi.GetCustomSkills()[0]}",LogLevel.Warn);
+            LevelsHandler.Load(SpaceCoreApi);
             
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
@@ -988,7 +951,7 @@ namespace RunescapeSpellbook
                     int.TryParse(ModAssets.TryGetModVariable(who, "Tofu.RunescapeSpellbook_SelectedSpellID"), out selectedSpellID);
                     
                     if (selectedSpellID != -1 &&
-                        ModAssets.modSpells[selectedSpellID].GetType() == typeof(CombatSpell) && ModAssets.HasMagic(Game1.player))
+                        ModAssets.modSpells[selectedSpellID].GetType() == typeof(CombatSpell) && LevelsHandler.HasMagic(Game1.player))
                     {
                         CombatSpell spell = (CombatSpell)ModAssets.modSpells[selectedSpellID];
                         Point mousePos = Game1.getMousePosition();
@@ -1019,7 +982,7 @@ namespace RunescapeSpellbook
                     }
                     else
                     {
-                        Game1.showRedMessage(KeyTranslator.GetTranslation(ModAssets.HasMagic(Game1.player) ? "ui.NoSpellSelected.text" : "ui.NoBattlestaffKnowledge.text"));
+                        Game1.showRedMessage(KeyTranslator.GetTranslation(LevelsHandler.HasMagic(Game1.player) ? "ui.NoSpellSelected.text" : "ui.NoBattlestaffKnowledge.text"));
                     }
                 }
                 
@@ -1552,7 +1515,7 @@ namespace RunescapeSpellbook
             //Console Commands
             private bool HasNoMagic()
             {
-                if (!ModAssets.HasMagic(Game1.player))
+                if (!LevelsHandler.HasMagic(Game1.player))
                 {
                     this.Monitor.Log(KeyTranslator.GetTranslation("log.NoMagic.text"),LogLevel.Warn);
                     return true;
@@ -1572,11 +1535,12 @@ namespace RunescapeSpellbook
                 return false;
             }
 
+            //TODO Most of these dont work now cuz of the switch to spacecore
             private void GrantMagic(string command, string[] args)
             {
                 if(HasNoWorldContextReady()){return;}
             
-                if (ModAssets.HasMagic(Game1.player))
+                if (LevelsHandler.HasMagic(Game1.player))
                 {
                     this.Monitor.Log(KeyTranslator.GetTranslation("log.AlreadyHaveMagic.text"),LogLevel.Warn);
                     return;
@@ -1626,7 +1590,7 @@ namespace RunescapeSpellbook
                     reqExp = Math.Clamp(reqExp, 0, Farmer.getBaseExperienceForLevel(10));
                     ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", "0");
                     ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", "0");
-                    ModAssets.IncrementMagicExperience(Game1.player, reqExp,false);
+                    LevelsHandler.IncrementMagicExperience(Game1.player, reqExp,false);
                     this.Monitor.Log(KeyTranslator.GetTranslation("log.SetExperienceLevel.text", new {RequestedExp = reqExp}),LogLevel.Info);
                 }
             }
@@ -1643,8 +1607,7 @@ namespace RunescapeSpellbook
             
                 if (double.TryParse(args[0], out double reqAddExp))
                 {
-                    reqAddExp = Math.Clamp(reqAddExp, 0, Farmer.getBaseExperienceForLevel(10) - ModAssets.GetFarmerExperience(Game1.player));
-                    ModAssets.IncrementMagicExperience(Game1.player, reqAddExp,false);
+                    LevelsHandler.IncrementMagicExperience(Game1.player, reqAddExp,false);
                     this.Monitor.Log(KeyTranslator.GetTranslation("log.AddExperienceLevel.text", new {RequestedExp = reqAddExp}),LogLevel.Info);
                 }
             }
@@ -1665,18 +1628,9 @@ namespace RunescapeSpellbook
                 foreach (Farmer farmerRoot in ModAssets.GetFarmers())
                 {
                     Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-name", new {Value = farmerRoot.Name}),LogLevel.Info);
-                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-hasmagic", new {Value = ModAssets.HasMagic(farmerRoot)}),LogLevel.Info);
-                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-level", new {Value = ModAssets.GetFarmerMagicLevel(farmerRoot)}),LogLevel.Info);
-                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-exp", new {Value = ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_MagicExp")}),LogLevel.Info);
+                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-hasmagic", new {Value = LevelsHandler.HasMagic(farmerRoot)}),LogLevel.Info);
+                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-level", new {Value = LevelsHandler.GetFarmerMagicLevel(farmerRoot)}),LogLevel.Info);
                     Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-multiplier",new {Value = ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier")}),LogLevel.Info);
-                    
-                    List<int> perkIDs = ModAssets.PerksAssigned(farmerRoot);
-                    int perkIndex = 1;
-                    foreach (int id in perkIDs)
-                    {
-                        string perkName = id == -1 ? KeyTranslator.GetTranslation("log.PlayerInfo.perk-default") : ModAssets.perks.Where(x=>x.perkID==id).Select(x=>x.perkName).First();
-                        Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-perk",new {PerkIndex = perkIndex,PerkName = perkName}),LogLevel.Info);
-                    }
                 }
             }
             private void GrantRunes(string command, string[] args)

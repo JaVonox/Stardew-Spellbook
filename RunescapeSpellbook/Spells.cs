@@ -47,7 +47,7 @@ public class Spell : ITranslatable
 
     protected bool HasMagicLevel()
     {
-        return ModAssets.GetFarmerMagicLevel(Game1.player) >= magicLevelRequirement;
+        return LevelsHandler.GetFarmerMagicLevel(Game1.player) >= magicLevelRequirement;
     }
     public virtual SpellResponse CanCastSpell()
     {
@@ -69,7 +69,7 @@ public class Spell : ITranslatable
     public virtual bool HasRuneCost(string runeID)
     {
         return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || 
-                (runeID == "Tofu.RunescapeSpellbook_RuneAir" && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")));
+                (runeID == "Tofu.RunescapeSpellbook_RuneAir" && LevelsHandler.HasPerk(Game1.player, "magicEmerald")));
     }
 
         
@@ -90,11 +90,11 @@ public class Spell : ITranslatable
     protected void RemoveRunes(string? ignoreRune = null)
     {
         //Remove all required runes - any granted by staffs (ignoreRune) and air runes if we have the emerald perk
-        bool hasInfiniteAir = ModAssets.CheckHasPerkByName(Game1.player, "Emerald");
+        bool hasInfiniteAir = LevelsHandler.HasPerk(Game1.player, "magicEmerald");
         List<string> skippedItems = requiredItems.Where(x=>x.Key == ignoreRune || (x.Key == "Tofu.RunescapeSpellbook_RuneAir" && hasInfiniteAir)).Select(x=>x.Key).ToList();
 
         //If we have the ruby perk we have a 20% chance of skipping the cost entirely
-        if (GetType() != typeof(CombatSpell) && ModAssets.CheckHasPerkByName(Game1.player, "Ruby") && Game1.random.NextDouble() <= 0.2)
+        if (GetType() != typeof(CombatSpell) && LevelsHandler.HasPerk(Game1.player, "magicRuby") && Game1.random.NextDouble() <= 0.2)
         {
             return;
         }
@@ -108,7 +108,7 @@ public class Spell : ITranslatable
 
     protected virtual void AddExperience()
     {
-        ModAssets.IncrementMagicExperience(Game1.player,expReward);
+        LevelsHandler.IncrementMagicExperience(Game1.player,expReward);
     }
 
 }
@@ -195,7 +195,7 @@ public class TeleportSpell : Spell
             
             if(actionResult.wasSpellSuccessful) //Second pass checks if there are any spell specific issues - like how teleporting is forbidden on festival days
             {
-                if (!ModAssets.CheckHasPerkByName(Game1.player, "Sapphire")) //Having the sapphire perk means no exp for teleport spells
+                if (!LevelsHandler.HasPerk(Game1.player, "magicSapphire")) //Having the sapphire perk means no exp for teleport spells
                 {
                     RemoveRunes();
                     AddExperience();
@@ -210,8 +210,8 @@ public class TeleportSpell : Spell
     public override bool HasRuneCost(string runeID)
     {
         return (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] ||
-                (runeID == "Tofu.RunescapeSpellbook_RuneAir" && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")) 
-                || ModAssets.CheckHasPerkByName(Game1.player, "Sapphire"));
+                (runeID == "Tofu.RunescapeSpellbook_RuneAir" && LevelsHandler.HasPerk(Game1.player, "magicEmerald")) 
+                || LevelsHandler.HasPerk(Game1.player, "magicSapphire"));
     }
 }
 
@@ -288,7 +288,7 @@ public class TilesSpell : Spell
     
     protected void AddExperiencePerTile(int tileCount)
     {
-        ModAssets.IncrementMagicExperience(Game1.player,perTileExp * ((double)tileCount));
+        LevelsHandler.IncrementMagicExperience(Game1.player,perTileExp * ((double)tileCount));
     }
 }
 ///<summary> Subclass of spell which opens a new menu, allowing a user to specify which item the spell will be applied upon </summary>
@@ -456,7 +456,7 @@ public class CombatSpell : Spell
     
     public override bool HasRuneCost(string runeID)
     {
-        if (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || (runeID == "Tofu.RunescapeSpellbook_RuneAir" && ModAssets.CheckHasPerkByName(Game1.player, "Emerald")))
+        if (Game1.player.Items.CountId($"{runeID}") >= requiredItems[runeID] || (runeID == "Tofu.RunescapeSpellbook_RuneAir" && LevelsHandler.HasPerk(Game1.player, "magicEmerald")))
         {
             return true;
         }
@@ -508,7 +508,7 @@ public class CombatSpell : Spell
     
     protected override void AddExperience()
     {
-        ModAssets.IncrementMagicExperience(Game1.player,expReward);
+        LevelsHandler.IncrementMagicExperience(Game1.player,expReward);
     }
     
     const float extraProjectileOffsets = (float)(10 * (Math.PI/180));
@@ -532,7 +532,7 @@ public class CombatSpell : Spell
                                (caster.hasBuff("statue_of_blessings_5") ? 0.1f : 0f) *
                                (caster.professions.Contains(25) ? 1.5f : 1f);
             
-            int projectileCount = caster.hasBuff("Tofu.RunescapeSpellbook_BuffCharge") || (ModAssets.CheckHasPerkByName(Game1.player, "Dragonstone") && Game1.random.NextDouble() <= 0.2) ? 3 : 1;
+            int projectileCount = caster.hasBuff("Tofu.RunescapeSpellbook_BuffCharge") || (LevelsHandler.HasPerk(Game1.player, "magicDragon") && Game1.random.NextDouble() <= 0.2) ? 3 : 1;
             
             List<MagicProjectile> generatedProjectiles = new();
             for(int i = 0; i < projectileCount; i++)

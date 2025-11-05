@@ -10,17 +10,13 @@ public class SpellbookPage : IClickableMenu
     public List<ClickableComponent> spellIcons = new();
     
     private int hoverSpellID = -1;
-    private int hoverPerkID = -1;
     private int magicLevel;
-    private bool hasPerkPoints;
     
     private Texture2D runesTextures;
 
     private const int spellsPerRow = 6;
 
     private ClickableTextureComponent magicIcon;
-    public List<ClickableComponent> perkIcons = new();
-    private List<int> perksAssigned = new();
     
     private bool hasMagic = false;
     public SpellbookPage(int x, int y, int width, int height)
@@ -28,7 +24,7 @@ public class SpellbookPage : IClickableMenu
     {
         runesTextures = ItemRegistry.GetData($"(O)Tofu.RunescapeSpellbook_RuneSpellbook").GetTexture();
         
-        hasMagic = ModAssets.HasMagic(Game1.player);
+        hasMagic = LevelsHandler.HasMagic(Game1.player);
         if (hasMagic)
         {
             List<Spell> orderedSpells = ModAssets.modSpells.OrderBy(x => x.magicLevelRequirement).ToList();
@@ -63,9 +59,9 @@ public class SpellbookPage : IClickableMenu
                 ModAssets.extraTextures, new Rectangle(160, 105, 80, 80), 1f, true);
             magicIcon.myID = 4290;
 
-            magicLevel = ModAssets.GetFarmerMagicLevel(Game1.player);
-
-            RefreshPerkData();
+            magicLevel = LevelsHandler.GetFarmerMagicLevel(Game1.player);
+            
+            //TODO spellbooks need checking on controllers now perks are gone
         }
     }
     
@@ -74,37 +70,6 @@ public class SpellbookPage : IClickableMenu
         base.snapToDefaultClickableComponent();
         currentlySnappedComponent = getComponentWithID(0);
         snapCursorToCurrentSnappedComponent();
-    }
-
-    public void RefreshPerkData()
-    {
-        perkIcons.Clear();
-        perksAssigned = ModAssets.PerksAssigned(Game1.player);
-
-        int newPerkPoints = (magicLevel / 5) - perksAssigned.Count;
-
-        hasPerkPoints = newPerkPoints > 0;
-        int perksPlaced = 0;
-        
-        for (int i = 0; i < 4; i++)
-        {
-            int upVal = i == 0 ? -7777 : (i - 1) + 429;
-            int downVal = i == 3 ? -7777 : (i + 1) + 429;
-            perkIcons.Add(
-                new ClickableComponent(
-                    new Rectangle(magicIcon.bounds.X, magicIcon.bounds.Y + 140 + (perksPlaced * 90),80,80), name: i.ToString())
-                {
-                    myID = i + 429,
-                    leftNeighborID = upVal,
-                    rightNeighborID = downVal,
-                    upNeighborID = upVal,
-                    downNeighborID =  downVal,
-                    fullyImmutable = false,
-                    name = i.ToString()
-                }
-            );
-            perksPlaced++;
-        }
     }
 
     public override void performHoverAction(int x, int y)
@@ -116,21 +81,10 @@ public class SpellbookPage : IClickableMenu
             if (c.containsPoint(x, y))
             {
                 hoverSpellID = int.Parse(c.name);
-                hoverPerkID = -1;
                 return;
             }
 
             hoverSpellID = -1;
-        }
-
-        foreach (ClickableComponent perk in perkIcons)
-        {
-            if (perk.containsPoint(x, y))
-            {
-                hoverPerkID = int.Parse(perk.name);
-                return;
-            }
-            hoverPerkID = -1;
         }
     }
 
@@ -227,52 +181,6 @@ public class SpellbookPage : IClickableMenu
             nextXOffset += (16 * 4) + runesOffset;
         }
     }
-
-    private void GenerateHoverBoxPerk(SpriteBatch b)
-    {
-        if(!hasMagic){return;}
-        int x = Game1.getOldMouseX() + 32;
-        int y = Game1.getOldMouseY() + 32;
-        PerkData hoveredPerk = ModAssets.perks[hoverPerkID];
-        bool isHoveredPerkAssigned = ModAssets.HasPerk(Game1.player, hoveredPerk.perkID);
-
-        string hoveredPerkText = isHoveredPerkAssigned
-            ? KeyTranslator.GetTranslation("ui.AlreadyHavePerk.text")
-            : (!hasPerkPoints ? KeyTranslator.GetTranslation("ui.NoPerkPoints.text") : KeyTranslator.GetTranslation("ui.BuyPerk.text"));
-
-        bool perkHasLine2 = hoveredPerk.perkDescriptionLine2 != "";
-        Vector2 perkTitleSizes = Game1.dialogueFont.MeasureString(hoveredPerk.perkDisplayName);
-        Vector2 perkDescription1Sizes = Game1.smallFont.MeasureString(hoveredPerk.perkDescription);
-        Vector2 perkDescription2Sizes = perkHasLine2 ? Game1.smallFont.MeasureString(hoveredPerk.perkDescriptionLine2) : new Vector2(0,0);
-        Vector2 perkInteractionSizes = Game1.smallFont.MeasureString(hoveredPerkText);
-        
-        int requiredWidth = (int)Math.Floor(Math.Max(perkTitleSizes.X,Math.Max(perkDescription1Sizes.X,
-            Math.Max(perkInteractionSizes.X,perkDescription2Sizes.X))) + 16);
-        requiredWidth = requiredWidth < 100 ? 132 : 32 + requiredWidth;
-        
-        int requiredHeight = (int)Math.Ceiling(4 + perkTitleSizes.Y + 4 + perkDescription1Sizes.Y + 4 + perkInteractionSizes.Y + 4 + perkDescription2Sizes.Y + 4 + 16);
-        requiredHeight = requiredHeight < 50 ? 66 : 16 + requiredHeight;
-        
-        RepositionHoverBox(requiredWidth, requiredHeight, ref x, ref y);
-        
-        drawTextureBox(b, Game1.menuTexture, new Rectangle(0, 256, 60, 60), x, y, requiredWidth, requiredHeight, Color.White, 1f);
-        //Title
-        
-        int nextYOffset = 16;
-        b.DrawString(Game1.dialogueFont, hoveredPerk.perkDisplayName, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
-        nextYOffset += (int)Math.Floor(perkTitleSizes.Y);
-        b.DrawString(Game1.smallFont, hoveredPerk.perkDescription, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
-        nextYOffset += (int)Math.Floor(perkDescription1Sizes.Y);
-        if (perkHasLine2)
-        {
-            b.DrawString(Game1.smallFont, hoveredPerk.perkDescriptionLine2, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), Game1.textColor);
-            nextYOffset += (int)Math.Floor(perkDescription2Sizes.Y);
-        }
-        
-        b.DrawString(Game1.smallFont, hoveredPerkText, new Vector2(x + 16, y + nextYOffset + 4) + new Vector2(2f, 2f), 
-            (isHoveredPerkAssigned || hasPerkPoints ? Color.DarkGreen : Color.DarkRed));
-        
-    }
     
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
@@ -287,32 +195,6 @@ public class SpellbookPage : IClickableMenu
             else
             {
                 Game1.showRedMessage(castReturn.translatedResponse);
-            }
-        }
-        else if (hoverPerkID != -1)
-        {
-            if (!hasPerkPoints)
-            {
-                if (ModAssets.HasPerk(Game1.player, hoverPerkID))
-                {
-                    Game1.showRedMessage(KeyTranslator.GetTranslation("ui.AlreadyHavePerk.text"));
-                }
-                else
-                {
-                    Game1.showRedMessage(KeyTranslator.GetTranslation("ui.NoPerkPoints.text"));
-                }
-                return;
-            }
-            
-            bool couldAssignPerk = ModAssets.GrantPerk(Game1.player,ModAssets.perks[hoverPerkID].perkID);
-
-            if (couldAssignPerk)
-            {
-                RefreshPerkData();
-            }
-            else
-            {
-                Game1.showRedMessage(KeyTranslator.GetTranslation("ui.NoAssign.text"));
             }
         }
     }
@@ -376,23 +258,10 @@ public class SpellbookPage : IClickableMenu
         b.DrawString(Game1.dialogueFont, levelText,
             new Vector2(magicIcon.bounds.X + spacing, magicIcon.bounds.Y + 90), Game1.textColor);
 
-        int newPerkPoints = (magicLevel / 5) - perksAssigned.Count;
-        foreach (ClickableComponent perk in perkIcons)
-        {
-            int iValue = int.Parse(perk.name);
-            int yValue = perksAssigned.Contains(iValue) ? 182 + ((iValue + 1) * 160) : (newPerkPoints == 0 ? 182 : 262 + (iValue * 160));
-            b.Draw(ModAssets.extraTextures, perk.bounds,
-                new Rectangle(160, yValue, 80, 80), Color.White);
-        }
-
         //Needs to be at end to prevent overlap
         if (hoverSpellID != -1)
         {
             GenerateHoverBoxSpell(b, ModAssets.modSpells[hoverSpellID].CanCastSpell());
-        }
-        else if (hoverPerkID != -1)
-        {
-            GenerateHoverBoxPerk(b);
         }
 
         b.End();

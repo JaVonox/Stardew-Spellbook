@@ -318,83 +318,83 @@ public static class ModAssets
     
     public static readonly Spell[] modSpells = {
         new TeleportSpell(0,"Teleport_Valley","TeleportValley",0,
-            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneWater",2} },8,"Town", 43, 60,0),
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneWater",2} },800,"Town", 43, 60,0),
         
         new TeleportSpell(1,"Teleport_Home","TeleportHome",4,
-            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneEarth",3} },10, "FarmHouse"),
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneEarth",3} },1000, "FarmHouse"),
         
         new InventorySpell(2,"Menu_Superheat","MenuSuperheat",1,
-            new() { {"Tofu.RunescapeSpellbook_RuneNature", 1},{"Tofu.RunescapeSpellbook_RuneFire",4}},10,
+            new() { {"Tofu.RunescapeSpellbook_RuneNature", 1},{"Tofu.RunescapeSpellbook_RuneFire",4}},1000,
             (i=>i is Item item && (item.QualifiedItemId == "(O)388" || DataLoader.Machines(Game1.content).GetValueOrDefault("(BC)13").OutputRules.Any(x=>x.Triggers.Any(y=>y.RequiredItemId == item.QualifiedItemId)))),
             SpellEffects.SuperheatItem,1,"Superheat"),
         
         new InventorySpell(3,"Menu_HighAlch","MenuHighAlch",8,
-            new() { {"Tofu.RunescapeSpellbook_RuneNature", 2},{"Tofu.RunescapeSpellbook_RuneFire",5}},15,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
+            new() { {"Tofu.RunescapeSpellbook_RuneNature", 2},{"Tofu.RunescapeSpellbook_RuneFire",5}},1500,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
             SpellEffects.HighAlchemy,0,"HighAlch"),
         
         new TilesSpell(4,"Area_Humidify","AreaHumidify",1,
-            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",1},{"Tofu.RunescapeSpellbook_RuneWater",3}}, 0.4f,SpellEffects.Humidify, 10,5,"Humidify",
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",1},{"Tofu.RunescapeSpellbook_RuneWater",3}}, 40f,SpellEffects.Humidify, 10,5,"Humidify",
             (tile => tile is HoeDirt hoeLand && (hoeLand.crop == null || !hoeLand.crop.forageCrop.Value || hoeLand.crop.whichForageCrop.Value != "2") && hoeLand.state.Value != 1)),
         
         new TilesSpell(5,"Area_Cure","AreaCure",6,
-            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneEarth",8}},0.6f, SpellEffects.CurePlant, 10,6,"Cure",
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneEarth",8}},60f, SpellEffects.CurePlant, 10,6,"Cure",
             (tile => tile is HoeDirt hoeLand && hoeLand.crop != null && hoeLand.crop.dead.Value)),
         
         new BuffSpell(6,"Buff_VileVigour","BuffVileVigour",3,
-            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 1},{"Tofu.RunescapeSpellbook_RuneAir",3}},5, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
+            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 1},{"Tofu.RunescapeSpellbook_RuneAir",3}},500, (f=> f is Farmer farmer && farmer.stamina < farmer.MaxStamina), SpellEffects.VileVigour,
             7,"Vile","spell-error.BuffVileVigourEnergyFull.text"),
         
         new BuffSpell(7,"Buff_PieMake","BuffPieMake",3,
-            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",1},{"Tofu.RunescapeSpellbook_RuneWater",1}}, 15,
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",1},{"Tofu.RunescapeSpellbook_RuneWater",1}}, 1500,
             (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0), SpellEffects.BakePie, 8,"BakePie","spell-error.BuffPieMakeNoRecipes.text"),
         
         new TeleportSpell(8,"Teleport_Desert","TeleportDesert",5,
-            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 2},{"Tofu.RunescapeSpellbook_RuneEarth",5},{"Tofu.RunescapeSpellbook_RuneFire",5}}, 15,"Desert", 19, 34,2,
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 2},{"Tofu.RunescapeSpellbook_RuneEarth",5},{"Tofu.RunescapeSpellbook_RuneFire",5}}, 1500,"Desert", 19, 34,2,
             ((farmer => Game1.MasterPlayer.mailReceived.Contains("ccVault")))),
         
         new TeleportSpell(9,"Teleport_Ginger","TeleportGinger",7,
-            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 2},{"Tofu.RunescapeSpellbook_RuneWater",5},{"Tofu.RunescapeSpellbook_RuneFire",5}},15, "IslandSouth",21,37,0,
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 2},{"Tofu.RunescapeSpellbook_RuneWater",5},{"Tofu.RunescapeSpellbook_RuneFire",5}},1500, "IslandSouth",21,37,0,
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("willyBoatFixed")))),
         
         new TeleportSpell(10,"Teleport_Caves","TeleportCaves",2,
-            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",5}},10, "Mountain",54,7,0, 
+            new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",5}},1000, "Mountain",54,7,0, 
             ((farmer => Game1.MasterPlayer.hasOrWillReceiveMail("landslideDone")))),
         
         new InventorySpell(11,"Menu_EnchantRuby","MenuEnchantRuby",4,
-            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 1},{"Tofu.RunescapeSpellbook_RuneFire",3}},10,(i => i is Item item && SpellEffects.redGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantRubyBolts,2,"EnchantBolt"),
+            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 1},{"Tofu.RunescapeSpellbook_RuneFire",3}},1000,(i => i is Item item && SpellEffects.redGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantRubyBolts,2,"EnchantBolt"),
         
         new InventorySpell(12,"Menu_EnchantEmerald","MenuEnchantEmerald",8,
-            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 2},{"Tofu.RunescapeSpellbook_RuneEarth",3}},15,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,2,"EnchantBolt"),
+            new() { {"Tofu.RunescapeSpellbook_RuneCosmic", 2},{"Tofu.RunescapeSpellbook_RuneEarth",3}},1500,(i => i is Item item && SpellEffects.greenGemsEnchants.ContainsKey(item.ItemId)),SpellEffects.EnchantEmeraldBolt,2,"EnchantBolt"),
         
         new BuffSpell(13,"Buff_DarkLure","BuffDarkLure",6,
-            new() { {"Tofu.RunescapeSpellbook_RuneNature", 3},{"Tofu.RunescapeSpellbook_RuneDeath",3},{"Tofu.RunescapeSpellbook_RuneAir",3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("Tofu.RunescapeSpellbook_BuffDark")),SpellEffects.DarkLure, 9,"DarkLure","spell-error.BuffDarkLureActive.text"),
+            new() { {"Tofu.RunescapeSpellbook_RuneNature", 3},{"Tofu.RunescapeSpellbook_RuneDeath",3},{"Tofu.RunescapeSpellbook_RuneAir",3}},1000,(f=> f is Farmer farmer && !farmer.hasBuff("Tofu.RunescapeSpellbook_BuffDark")),SpellEffects.DarkLure, 9,"DarkLure","spell-error.BuffDarkLureActive.text"),
         
         new CombatSpell(14,"Combat_Wind","CombatWind",0,
-            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 1},{"Tofu.RunescapeSpellbook_RuneAir",1}}, 1,40,15,0,Color.White,"WindStrike"),
+            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 1},{"Tofu.RunescapeSpellbook_RuneAir",1}}, 100,40,15,0,Color.White,"WindStrike"),
        
         new CombatSpell(15,"Combat_Water","CombatWater",2,
-            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 2},{"Tofu.RunescapeSpellbook_RuneAir",2},{"Tofu.RunescapeSpellbook_RuneWater",2}},2, 70,16,1,Color.DarkCyan,"WaterBolt"),
+            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 2},{"Tofu.RunescapeSpellbook_RuneAir",2},{"Tofu.RunescapeSpellbook_RuneWater",2}},200, 70,16,1,Color.DarkCyan,"WaterBolt"),
         
         new CombatSpell(16,"Combat_Undead","CombatUndead",4,
-            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 2},{"Tofu.RunescapeSpellbook_RuneAir",2},{"Tofu.RunescapeSpellbook_RuneEarth",2}},4, 60,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
+            new() { {"Tofu.RunescapeSpellbook_RuneChaos", 2},{"Tofu.RunescapeSpellbook_RuneAir",2},{"Tofu.RunescapeSpellbook_RuneEarth",2}},400, 60,13,3,Color.Yellow,"CrumbleUndead",SpellEffects.DealUndeadDamage),
         
         new CombatSpell(17,"Combat_Earth","CombatEarth",6,
-            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneEarth",3}},4, 90,16,1,Color.DarkGreen,"EarthBlast"),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneEarth",3}},400, 90,16,1,Color.DarkGreen,"EarthBlast"),
         
         new CombatSpell(18,"Combat_Fire","CombatFire",8,
-            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 2},{"Tofu.RunescapeSpellbook_RuneAir",5},{"Tofu.RunescapeSpellbook_RuneFire",4}},5, 120,15,2,Color.OrangeRed,"FireWave"),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 2},{"Tofu.RunescapeSpellbook_RuneAir",5},{"Tofu.RunescapeSpellbook_RuneFire",4}},500, 120,15,2,Color.OrangeRed,"FireWave"),
         
         new BuffSpell(19,"Buff_Charge","BuffCharge",7,
-            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 3},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneFire",3}},10,(f=> f is Farmer farmer && !farmer.hasBuff("Tofu.RunescapeSpellbook_BuffCharge")),SpellEffects.Charge, 10,"Charge","spell-error.BuffChargeActive.text"),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 3},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneFire",3}},1000,(f=> f is Farmer farmer && !farmer.hasBuff("Tofu.RunescapeSpellbook_BuffCharge")),SpellEffects.Charge, 10,"Charge","spell-error.BuffChargeActive.text"),
         
         new CombatSpell(20,"Combat_Demonbane","CombatDemonbane",9,
-            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 2},{"Tofu.RunescapeSpellbook_RuneAstral",2},{"Tofu.RunescapeSpellbook_RuneFire",4}},6, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 2},{"Tofu.RunescapeSpellbook_RuneAstral",2},{"Tofu.RunescapeSpellbook_RuneFire",4}},600, 100,13,3,Color.Purple,"CrumbleUndead",SpellEffects.DealDemonbaneDamage),
         
         new CombatSpell(21,"Combat_Blood","CombatBlood",10,
-            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 4},{"Tofu.RunescapeSpellbook_RuneCosmic",3}}, 10,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
+            new() { {"Tofu.RunescapeSpellbook_RuneDeath", 4},{"Tofu.RunescapeSpellbook_RuneCosmic",3}}, 1000,100,15,1,Color.Crimson, "BloodBarrage",SpellEffects.DealVampiricDamage),
         
         new InventorySpell(22,"Menu_Plank","MenuPlank",3,
-            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneCosmic",1}},10,
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneCosmic",1}},1000,
             (i => i is Item item && (item.itemId.Value == "388" || item.itemId.Value == "709" || 
                                      (CraftingRecipe.craftingRecipes.ContainsKey(item.Name) 
                                       && CraftingRecipe.craftingRecipes[item.Name].Split(' ').ToList() is List<string> recipes 
@@ -402,11 +402,12 @@ public static class ModAssets
             ,SpellEffects.PlankMake, 3,"Degrime"),
         
         new InventorySpell(23,"Menu_LowAlch","MenuLowAlch",5,
-            new() { {"Tofu.RunescapeSpellbook_RuneNature", 1},{"Tofu.RunescapeSpellbook_RuneFire",3}},10,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
+            new() { {"Tofu.RunescapeSpellbook_RuneNature", 1},{"Tofu.RunescapeSpellbook_RuneFire",3}},1000,(i=>i is Item item && item.canBeShipped() && item.salePrice(false) > 0 && item.Category != -429 && item.Category != -430 && item.Category != -431),
             SpellEffects.LowAlchemy,0,"HighAlch"),
 
     };
     
+    /*
     public static readonly List<PerkData> perks = new()
     {
         new PerkData(0,"Sapphire","Sapphire"),
@@ -414,6 +415,7 @@ public static class ModAssets
         new PerkData(2,"Ruby","Ruby"),
         new PerkData(3,"Dragonstone","Dragonstone")
     };
+    */
 
     public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new()
     {
@@ -709,11 +711,6 @@ public static class ModAssets
         new CustomBuff("Tofu.RunescapeSpellbook_BuffHunters", "Hunters", 300_000, 2),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffBattlemage", "Battlemage", 540_000, 3),
     };
-    public static bool CheckHasPerkByName(Farmer farmer,string perkName)
-    {
-        PerkData? perk = perks.FirstOrDefault(x => x.perkName == perkName);
-        return perk == null ? false : perk.HasPerk(farmer);
-    }
     
     private static MethodInfo cachedBroadcastMethod;
     private static MethodInfo cachedGlobalChatMethod;
@@ -721,6 +718,14 @@ public static class ModAssets
     {
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
         animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
+        
+        LevelsHandler.LoadSpellTextures(
+            new Dictionary<string, Texture2D>()
+            {
+                { "SkillIcon",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\magicsmall")},
+                { "BigIcon",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\magicbig")},
+                { "ProfTemp",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\tmpicon")},
+            });
         
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
         cachedBroadcastMethod = multiplayer.GetType().GetMethod("broadcastSprites", new[] { typeof(GameLocation), typeof(TemporaryAnimatedSprite[]) });
@@ -747,7 +752,7 @@ public static class ModAssets
 
     public static void ApplyMassTranslations()
     {
-        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, staffWeapons, machineItems, perks,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs  }.SelectMany(x => x);
+        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, staffWeapons, machineItems,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs  }.SelectMany(x => x);
         foreach (var obj in translationTargets)
         {
             obj.ApplyTranslations();
@@ -776,19 +781,8 @@ public static class ModAssets
         
         return farmers;
     }
-    
     public static void SetupModDataKeys(Farmer farmerInstance)
     {
-        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicLevel"))
-        {
-            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicLevel", "0");
-        }
-
-        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicExp"))
-        {
-            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicExp","0");
-        }
-        
         if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicProf1"))
         {
             farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicProf1","-1");
@@ -833,7 +827,6 @@ public static class ModAssets
             farmer.modData[dataKey] = newValue;
         }
     }
-
     public static int GetBonusHealth(Farmer farmer)
     {
         if (farmer.modData.TryGetValue("Tofu.RunescapeSpellbook_BonusHealth", out string parseString))
@@ -873,139 +866,6 @@ public static class ModAssets
         {
             farmer.modData.Remove("Tofu.RunescapeSpellbook_BonusHealth");
         }
-    }
-    public static bool HasMagic(Farmer farmer)
-    {
-        if (farmer.mailReceived.Contains("Tofu.RunescapeSpellbook_HasUnlockedMagic"))
-        {
-            return true;
-        }
-        
-        if (farmer.eventsSeen.Contains("Tofu.RunescapeSpellbook_Event0"))
-        {
-            farmer.mailReceived.Add("Tofu.RunescapeSpellbook_HasUnlockedMagic");
-            return true;
-        }
-        return false;
-    }
-    public static int GetFarmerMagicLevel(Farmer farmer)
-    {
-        int level = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicLevel"),out level);
-        return level;
-    }
-    
-    public static double GetFarmerExperience(Farmer farmer)
-    {
-        double experience = -1;
-        double.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp"),out experience);
-        return experience;
-    }
-
-    public static void IncrementMagicExperience(Farmer farmer, double gainedExperience, bool shouldUseMultiplier = true)
-    {
-        double experience = GetFarmerExperience(farmer);
-        
-        if (experience != -1 && experience <= Farmer.getBaseExperienceForLevel(10)) //If our exp should still be tracked then increment it
-        {
-            int expMultiplier = 100;
-            int.TryParse(TryGetModVariable(Game1.player, "Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier"),
-                out expMultiplier);
-            double multiplier = shouldUseMultiplier ? expMultiplier / 100.0 : 1.0;
-            double newTotalExperience = (experience + (gainedExperience * multiplier));
-            
-            TrySetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicExp",Math.Round(newTotalExperience,4).ToString());
-            int currentLevel = GetFarmerMagicLevel(farmer);
-            int expTilNextLevel = Farmer.getBaseExperienceForLevel(currentLevel + 1);
-
-            int messageTier = 0;
-            if (newTotalExperience >= expTilNextLevel)
-            {
-                while (currentLevel + 1 <= 10 && newTotalExperience >= expTilNextLevel)
-                {
-                    currentLevel++;
-                    expTilNextLevel = Farmer.getBaseExperienceForLevel(currentLevel + 1);
-                    
-                    if (currentLevel > 0 && currentLevel % 5 == 0)
-                    {
-                        messageTier = 2;
-                    }
-                    else
-                    {
-                        messageTier = messageTier != 2 ? 1 : 0;
-                    }
-                }
-
-                TrySetModVariable(farmer, "Tofu.RunescapeSpellbook_MagicLevel", (currentLevel).ToString());
-                Game1.player.playNearbySoundLocal("RunescapeSpellbook.MagicLevel");
-            }
-            
-            switch (messageTier)
-            {
-                case 1:
-                    Game1.addHUDMessage(new HUDMessage(KeyTranslator.GetTranslation("ui.LevelUpNormal.text"), 2));
-                    break;
-                case 2:
-                    Game1.addHUDMessage(new HUDMessage(KeyTranslator.GetTranslation("ui.LevelUpProfession.text"), 2));
-                    break;
-            }
-        }
-    }
-    public static List<int> PerksAssigned(Farmer farmer)
-    {
-        List<int> perkIDs = new();
-        int id1 = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf1"),out id1);
-        if (id1 != -1)
-        {
-            perkIDs.Add(id1);
-        }
-        
-        int id2 = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf2"),out id2);
-        if (id2 != -1)
-        {
-            perkIDs.Add(id2);
-        }
-        
-        return perkIDs;
-    }
-
-    public static bool HasPerk(Farmer farmer, int perkID)
-    {
-        int id1 = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf1"),out id1);
-        int id2 = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf2"),out id2);
-        
-        return (perkID == id1 || perkID == id2);
-    }
-
-    public static bool GrantPerk(Farmer farmer, int perkID)
-    {
-        int id1 = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf1"),out id1);
-        int id2 = -1;
-        int.TryParse(TryGetModVariable(farmer,"Tofu.RunescapeSpellbook_MagicProf2"),out id2);
-
-        if (id1 == perkID || id2 == perkID)
-        {
-            return false;
-        }
-        
-        bool successfulAssignment = false;
-        if (id1 == -1)
-        {
-            TrySetModVariable(farmer, "Tofu.RunescapeSpellbook_MagicProf1", perkID.ToString());
-            successfulAssignment = true;
-        }
-        else if (id2 == -1)
-        {
-            TrySetModVariable(farmer, "Tofu.RunescapeSpellbook_MagicProf2", perkID.ToString());
-            successfulAssignment = true;
-        }
-        
-        return successfulAssignment;
     }
 }
 public sealed class ModConfig

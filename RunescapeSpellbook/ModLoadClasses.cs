@@ -712,37 +712,6 @@ public class Gobcast : LoadableTV
     public Gobcast(int day, Season season, int firstYear, List<string> contents) :
         base(channelID,day, season, firstYear, contents) { }
 }
-public class PerkData : ITranslatable
-{
-    public int perkID;
-    public string perkName;
-    public string translationKey;
-    public string perkDisplayName;
-    public string perkDescription;
-    public string perkDescriptionLine2;
-    public PerkData(int perkID, string perkName, string translationKey)
-    {
-        this.perkID = perkID;
-        this.perkName = perkName;
-        this.translationKey = translationKey;
-        this.perkDisplayName = translationKey;
-        this.perkDescription = translationKey;
-        this.perkDescriptionLine2 = translationKey;
-    }
-
-    public virtual void ApplyTranslations()
-    {
-        this.perkDisplayName = KeyTranslator.GetTranslation($"perk.{this.translationKey}.display-name");
-        this.perkDescription = KeyTranslator.GetTranslation($"perk.{this.translationKey}.description-1");
-        this.perkDescriptionLine2 = KeyTranslator.GetTranslation($"perk.{this.translationKey}.description-2");
-    }
-
-    public bool HasPerk(Farmer farmer)
-    {
-        return ModAssets.HasPerk(farmer, this.perkID);
-    }
-}
-
 public class ShopListings
 {
     public readonly ShopItemData itemData;

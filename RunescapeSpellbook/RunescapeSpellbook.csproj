@@ -19,9 +19,19 @@
     <ItemGroup>
       <EmbeddedResource Remove="Content\**" />
     </ItemGroup>
+	
+  <ItemGroup>
+	<Reference Include="SpaceCore" private="false" >
+	  <HintPath>$(GamePath)\Mods\SpaceCore\SpaceCore.dll</HintPath>
+	</Reference>
+  </ItemGroup>
 
     <ItemGroup>
       <None Remove="Content\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\SkillIcons\" />
     </ItemGroup>
 
 </Project>

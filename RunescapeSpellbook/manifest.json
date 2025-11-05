@@ -1,10 +1,23 @@
 {
   "Name": "RunescapeSpellbook",
   "Author": "Tofu",
-  "Version": "1.0.3",
+  "Version": "1.1.0",
   "Description": "Runescape based spellbook mod",
   "UniqueID": "Tofu.RunescapeSpellbook",
   "EntryDll": "RunescapeSpellbook.dll",
   "MinimumApiVersion": "4.0.0",
-  "UpdateKeys": ["Nexus:37781"]
+  "UpdateKeys": ["Nexus:37781"],
+  "Dependencies": [
+    {
+      "UniqueID": "spacechase0.SpaceCore",
+      "IsRequired": true
+    },
+    {
+      "UniqueID": "spacechase0.GenericModConfigMenu",
+      "IsRequired": false
+    },
+    {
+      "UniqueID": "leclair.bettergamemenu",
+      "IsRequired": false
+    }]
 }
