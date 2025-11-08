@@ -52,6 +52,16 @@ public class RunesObjects : ModLoadObjects
     }
     
 }
+public class RunesCurrency : ModLoadObjects
+{
+    public VirtualCurrencyHandler handler;
+    public RunesCurrency(string id,string translationKey, int spriteIndex,string tiedRuneObject) : 
+        base(id,translationKey,spriteIndex,null,"Basic",0)
+    {
+        handler = new VirtualCurrencyHandler(id,tiedRuneObject);
+    }
+    
+}
 public class SlingshotItem : ModLoadObjects
 {
     public int extraDamage = 0;

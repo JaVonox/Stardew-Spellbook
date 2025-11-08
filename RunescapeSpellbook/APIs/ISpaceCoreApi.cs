@@ -30,5 +30,9 @@ namespace SpaceShared.APIs
         Item GetItemInEquipmentSlot(Farmer farmer, string globalId);
         void SetItemInEquipmentSlot(Farmer farmer, string globalId, Item item);
         bool CanItemGoInEquipmentSlot(string globalId, Item item);
+
+        public List<string> GetVirtualCurrencyList();
+        int GetVirtualCurrencyAmount(Farmer who, string currency);
+        void AddToVirtualCurrency(Farmer who, string currency, int amount);
     }
 }

@@ -12,7 +12,6 @@ public delegate void CombatExtraMethod(Farmer caster, NPC target, ref int damage
 public class Spell : ITranslatable
 {
     public int id;
-    public string name;
     public string displayName;
     public string description;
     public string translationKey;
@@ -28,7 +27,6 @@ public class Spell : ITranslatable
     public Spell(int id, string name, string translationKey, int magicLevelRequirement, Dictionary<string,int> requiredItems, double expReward, int spellAnimOffset, string audioID = "HighAlch")
     {
         this.id = id;
-        this.name = name;
         this.displayName = translationKey;
         this.description = translationKey;
         this.translationKey = translationKey;

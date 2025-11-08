@@ -16,7 +16,7 @@ public static class LevelsHandler
         SpaceCoreApi = api;
     }
 
-    public static void LoadSpellTextures(Dictionary<string, Texture2D> newSkillTextures)
+    public static void LoadSkillTextures(Dictionary<string, Texture2D> newSkillTextures)
     {
         skillTextures = newSkillTextures;
     }
@@ -96,7 +96,7 @@ public static class LevelsHandler
     
     public class MagicSkill : Skills.Skill
     {
-        public static Dictionary<string, Profession> professionsSet;
+        public static Dictionary<string, MagicProfession> professionsSet;
         public MagicSkill() : base("Tofu.RunescapeSpellbook.MagicSkill")
         {
             this.Icon = LevelsHandler.skillTextures["BigIcon"];
@@ -105,12 +105,12 @@ public static class LevelsHandler
             this.ExperienceCurve = new[] { 10000, 38000, 77000, 130000, 215000, 330000, 400000, 690000, 1000000, 1500000 };
             this.ExperienceBarColor = new Microsoft.Xna.Framework.Color(27, 6, 146);
 
-            professionsSet = new Dictionary<string, Profession>()
+            professionsSet = new Dictionary<string, MagicProfession>()
             {
-                {"magicSapphire",new MagicProfession(this, "magicSapphire", "Sapphire", "Temp")},
-                {"magicRuby",new MagicProfession(this, "magicRuby", "Ruby", "Temp")},
-                {"magicEmerald",new MagicProfession(this, "magicEmerald", "Emerald", "Temp")},
-                {"magicDragon",new MagicProfession(this, "magicDragon", "Dragon", "Temp")}
+                {"magicSapphire",new MagicProfession(this, "magicSapphire", "Sapphire")},
+                {"magicRuby",new MagicProfession(this, "magicRuby", "Ruby")},
+                {"magicEmerald",new MagicProfession(this, "magicEmerald", "Emerald")},
+                {"magicDragon",new MagicProfession(this, "magicDragon", "Dragonstone")}
             };
 
             foreach (Profession prof in professionsSet.Values)
@@ -118,65 +118,30 @@ public static class LevelsHandler
                 this.Professions.Add(prof);
             }
             
-            this.ProfessionsForLevels.Add(new ProfessionPair(5,professionsSet["magicSapphire"],professionsSet["magicRuby"]));
-            this.ProfessionsForLevels.Add(new ProfessionPair(10,professionsSet["magicEmerald"],professionsSet["magicDragon"]));
+            this.ProfessionsForLevels.Add(new ProfessionPair(5,professionsSet["magicEmerald"],professionsSet["magicRuby"]));
+            this.ProfessionsForLevels.Add(new ProfessionPair(10,professionsSet["magicSapphire"],professionsSet["magicDragon"]));
+        }
+
+        public override List<string> GetExtraLevelUpInfo(int level)
+        {
+            return new List<string>() { "Congratulations, you just advanced a Magic level.", "You've unlocked access to new spells!" }; //TODO translation
         }
         
         //TODO add level up effects (sound etc.)
     
-        public override string GetName() => "Runic Magic";
+        public override string GetName() => "Runic Magic"; //TODO translation
     }
 
     public class MagicProfession : Skills.Skill.Profession
     {
-        private string name;
+        public override string GetName() => KeyTranslator.GetTranslation($"perk.{this.translationKey}.display-name");
+        public override string GetDescription() => KeyTranslator.GetTranslation($"perk.{this.translationKey}.description-1");
 
-        public override string GetName() => name;
-        
-        private string description;
-        public override string GetDescription() => description;
-        
-        public MagicProfession(Skills.Skill skill, string id, string newName, string newDesc) : base(skill,id)
+        private string translationKey;
+        public MagicProfession(Skills.Skill skill, string id, string translationKey) : base(skill,id)
         {
-            name = newName;
-            description = newDesc;
-            base.Icon = LevelsHandler.skillTextures["ProfTemp"];
+            this.translationKey = translationKey;
+            base.Icon = LevelsHandler.skillTextures[translationKey];
         }
     }
-    
-    //TODO add translations
-    
-    /*
-     * 
-public class PerkData : ITranslatable
-{
-    public int perkID;
-    public string perkName;
-    public string translationKey;
-    public string perkDisplayName;
-    public string perkDescription;
-    public string perkDescriptionLine2;
-    public PerkData(int perkID, string perkName, string translationKey)
-    {
-        this.perkID = perkID;
-        this.perkName = perkName;
-        this.translationKey = translationKey;
-        this.perkDisplayName = translationKey;
-        this.perkDescription = translationKey;
-        this.perkDescriptionLine2 = translationKey;
-    }
-
-    public virtual void ApplyTranslations()
-    {
-        this.perkDisplayName = KeyTranslator.GetTranslation($"perk.{this.translationKey}.display-name");
-        this.perkDescription = KeyTranslator.GetTranslation($"perk.{this.translationKey}.description-1");
-        this.perkDescriptionLine2 = KeyTranslator.GetTranslation($"perk.{this.translationKey}.description-2");
-    }
-
-    public bool HasPerk(Farmer farmer)
-    {
-        return LevelsHandler.HasPerk(farmer, this.perkID);
-    }
-}
-     */
 }

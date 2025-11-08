@@ -8,6 +8,7 @@ using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using SpaceCore;
+using SpaceCore.VanillaAssetExpansion;
 using SpaceShared.APIs;
 using StardewValley.Buffs;
 using StardewValley.Extensions;
@@ -89,6 +90,11 @@ namespace RunescapeSpellbook
         private void OnNewDay(object? sender, DayStartedEventArgs e)
         {
             ModAssets.ClearBonusHealth(Game1.player);
+
+            foreach (RunesCurrency currency in ModAssets.modItems.Where(x=>x.Value is RunesCurrency).Select(y=>y.Value as RunesCurrency))
+            {
+                currency.handler.TruncateToDailyCap(Game1.player);
+            }
         }
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -171,8 +177,8 @@ namespace RunescapeSpellbook
             
             ISpaceCoreApi SpaceCoreApi = ModEntry.Instance.Helper.ModRegistry.GetApi<ISpaceCoreApi>("spacechase0.SpaceCore");
             Skills.RegisterSkill(new LevelsHandler.MagicSkill());
-            Monitor.Log($"{SpaceCoreApi.GetCustomSkills()[0]}",LogLevel.Warn);
             LevelsHandler.Load(SpaceCoreApi);
+            VirtualCurrencyHandler.Load(SpaceCoreApi);
             
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
@@ -555,7 +561,19 @@ namespace RunescapeSpellbook
                         weaponDict.Add(newWeapon.id, newWeapon);
                     }
                 });
-
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("spacechase0.SpaceCore/VirtualCurrencyData"))
+            {
+                e.Edit(asset =>
+                    {
+                        var currenciesSet = asset.AsDictionary<string, SpaceCore.VanillaAssetExpansion.VirtualCurrencyData>().Data;
+                        foreach (ModLoadObjects essenceCurrency in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
+                        {
+                            currenciesSet.Add(essenceCurrency.Name,new VirtualCurrencyData());
+                        }
+                    }
+                );
             }
         }
         
@@ -1718,7 +1736,7 @@ namespace RunescapeSpellbook
                     item.Stack = 255;
                     Game1.player.addItemToInventory(item);
                 }
-            
+
                 this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedAmmo.text"),LogLevel.Info);
             }
             private void GrantStaffs(string command, string[] args)
@@ -1751,6 +1769,24 @@ namespace RunescapeSpellbook
             private void DebugCommand(string command, string[] args)
             {
                 if (HasNoWorldContextReady()){return;}
+
+                Point pos = Game1.player.GetBoundingBox().Center;
+                foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency && x.Value.SpriteIndex > 50).Select(y=>y.Value))
+                {
+                    pos.X -= 100; 
+                    StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{item.id}");
+                    Game1.createItemDebris(spawnObj, new Vector2(pos.X, pos.Y), 0);
+                }
+                
+                Instance.Monitor.Log("Spawned Debris",LogLevel.Info);
+                /*
+                foreach (string x in SpaceCoreApi.GetVirtualCurrencyList())
+                {
+                    Instance.Monitor.Log($"{x} : {SpaceCoreApi.GetVirtualCurrencyAmount(Game1.player,x)}",LogLevel.Warn);
+                }
+                
+                SpaceCoreApi.AddToVirtualCurrency(Game1.player, "Tofu.RunescapeSpellbook_EssAir", -10);
+                */
             }
         
             private void DebugPosition(string command, string[] args)

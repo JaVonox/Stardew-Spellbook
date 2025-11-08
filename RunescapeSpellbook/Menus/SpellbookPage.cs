@@ -15,8 +15,6 @@ public class SpellbookPage : IClickableMenu
     private Texture2D runesTextures;
 
     private const int spellsPerRow = 6;
-
-    private ClickableTextureComponent magicIcon;
     
     private bool hasMagic = false;
     public SpellbookPage(int x, int y, int width, int height)
@@ -53,11 +51,6 @@ public class SpellbookPage : IClickableMenu
                 spellsPlaced++;
                 
             }
-
-            magicIcon = new ClickableTextureComponent(new Rectangle(xPositionOnScreen + 70 + ((spellsPerRow) * 90) + 30,
-                    yPositionOnScreen + IClickableMenu.borderWidth + IClickableMenu.spaceToClearTopBorder - 14, 80, 80),
-                ModAssets.extraTextures, new Rectangle(160, 105, 80, 80), 1f, true);
-            magicIcon.myID = 4290;
 
             magicLevel = LevelsHandler.GetFarmerMagicLevel(Game1.player);
             
@@ -250,13 +243,6 @@ public class SpellbookPage : IClickableMenu
                     new Rectangle(160, 25, ModAssets.spellsSize, ModAssets.spellsSize), Color.White);
             }
         }
-
-        //Magic Level
-        magicIcon.draw(b);
-        string levelText = KeyTranslator.GetTranslation("ui.LevelDisplay.text",new {MagicLevel = magicLevel});
-        int spacing = (int)(magicIcon.bounds.Width - Game1.dialogueFont.MeasureString(levelText).X) / 2;
-        b.DrawString(Game1.dialogueFont, levelText,
-            new Vector2(magicIcon.bounds.X + spacing, magicIcon.bounds.Y + 90), Game1.textColor);
 
         //Needs to be at end to prevent overlap
         if (hoverSpellID != -1)

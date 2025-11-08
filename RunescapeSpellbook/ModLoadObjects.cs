@@ -23,27 +23,47 @@ public static class ModAssets
     
     public static Dictionary<string,ModLoadObjects> modItems = new(){
         {"Tofu.RunescapeSpellbook_RuneSpellbook",new RunesObjects("Tofu.RunescapeSpellbook_RuneSpellbook","RuneSpellbook",0,-999)},
+        
         {"Tofu.RunescapeSpellbook_RuneAir",new RunesObjects("Tofu.RunescapeSpellbook_RuneAir","RuneAir",1,-429,
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssAir",new RunesCurrency("Tofu.RunescapeSpellbook_EssAir","RuneSpellbook",54,"Tofu.RunescapeSpellbook_RuneAir")},
+        
         {"Tofu.RunescapeSpellbook_RuneWater",new RunesObjects("Tofu.RunescapeSpellbook_RuneWater","RuneWater",2,-429,
             new(){{"Emily",PrefType.Neutral},{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssWater",new RunesCurrency("Tofu.RunescapeSpellbook_EssWater","RuneSpellbook",53,"Tofu.RunescapeSpellbook_RuneWater")},
+
         {"Tofu.RunescapeSpellbook_RuneFire",new RunesObjects("Tofu.RunescapeSpellbook_RuneFire","RuneFire",3,-429,
             new(){{"Emily",PrefType.Neutral},{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssFire",new RunesCurrency("Tofu.RunescapeSpellbook_EssFire","RuneSpellbook",52,"Tofu.RunescapeSpellbook_RuneFire")},
+        
         {"Tofu.RunescapeSpellbook_RuneEarth",new RunesObjects("Tofu.RunescapeSpellbook_RuneEarth","RuneEarth",4,-429,
             new(){{"Emily",PrefType.Neutral},{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssEarth",new RunesCurrency("Tofu.RunescapeSpellbook_EssEarth","RuneSpellbook",55,"Tofu.RunescapeSpellbook_RuneEarth")},
+        
         {"Tofu.RunescapeSpellbook_RuneLaw",new RunesObjects("Tofu.RunescapeSpellbook_RuneLaw","RuneLaw",5,-431,
             new(){{"Emily",PrefType.Neutral},{"Wizard",PrefType.Like}})},
+        {"Tofu.RunescapeSpellbook_EssLaw",new RunesCurrency("Tofu.RunescapeSpellbook_EssLaw","RuneSpellbook",5,"Tofu.RunescapeSpellbook_RuneLaw")},
+        
         {"Tofu.RunescapeSpellbook_RuneNature",new RunesObjects("Tofu.RunescapeSpellbook_RuneNature","RuneNature",6,-431,
             new(){{"Emily",PrefType.Neutral},{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssNature",new RunesCurrency("Tofu.RunescapeSpellbook_EssNature","RuneSpellbook",6,"Tofu.RunescapeSpellbook_RuneNature")},
+
         {"Tofu.RunescapeSpellbook_RuneCosmic",new RunesObjects("Tofu.RunescapeSpellbook_RuneCosmic","RuneCosmic",7,-431,
             new(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssCosmic",new RunesCurrency("Tofu.RunescapeSpellbook_EssCosmic","RuneSpellbook",7,"Tofu.RunescapeSpellbook_RuneCosmic")},
+
         {"Tofu.RunescapeSpellbook_RuneAstral",new RunesObjects("Tofu.RunescapeSpellbook_RuneAstral","RuneAstral",8,-431,
             new(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssAstral",new RunesCurrency("Tofu.RunescapeSpellbook_EssAstral","RuneSpellbook",8,"Tofu.RunescapeSpellbook_RuneAstral")},
+        
         {"Tofu.RunescapeSpellbook_RuneChaos",new RunesObjects("Tofu.RunescapeSpellbook_RuneChaos","RuneChaos",9,-430,
             new(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
+        {"Tofu.RunescapeSpellbook_EssChaos",new RunesCurrency("Tofu.RunescapeSpellbook_EssChaos","RuneSpellbook",9,"Tofu.RunescapeSpellbook_RuneChaos")},
+
         {"Tofu.RunescapeSpellbook_RuneDeath",new RunesObjects("Tofu.RunescapeSpellbook_RuneDeath","RuneDeath",10,-430,
             new(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
-
+        {"Tofu.RunescapeSpellbook_EssDeath",new RunesCurrency("Tofu.RunescapeSpellbook_EssDeath","RuneSpellbook",10,"Tofu.RunescapeSpellbook_RuneDeath")},
+        
         {"Tofu.RunescapeSpellbook_AmmoFire",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoFire","AmmoFire",30,15,2)},
         {"Tofu.RunescapeSpellbook_AmmoEarth",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoEarth","AmmoEarth",31,25,1,true)},
         
@@ -719,12 +739,15 @@ public static class ModAssets
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
         animTextures = helper.ModContent.Load<Texture2D>("assets\\spellanimations"); 
         
-        LevelsHandler.LoadSpellTextures(
+        LevelsHandler.LoadSkillTextures(
             new Dictionary<string, Texture2D>()
             {
                 { "SkillIcon",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\magicsmall")},
                 { "BigIcon",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\magicbig")},
-                { "ProfTemp",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\tmpicon")},
+                { "Sapphire",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\perksapphire")},
+                { "Ruby",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\perkruby")},
+                { "Emerald",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\perkemerald")},
+                { "Dragonstone",helper.ModContent.Load<Texture2D>("assets\\Skilldata\\perkdragon")},
             });
         
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
@@ -752,7 +775,7 @@ public static class ModAssets
 
     public static void ApplyMassTranslations()
     {
-        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, staffWeapons, machineItems,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs  }.SelectMany(x => x);
+        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, staffWeapons ,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs  }.SelectMany(x => x);
         foreach (var obj in translationTargets)
         {
             obj.ApplyTranslations();
@@ -783,16 +806,6 @@ public static class ModAssets
     }
     public static void SetupModDataKeys(Farmer farmerInstance)
     {
-        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicProf1"))
-        {
-            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicProf1","-1");
-        }
-        
-        if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicProf2"))
-        {
-            farmerInstance.modData.Add("Tofu.RunescapeSpellbook_MagicProf2","-1");
-        }
-        
         if (!farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier"))
         {
             farmerInstance.modData.Add("Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier",GetSpellBaseExpMultiplier().ToString());
