@@ -1771,22 +1771,15 @@ namespace RunescapeSpellbook
                 if (HasNoWorldContextReady()){return;}
 
                 Point pos = Game1.player.GetBoundingBox().Center;
+                pos.X -= 100;
                 foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency && x.Value.SpriteIndex > 50).Select(y=>y.Value))
                 {
                     pos.X -= 100; 
                     StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{item.id}");
-                    Game1.createItemDebris(spawnObj, new Vector2(pos.X, pos.Y), 0);
+                    Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2()));
                 }
                 
-                Instance.Monitor.Log("Spawned Debris",LogLevel.Info);
-                /*
-                foreach (string x in SpaceCoreApi.GetVirtualCurrencyList())
-                {
-                    Instance.Monitor.Log($"{x} : {SpaceCoreApi.GetVirtualCurrencyAmount(Game1.player,x)}",LogLevel.Warn);
-                }
-                
-                SpaceCoreApi.AddToVirtualCurrency(Game1.player, "Tofu.RunescapeSpellbook_EssAir", -10);
-                */
+                Instance.Monitor.Log("Spawned Floats",LogLevel.Info);
             }
         
             private void DebugPosition(string command, string[] args)
