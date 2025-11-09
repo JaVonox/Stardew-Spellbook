@@ -26,43 +26,43 @@ public static class ModAssets
         
         {"Tofu.RunescapeSpellbook_RuneAir",new RunesObjects("Tofu.RunescapeSpellbook_RuneAir","RuneAir",1,-429,
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssAir",new RunesCurrency("Tofu.RunescapeSpellbook_EssAir","RuneSpellbook",54,"Tofu.RunescapeSpellbook_RuneAir")},
+        {"Tofu.RunescapeSpellbook_EssAir",new RunesCurrency("Tofu.RunescapeSpellbook_EssAir","RuneAir",54,"Tofu.RunescapeSpellbook_RuneAir", Color.Yellow)},
         
         {"Tofu.RunescapeSpellbook_RuneWater",new RunesObjects("Tofu.RunescapeSpellbook_RuneWater","RuneWater",2,-429,
             new(){{"Emily",PrefType.Neutral},{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssWater",new RunesCurrency("Tofu.RunescapeSpellbook_EssWater","RuneSpellbook",53,"Tofu.RunescapeSpellbook_RuneWater")},
+        {"Tofu.RunescapeSpellbook_EssWater",new RunesCurrency("Tofu.RunescapeSpellbook_EssWater","RuneWater",53,"Tofu.RunescapeSpellbook_RuneWater", Color.Blue)},
 
         {"Tofu.RunescapeSpellbook_RuneFire",new RunesObjects("Tofu.RunescapeSpellbook_RuneFire","RuneFire",3,-429,
             new(){{"Emily",PrefType.Neutral},{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssFire",new RunesCurrency("Tofu.RunescapeSpellbook_EssFire","RuneSpellbook",52,"Tofu.RunescapeSpellbook_RuneFire")},
+        {"Tofu.RunescapeSpellbook_EssFire",new RunesCurrency("Tofu.RunescapeSpellbook_EssFire","RuneFire",52,"Tofu.RunescapeSpellbook_RuneFire", Color.Red)},
         
         {"Tofu.RunescapeSpellbook_RuneEarth",new RunesObjects("Tofu.RunescapeSpellbook_RuneEarth","RuneEarth",4,-429,
             new(){{"Emily",PrefType.Neutral},{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssEarth",new RunesCurrency("Tofu.RunescapeSpellbook_EssEarth","RuneSpellbook",55,"Tofu.RunescapeSpellbook_RuneEarth")},
+        {"Tofu.RunescapeSpellbook_EssEarth",new RunesCurrency("Tofu.RunescapeSpellbook_EssEarth","RuneEarth",55,"Tofu.RunescapeSpellbook_RuneEarth", Color.Green)},
         
         {"Tofu.RunescapeSpellbook_RuneLaw",new RunesObjects("Tofu.RunescapeSpellbook_RuneLaw","RuneLaw",5,-431,
             new(){{"Emily",PrefType.Neutral},{"Wizard",PrefType.Like}})},
-        {"Tofu.RunescapeSpellbook_EssLaw",new RunesCurrency("Tofu.RunescapeSpellbook_EssLaw","RuneSpellbook",5,"Tofu.RunescapeSpellbook_RuneLaw")},
+        {"Tofu.RunescapeSpellbook_EssLaw",new RunesCurrency("Tofu.RunescapeSpellbook_EssLaw","RuneLaw",5,"Tofu.RunescapeSpellbook_RuneLaw", Color.DarkBlue)},
         
         {"Tofu.RunescapeSpellbook_RuneNature",new RunesObjects("Tofu.RunescapeSpellbook_RuneNature","RuneNature",6,-431,
             new(){{"Emily",PrefType.Neutral},{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssNature",new RunesCurrency("Tofu.RunescapeSpellbook_EssNature","RuneSpellbook",6,"Tofu.RunescapeSpellbook_RuneNature")},
+        {"Tofu.RunescapeSpellbook_EssNature",new RunesCurrency("Tofu.RunescapeSpellbook_EssNature","RuneNature",6,"Tofu.RunescapeSpellbook_RuneNature", Color.ForestGreen)},
 
         {"Tofu.RunescapeSpellbook_RuneCosmic",new RunesObjects("Tofu.RunescapeSpellbook_RuneCosmic","RuneCosmic",7,-431,
             new(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssCosmic",new RunesCurrency("Tofu.RunescapeSpellbook_EssCosmic","RuneSpellbook",7,"Tofu.RunescapeSpellbook_RuneCosmic")},
+        {"Tofu.RunescapeSpellbook_EssCosmic",new RunesCurrency("Tofu.RunescapeSpellbook_EssCosmic","RuneCosmic",7,"Tofu.RunescapeSpellbook_RuneCosmic", Color.LightYellow)},
 
         {"Tofu.RunescapeSpellbook_RuneAstral",new RunesObjects("Tofu.RunescapeSpellbook_RuneAstral","RuneAstral",8,-431,
             new(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssAstral",new RunesCurrency("Tofu.RunescapeSpellbook_EssAstral","RuneSpellbook",8,"Tofu.RunescapeSpellbook_RuneAstral")},
+        {"Tofu.RunescapeSpellbook_EssAstral",new RunesCurrency("Tofu.RunescapeSpellbook_EssAstral","RuneAstral",8,"Tofu.RunescapeSpellbook_RuneAstral", Color.Pink)},
         
         {"Tofu.RunescapeSpellbook_RuneChaos",new RunesObjects("Tofu.RunescapeSpellbook_RuneChaos","RuneChaos",9,-430,
             new(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssChaos",new RunesCurrency("Tofu.RunescapeSpellbook_EssChaos","RuneSpellbook",9,"Tofu.RunescapeSpellbook_RuneChaos")},
+        {"Tofu.RunescapeSpellbook_EssChaos",new RunesCurrency("Tofu.RunescapeSpellbook_EssChaos","RuneChaos",9,"Tofu.RunescapeSpellbook_RuneChaos", Color.Orange)},
 
         {"Tofu.RunescapeSpellbook_RuneDeath",new RunesObjects("Tofu.RunescapeSpellbook_RuneDeath","RuneDeath",10,-430,
             new(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssDeath",new RunesCurrency("Tofu.RunescapeSpellbook_EssDeath","RuneSpellbook",10,"Tofu.RunescapeSpellbook_RuneDeath")},
+        {"Tofu.RunescapeSpellbook_EssDeath",new RunesCurrency("Tofu.RunescapeSpellbook_EssDeath","RuneDeath",10,"Tofu.RunescapeSpellbook_RuneDeath", Color.DarkGray)},
         
         {"Tofu.RunescapeSpellbook_AmmoFire",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoFire","AmmoFire",30,15,2)},
         {"Tofu.RunescapeSpellbook_AmmoEarth",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoEarth","AmmoEarth",31,25,1,true)},
@@ -426,181 +426,6 @@ public static class ModAssets
             SpellEffects.LowAlchemy,0,"HighAlch"),
 
     };
-    
-    /*
-    public static readonly List<PerkData> perks = new()
-    {
-        new PerkData(0,"Sapphire","Sapphire"),
-        new PerkData(1,"Emerald","Emerald"),
-        new PerkData(2,"Ruby","Ruby"),
-        new PerkData(3,"Dragonstone","Dragonstone")
-    };
-    */
-
-    public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new()
-    {
-        //Caves (Basic)
-        { "Big Slime", new(){ 
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.08f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",2,0.1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.02f),
-        } },
-        { "Prismatic Slime", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",4,0.9f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",5,0.9f),
-        } },
-        { "Green Slime", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.08f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.02f),
-        } },
-        { "Fly", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.05f),
-        } },
-        { "Rock Crab", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.3f),
-        } },
-        { "Grub", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",2,0.1f),
-        } },
-        { "Bug", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.08f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
-        } },
-        { "Bat", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.15f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.25f),
-        } },
-        { "Stone Golem", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.04f),
-        } },
-        { "Dust Spirit", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.04f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",1,0.02f),
-        } },
-        { "Frost Bat", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.05f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.15f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.3f),
-        } },
-        { "Ghost", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.35f),
-        } },
-        { "Frost Jelly", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
-        } },
-        { "Skeleton", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",1,0.02f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.05f),
-            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.08f),
-        } },
-        { "Lava Bat", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.15f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.15f),
-        } },
-        { "Lava Crab", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.15f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",1,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",2,0.3f),
-        } },
-        { "Shadow Shaman", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",3,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",2,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.1f),
-        } },
-        { "Metal Head", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",2,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.1f),
-        } },
-        { "Shadow Brute", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",2,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.1f),
-        } },
-        { "Squid Kid", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",2,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",2,0.2f),
-        } }, //Skull Cavern 
-        { "Sludge", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
-        } },
-        { "Serpent", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.25f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",2,0.1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.05f),
-        } },
-        { "Carbon Ghost", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.35f),
-        } },
-        { "Iridium Crab", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",5,0.6f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",6,0.6f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",3,0.4f),
-        } },
-        { "Pepper Rex", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",3,1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",3,0.5f),
-        } },
-        { "Mummy", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",2,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",3,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",1,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.07f),
-        } },
-        { "Iridium Bat", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.5f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.15f),
-        } },
-        { "Haunted Skull", new(){ //Quarry Mine
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",3,0.4f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",3,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.05f),
-            new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.02f),
-        } },
-        { "Hot Head", new(){ //Ginger Island/Volcano
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",3,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.2f),
-        } },
-        { "Tiger Slime", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",2,0.1f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",5,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",3,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.1f),
-        } },
-        { "Magma Sprite", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",3,0.3f),
-        } },
-        { "Dwarvish Sentry", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",4,0.24f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",10,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",3,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_BarrowsCasket",1,0.07f),
-        } },
-        { "Magma Duggy", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",5,0.3f),
-            new ItemDrop("Tofu.RunescapeSpellbook_BarrowsCasket",1,0.07f),
-        } },
-        { "Magma Sparker", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",3,0.3f),
-        } },
-        { "False Magma Cap", new(){
-            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
-            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",10,0.2f),
-        } },
-    };
 
     //Items to be put in shops
     public static Dictionary<string, List<ShopListings>> loadableShops = new()
@@ -881,6 +706,8 @@ public static class ModAssets
         }
     }
 }
+
+//TODO add config to remove effects like particles from the mod
 public sealed class ModConfig
 {
     public KeybindList SpellbookKey = KeybindList.Parse("J");

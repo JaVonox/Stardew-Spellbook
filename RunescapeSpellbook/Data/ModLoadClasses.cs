@@ -55,10 +55,12 @@ public class RunesObjects : ModLoadObjects
 public class RunesCurrency : ModLoadObjects
 {
     public VirtualCurrencyHandler handler;
-    public RunesCurrency(string id,string translationKey, int spriteIndex,string tiedRuneObject) : 
+    public Color effectColour;
+    public RunesCurrency(string id,string translationKey, int spriteIndex,string tiedRuneObject, Color effectColour) : 
         base(id,translationKey,spriteIndex,null,"Basic",0)
     {
         handler = new VirtualCurrencyHandler(id,tiedRuneObject);
+        this.effectColour = effectColour;
     }
     
 }

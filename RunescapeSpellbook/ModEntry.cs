@@ -73,6 +73,7 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addpots", KeyTranslator.GetTranslation("console.addpots.text"), this.GrantPotions);
             helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
+            helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
         }
 
         private void OnLocaleChanged(object? sender, LocaleChangedEventArgs e)
@@ -709,6 +710,7 @@ namespace RunescapeSpellbook
             }
         }
         
+        //TODO maybe see if we can make this apply on farmer takedamage instead?
         [HarmonyPatch(typeof(Farmer), "Update")]
         [HarmonyPatch(new Type[] { typeof(GameTime),typeof(GameLocation)})]
         public class FarmerBonusHealthPatcher
@@ -1107,7 +1109,7 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(Monster __instance, string name)
             {
-                if (ModAssets.monsterDrops.TryGetValue(name, out var monsterDrops))
+                if (DropTable.monsterDrops.TryGetValue(name, out var monsterDrops))
                 {
                     foreach (ItemDrop item in monsterDrops)
                     {
@@ -1117,6 +1119,28 @@ namespace RunescapeSpellbook
                             {
                                 __instance.objectsToDrop.Add(item.itemID);
                             }
+                        }
+                    }
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(GameLocation), "monsterDrop")]
+        [HarmonyPatch(new Type[] { typeof(Monster), typeof(int), typeof(int), typeof(Farmer) })]
+        public class MonsterEssenceDropsPatcher
+        {
+            public static void Postfix(Monster monster, int x, int y, Farmer who)
+            {
+                if (DropTable.monsterEssence.TryGetValue(monster.Name, out var dropSet))
+                {
+                    foreach (ItemDrop drop in dropSet)
+                    {
+                        if (Game1.random.NextDouble() < drop.chance) //TODO handle multiple drops?
+                        {
+                            StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{drop.itemID}");
+                            spawnObj.Stack = drop.amount;
+                            Color effectColour = ((RunesCurrency)ModAssets.modItems[drop.itemID]).effectColour;
+                            Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,monster.Position,effectColour));
                         }
                     }
                 }
@@ -1199,7 +1223,7 @@ namespace RunescapeSpellbook
             {
                 if (__instance.hauntedSkull.Value && __instance.cursedDoll.Value)
                 {
-                    foreach (ItemDrop item in ModAssets.monsterDrops["Haunted Skull"])
+                    foreach (ItemDrop item in DropTable.monsterDrops["Haunted Skull"])
                     {
                         if (Game1.random.NextDouble() <= item.chance)
                         {
@@ -1766,20 +1790,25 @@ namespace RunescapeSpellbook
                 this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedTreasures.text"),LogLevel.Info);
             }
         
-            private void DebugCommand(string command, string[] args)
+            private void DebugSpawnFloaters(string command, string[] args)
             {
                 if (HasNoWorldContextReady()){return;}
-
+            
                 Point pos = Game1.player.GetBoundingBox().Center;
                 pos.X -= 100;
                 foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency && x.Value.SpriteIndex > 50).Select(y=>y.Value))
                 {
                     pos.X -= 100; 
                     StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{item.id}");
-                    Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2()));
+                    Color effectColour = ((RunesCurrency)ModAssets.modItems[item.id]).effectColour;
+                    Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2(),effectColour));
                 }
                 
                 Instance.Monitor.Log("Spawned Floats",LogLevel.Info);
+            }
+            private void DebugCommand(string command, string[] args)
+            {
+                if (HasNoWorldContextReady()){return;}
             }
         
             private void DebugPosition(string command, string[] args)
