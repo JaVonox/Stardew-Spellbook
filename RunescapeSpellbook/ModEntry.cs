@@ -1336,6 +1336,7 @@ namespace RunescapeSpellbook
         {
             public static bool Prefix(BasicProjectile __instance, NPC n, GameLocation location)
             {
+                //TODO magic quiver breaks this - object reference not set to instance of an object
                 if (__instance.itemId != null && (__instance.damagesMonsters.Value && n is Monster))
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);

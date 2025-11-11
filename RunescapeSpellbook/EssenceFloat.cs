@@ -6,10 +6,42 @@ using StardewValley.Monsters;
 
 namespace RunescapeSpellbook;
 
+public class EssenceSparkle
+{
+    private Vector2 offset;
+    private float alpha = 1f;
+    private float alphaFade;
+    private int rotation;
+    private Color associatedColour;
+    private bool aboveBehind;
+
+    public EssenceSparkle(Color associatedColour)
+    {
+        this.offset = new Vector2(Game1.random.Next(0,30),Game1.random.Next(0,30));
+        this.alphaFade = 0.5f + (float)(Game1.random.NextDouble() * 2);
+        this.rotation = Game1.random.Next(360);
+        this.aboveBehind = Game1.random.NextBool();
+        this.associatedColour = associatedColour;
+    }
+
+    public bool Update(GameTime time)
+    {
+        float elapsedTime = (float)time.ElapsedGameTime.TotalSeconds;
+        this.alpha -= elapsedTime * this.alphaFade;
+        this.offset.Y -= elapsedTime * 32.0f;
+
+        return this.alpha <= 0;
+    }
+
+    public void Draw(SpriteBatch b, Vector2 globalPosition, int standingY)
+    {
+        b.Draw(Game1.mouseCursors, Game1.GlobalToLocal(Game1.viewport, globalPosition + offset), new Rectangle(346, 392, 8, 8), new Color(associatedColour,this.alpha), this.rotation, Vector2.Zero, 2f, SpriteEffects.None, standingY / 10000f + (this.aboveBehind ? -0.001f : 0.002f));
+    }
+}
 public class EssenceFloat : BigSlime
 {
     private float heldObjectBobTimer;
-    private TemporaryAnimatedSpriteList sparkles = new TemporaryAnimatedSpriteList();
+    private List<EssenceSparkle> sparkles = new List<EssenceSparkle>();
     private Color associatedColour;
     public EssenceFloat(Item essenceItem, Vector2 position, Color associatedColour) : base(position,0)
     {
@@ -20,7 +52,7 @@ public class EssenceFloat : BigSlime
         this.associatedColour = associatedColour;
         startGlowing(associatedColour,false,0.01f);
         
-        GenerateSparkle(2);
+        GenerateSparkle(3);
     }
 
     public override bool isInvincible() => true;
@@ -29,56 +61,44 @@ public class EssenceFloat : BigSlime
     {
         this.heldObjectBobTimer += (float)time.ElapsedGameTime.TotalMilliseconds * 0.007853982f;
 
-        int removedAmount = sparkles.RemoveWhere((TemporaryAnimatedSprite sprite) => sprite.update(time));
+        int removedAmount = sparkles.RemoveWhere((EssenceSparkle sparkle) => sparkle.Update(time));
         if (removedAmount > 0)
         {
             GenerateSparkle(removedAmount);
         }
     }
+    
+    public override Rectangle GetBoundingBox()
+    {
+        Vector2 pos = this.Position;
+        return new Rectangle((int)pos.X + 38, (int)pos.Y + 8, 46, 46);
+    }
 
     private void GenerateSparkle(int amount)
     {
-        Rectangle box = this.GetBoundingBox();
-        int standingY = base.StandingPixel.Y;
-
-        Vector2 centerPos = new Vector2((base.Tile.X * 64f), (base.Tile.Y * 64f));
         for (int i = 0; i < amount; i++)
         {
-            sparkles.Add(new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Rectangle(346, 392, 8, 8),
-                new Vector2(centerPos.X + Game1.random.Next(-30,30), centerPos.Y + Game1.random.Next(-30,30)),
-                flipped: false, (float)(Game1.random.Next(1,6))/100.0f,
-                this.associatedColour)
-            {
-                motion = new Vector2(0, -1),
-                interval = 99999f,
-                layerDepth = standingY / 10000f + (Game1.random.NextBool() ? -0.001f : 0.002f),
-                scale = 2f,
-                scaleChange = 0.01f,
-                rotation = Game1.random.Next(360),
-                local = false,
-                delayBeforeAnimationStart = 0
-            });
+            sparkles.Add(new EssenceSparkle(associatedColour));
         }
     }
 
     public override void draw(SpriteBatch b)
     {
         int standingY = base.StandingPixel.Y;
+        Rectangle box = this.GetBoundingBox();
+        //b.Draw(Game1.fadeToBlackRect,  Game1.GlobalToLocal(Game1.viewport,box), Color.Purple);
         this.heldItem.Value?.drawInMenu(b, base.getLocalPosition(Game1.viewport) + new Vector2(28f, -16f + (float)Math.Sin(this.heldObjectBobTimer + 1f) * 4f), 1f, 1f, (float)(standingY - 1) / 10000f, StackDrawType.Hide, Color.White, drawShadow: true);
         this.heldItem.Value?.drawInMenu(b, base.getLocalPosition(Game1.viewport) + new Vector2(28f, -16f + (float)Math.Sin(this.heldObjectBobTimer + 1f) * 4f), 1f, 1f, (float)(standingY - 1) / 10000f + 0.001f, StackDrawType.Hide, glowingColor * glowingTransparency, drawShadow: false);
         
-        foreach(TemporaryAnimatedSprite spark in sparkles)
+        foreach(EssenceSparkle spark in sparkles)
         {
-            spark.draw(b, localPosition: true);
+            spark.Draw(b,new Vector2(box.X,box.Y),standingY);
         }
     }
     
     public override void updateMovement(GameLocation location, GameTime time)
     {
     }
-
-    
-    //TODO being perfectly between two things and walking down still blocks - seems like there's some weird discrepancy here
     
     public override int getTimeFarmerMustPushBeforePassingThrough() => 0;
 
