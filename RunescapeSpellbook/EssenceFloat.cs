@@ -43,13 +43,15 @@ public class EssenceFloat : BigSlime
     private float heldObjectBobTimer;
     private List<EssenceSparkle> sparkles = new List<EssenceSparkle>();
     private Color associatedColour;
-    public EssenceFloat(Item essenceItem, Vector2 position, Color associatedColour) : base(position,0)
+    private float volatility;
+    public EssenceFloat(Item essenceItem, Vector2 position, Color associatedColour, float volatility) : base(position,0)
     {
         this.heldItem.Value = essenceItem;
         base.c.A = 0;
         base.Scale = 0;
         base.Health = 1;
         this.associatedColour = associatedColour;
+        this.volatility = volatility;
         startGlowing(associatedColour,false,0.01f);
         
         GenerateSparkle(3);
@@ -59,7 +61,7 @@ public class EssenceFloat : BigSlime
 
     protected override void updateAnimation(GameTime time)
     {
-        this.heldObjectBobTimer += (float)time.ElapsedGameTime.TotalMilliseconds * 0.007853982f;
+        this.heldObjectBobTimer += (float)time.ElapsedGameTime.TotalMilliseconds * 0.007853982f * volatility;
 
         int removedAmount = sparkles.RemoveWhere((EssenceSparkle sparkle) => sparkle.Update(time));
         if (removedAmount > 0)
@@ -105,6 +107,7 @@ public class EssenceFloat : BigSlime
     //When we check overlap, try to add item - dying if it is successful. either way return false.
     public override bool OverlapsFarmerForDamage(Farmer who)
     {
+        //TODO increase bounding box here so it doesn't block player movement
         if (this.GetBoundingBox().Intersects(who.GetBoundingBox()) && Health > 0 && who.addItemToInventoryBool(this.heldItem.Value))
         {
             sparkles.Clear();

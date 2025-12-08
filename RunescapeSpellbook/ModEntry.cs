@@ -1139,8 +1139,8 @@ namespace RunescapeSpellbook
                         {
                             StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{drop.itemID}");
                             spawnObj.Stack = drop.amount;
-                            Color effectColour = ((RunesCurrency)ModAssets.modItems[drop.itemID]).effectColour;
-                            Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,monster.Position,effectColour));
+                            RunesCurrency cur = ((RunesCurrency)ModAssets.modItems[drop.itemID]);
+                            Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,monster.Position,cur.effectColour,cur.volatility));
                         }
                     }
                 }
@@ -1336,8 +1336,8 @@ namespace RunescapeSpellbook
         {
             public static bool Prefix(BasicProjectile __instance, NPC n, GameLocation location)
             {
-                //TODO magic quiver breaks this - object reference not set to instance of an object
-                if (__instance.itemId != null && (__instance.damagesMonsters.Value && n is Monster))
+                //TODO check ammo works still
+                if (__instance.itemId.Value != null && (__instance.damagesMonsters.Value && n is Monster))
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);
                     
@@ -1797,12 +1797,12 @@ namespace RunescapeSpellbook
             
                 Point pos = Game1.player.GetBoundingBox().Center;
                 pos.X -= 100;
-                foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency && x.Value.SpriteIndex > 50).Select(y=>y.Value))
+                foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
                 {
                     pos.X -= 100; 
                     StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{item.id}");
-                    Color effectColour = ((RunesCurrency)ModAssets.modItems[item.id]).effectColour;
-                    Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2(),effectColour));
+                    RunesCurrency cur = ((RunesCurrency)ModAssets.modItems[item.id]);
+                    Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2(),cur.effectColour,cur.volatility));
                 }
                 
                 Instance.Monitor.Log("Spawned Floats",LogLevel.Info);

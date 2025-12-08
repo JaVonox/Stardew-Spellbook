@@ -10,38 +10,56 @@
 	"item.RuneSpellbook.display-name":"Spellbook",
 	"item.RuneSpellbook.plural-display-name":"Spellbooks",
 	"item.RuneSpellbook.description":"Debug object",
+	
 	"item.RuneAir.display-name":"Air Rune",
 	"item.RuneAir.plural-display-name":"Air Runes",
 	"item.RuneAir.description":"One of the 4 basic elemental Runes",
+	"item.EssenceAir.display-name":"Air Essence",
+	
 	"item.RuneWater.display-name":"Water Rune",
 	"item.RuneWater.plural-display-name":"Water Runes",
 	"item.RuneWater.description":"One of the 4 basic elemental Runes",
+	"item.EssenceWater.display-name":"Water Essence",
+	
 	"item.RuneFire.display-name":"Fire Rune",
 	"item.RuneFire.plural-display-name":"Fire Runes",
 	"item.RuneFire.description":"One of the 4 basic elemental Runes",
+	"item.EssenceFire.display-name":"Fire Essence",
+	
 	"item.RuneEarth.display-name":"Earth Rune",
 	"item.RuneEarth.plural-display-name":"Earth Runes",
 	"item.RuneEarth.description":"One of the 4 basic elemental Runes",
+	"item.EssenceEarth.display-name":"Earth Essence",
 	
 	"item.RuneLaw.display-name":"Law Rune",
 	"item.RuneLaw.plural-display-name":"Law Runes",
 	"item.RuneLaw.description":"Used for teleport spells",
+	"item.EssenceLaw.display-name":"Law Essence",
+	
 	"item.RuneNature.display-name":"Nature Rune",
 	"item.RuneNature.plural-display-name":"Nature Runes",
 	"item.RuneNature.description":"Used for alchemy spells",
+	"item.EssenceNature.display-name":"Nature Essence",
+	
 	"item.RuneCosmic.display-name":"Cosmic Rune",
 	"item.RuneCosmic.plural-display-name":"Cosmic Runes",
 	"item.RuneCosmic.description":"Used for enchant spells",
+	"item.EssenceCosmic.display-name":"Cosmic Essence",
+	
 	"item.RuneAstral.display-name":"Astral Rune",
 	"item.RuneAstral.plural-display-name":"Astral Runes",
 	"item.RuneAstral.description":"Used for Lunar spells",
+	"item.EssenceAstral.display-name":"Astral Essence",
 	
 	"item.RuneChaos.display-name":"Chaos Rune",
 	"item.RuneChaos.plural-display-name":"Chaos Runes",
 	"item.RuneChaos.description":"Used for low level combat spells",
+	"item.EssenceChaos.display-name":"Chaos Essence",
+	
 	"item.RuneDeath.display-name":"Death Rune",
 	"item.RuneDeath.plural-display-name":"Death Runes",
 	"item.RuneDeath.description":"Used for high level combat spells",
+	"item.EssenceDeath.display-name":"Death Essence",
 	
 	"item.AmmoFire.display-name":"Fire Orb",
 	"item.AmmoFire.description":"Enchanted ammo that burns enemies in a radius around a hit enemy. Fire cannot finish off enemies",

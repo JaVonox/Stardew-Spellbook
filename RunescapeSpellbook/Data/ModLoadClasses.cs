@@ -56,11 +56,13 @@ public class RunesCurrency : ModLoadObjects
 {
     public VirtualCurrencyHandler handler;
     public Color effectColour;
-    public RunesCurrency(string id,string translationKey, int spriteIndex,string tiedRuneObject, Color effectColour) : 
+    public float volatility;
+    public RunesCurrency(string id,string translationKey, int spriteIndex,string tiedRuneObject, Color effectColour, float volatility = 1.0f) : 
         base(id,translationKey,spriteIndex,null,"Basic",0)
     {
         handler = new VirtualCurrencyHandler(id,tiedRuneObject);
         this.effectColour = effectColour;
+        this.volatility = volatility;
     }
     
 }
