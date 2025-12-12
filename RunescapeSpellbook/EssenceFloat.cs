@@ -52,7 +52,11 @@ public class EssenceFloat : BigSlime
         base.Health = 1;
         this.associatedColour = associatedColour;
         this.volatility = volatility;
+        base.Slipperiness = 34;
+        double angle = Game1.random.NextDouble() * (Math.PI * 2);
         startGlowing(associatedColour,false,0.01f);
+        //TODO is this replicated in multiplayer?
+        base.setTrajectory((int)Math.Ceiling(Game1.random.Next(1,5) * Math.Cos(angle)),(int)Math.Ceiling(Game1.random.Next(1,5) * Math.Sin(angle)));
         
         GenerateSparkle(3);
     }
@@ -69,11 +73,16 @@ public class EssenceFloat : BigSlime
             GenerateSparkle(removedAmount);
         }
     }
-    
     public override Rectangle GetBoundingBox()
     {
         Vector2 pos = this.Position;
-        return new Rectangle((int)pos.X + 38, (int)pos.Y + 8, 46, 46);
+        return new Rectangle((int)pos.X + 32, (int)pos.Y + 8, 0, 0);
+    }
+    
+    public Rectangle GetOverlapBox()
+    {
+        Vector2 pos = this.Position;
+        return new Rectangle((int)pos.X + 24, (int)pos.Y + 8, 72, 72);
     }
 
     private void GenerateSparkle(int amount)
@@ -88,33 +97,42 @@ public class EssenceFloat : BigSlime
     {
         int standingY = base.StandingPixel.Y;
         Rectangle box = this.GetBoundingBox();
-        //b.Draw(Game1.fadeToBlackRect,  Game1.GlobalToLocal(Game1.viewport,box), Color.Purple);
+        
         this.heldItem.Value?.drawInMenu(b, base.getLocalPosition(Game1.viewport) + new Vector2(28f, -16f + (float)Math.Sin(this.heldObjectBobTimer + 1f) * 4f), 1f, 1f, (float)(standingY - 1) / 10000f, StackDrawType.Hide, Color.White, drawShadow: true);
         this.heldItem.Value?.drawInMenu(b, base.getLocalPosition(Game1.viewport) + new Vector2(28f, -16f + (float)Math.Sin(this.heldObjectBobTimer + 1f) * 4f), 1f, 1f, (float)(standingY - 1) / 10000f + 0.001f, StackDrawType.Hide, glowingColor * glowingTransparency, drawShadow: false);
         
         foreach(EssenceSparkle spark in sparkles)
         {
+            //TODO these don't expand far enough
             spark.Draw(b,new Vector2(box.X,box.Y),standingY);
         }
+        
+        //b.Draw(Game1.fadeToBlackRect,  Game1.GlobalToLocal(Game1.viewport,box), Color.Purple);
     }
     
     public override void updateMovement(GameLocation location, GameTime time)
     {
+        this.MovePosition(time, Game1.viewport, location);
     }
-    
+
     public override int getTimeFarmerMustPushBeforePassingThrough() => 0;
 
     //When we check overlap, try to add item - dying if it is successful. either way return false.
     public override bool OverlapsFarmerForDamage(Farmer who)
     {
-        //TODO increase bounding box here so it doesn't block player movement
-        if (this.GetBoundingBox().Intersects(who.GetBoundingBox()) && Health > 0 && who.addItemToInventoryBool(this.heldItem.Value))
+        if (this.GetOverlapBox().Intersects(who.GetBoundingBox()) && Health > 0 && who.addItemToInventoryBool(this.heldItem.Value))
         {
             sparkles.Clear();
             //TODO maybe add pickup animation? radial debris doesn't work cuz it expects to grab multiple icons in a row
             Health = 0;
         }
         return false;
+    }
+
+    public override int takeDamage(int damage, int xTrajectory, int yTrajectory, bool isBomb, double addedPrecision,
+        Farmer who)
+    {
+        return 0;
     }
 
     //TODO check interactions with specials like parry + explosions + fire/earth ammo

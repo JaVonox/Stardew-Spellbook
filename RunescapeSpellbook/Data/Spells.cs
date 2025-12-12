@@ -521,7 +521,6 @@ public class CombatSpell : Spell
             Vector2 mousePos = new Vector2(x, y);
             Vector2 characterPos = caster.getStandingPosition();
 
-            //TODO maybe add gamepad functionality??
             Vector2 v = Utility.getVelocityTowardPoint(characterPos, mousePos, velocity);
             caster.faceGeneralDirection(mousePos);
             

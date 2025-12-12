@@ -15,6 +15,7 @@ using StardewValley.Extensions;
 using StardewValley.GameData;
 using StardewValley.GameData.BigCraftables;
 using StardewValley.GameData.Buffs;
+using StardewValley.GameData.Buildings;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
@@ -575,6 +576,19 @@ namespace RunescapeSpellbook
                         }
                     }
                 );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
+            {
+                e.Edit(asset =>
+                {
+                    var buildDict = asset.AsDictionary<string, BuildingData>().Data;
+
+                    foreach (BuildingObject buildObj in ModAssets.buildingItems)
+                    {
+                        buildDict.Add(buildObj.id,buildObj);
+                    }
+                });
             }
         }
         

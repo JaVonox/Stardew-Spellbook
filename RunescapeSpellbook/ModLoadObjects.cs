@@ -332,6 +332,11 @@ public static class ModAssets
             }, 3,new Func<string,List<ItemDrop>>((itemID)=>((PackObject)modItems[itemID]).GetItemRanges()),"336 1 338 2 709 5",3,"(O)382","PackShredderFailMessage"
             )
     };
+
+    public static readonly BuildingObject[] buildingItems =
+    {
+        new BuildingObject("Ourania","Ourania","Temp",new Rectangle(0,0,32,32),new Point(2,2))
+    };
     
     //This dictionary provides a quick reference for which weapons provide what rune
     public static Dictionary<string, List<string>> infiniteRuneReferences;
