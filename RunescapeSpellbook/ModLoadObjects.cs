@@ -333,10 +333,12 @@ public static class ModAssets
             )
     };
 
+    /*
     public static readonly BuildingObject[] buildingItems =
     {
         new BuildingObject("Ourania","Ourania","Temp",new Rectangle(0,0,32,32),new Point(2,2))
     };
+    */
     
     //This dictionary provides a quick reference for which weapons provide what rune
     public static Dictionary<string, List<string>> infiniteRuneReferences;
@@ -560,6 +562,12 @@ public static class ModAssets
         new CustomBuff("Tofu.RunescapeSpellbook_BuffDark", "DarkLure", 180_000, 1),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffHunters", "Hunters", 300_000, 2),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffBattlemage", "Battlemage", 540_000, 3),
+    };
+
+    public static List<LoadablePower> loadablePowers = new()
+    {
+        new LoadablePower("Tofu.RunescapeSpellbook_StandardSpellbook", "Standard Spellbook",
+            "A set of basic spells for the aspiring runic wizard", "Mods.RunescapeSpellbook.Assets.itemsprites", new Point(0, 0), "PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0")
     };
     
     private static MethodInfo cachedBroadcastMethod;

@@ -9,6 +9,7 @@ using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
 using StardewValley.GameData.Machines;
 using StardewValley.GameData.Objects;
+using StardewValley.GameData.Powers;
 using StardewValley.GameData.Shops;
 
 namespace RunescapeSpellbook;
@@ -813,3 +814,33 @@ public class CustomBuff : ITranslatable
     }
 }
 
+public class LoadablePower
+{
+    private string internalName;
+    private string displayName;
+    private string description;
+    private string texturePath;
+    private Point texturePosition;
+    private string unlockedCondition;
+    public LoadablePower(string internalName,string displayName, string description, string texturePath, Point texturePosition,
+        string unlockedCondition)
+    {
+        this.internalName = internalName;
+        this.displayName = displayName;
+        this.description = description;
+        this.texturePath = texturePath;
+        this.texturePosition = texturePosition;
+        this.unlockedCondition = unlockedCondition;
+    }
+
+    public void AppendPowerData(IDictionary<string, PowersData> powerDict)
+    {
+        PowersData data = new PowersData();
+        data.DisplayName = displayName;
+        data.Description = description;
+        data.TexturePath = texturePath;
+        data.TexturePosition = texturePosition;
+        data.UnlockedCondition = unlockedCondition;
+        powerDict.Add(this.internalName,data);
+    }
+}

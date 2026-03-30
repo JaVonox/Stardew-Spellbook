@@ -2,86 +2,172 @@
 
 public class DropTable
 {
-        public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new()
+    public static readonly Dictionary<string, List<ItemDrop>> monsterDrops = new()
     {
         //Caves (Basic)
         { "Big Slime", new(){ 
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.08f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",2,0.1f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.02f),
         } },
+        { "Prismatic Slime", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",4,0.9f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",5,0.9f),
+        } },
         { "Green Slime", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.08f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.02f),
+        } },
+        { "Fly", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.05f),
         } },
         { "Rock Crab", new(){
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.3f),
         } },
+        { "Grub", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",2,0.1f),
+        } },
         { "Bug", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.08f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
         } },
+        { "Bat", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.25f),
+        } },
         { "Stone Golem", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.1f),
             new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.04f),
+        } },
+        { "Dust Spirit", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.04f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",1,0.02f),
+        } },
+        { "Frost Bat", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",1,0.05f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.3f),
         } },
         { "Ghost", new(){
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.35f),
         } },
         { "Frost Jelly", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.1f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
         } },
         { "Skeleton", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",1,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",1,0.02f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.05f),
             new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.08f),
         } },
+        { "Lava Bat", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.15f),
+        } },
         { "Lava Crab", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",1,0.15f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",1,0.3f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",2,0.3f),
         } },
         { "Shadow Shaman", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",3,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",2,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.1f),
         } },
         { "Metal Head", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",2,0.3f),
             new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.1f),
         } },
         { "Shadow Brute", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",2,0.3f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",1,0.1f),
         } },
         { "Squid Kid", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",2,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",2,0.2f),
         } }, //Skull Cavern 
         { "Sludge", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",2,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",1,0.2f),
         } },
         { "Serpent", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",2,0.25f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",2,0.1f),
             new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.05f),
         } },
         { "Carbon Ghost", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.1f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.35f),
         } },
         { "Iridium Crab", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",5,0.6f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",6,0.6f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",3,0.4f),
         } },
+        { "Pepper Rex", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",3,1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",3,0.5f),
+        } },
         { "Mummy", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",2,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",3,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",1,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.07f),
         } },
         { "Iridium Bat", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.5f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.15f),
         } },
         { "Haunted Skull", new(){ //Quarry Mine
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",3,0.4f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneAstral",3,0.3f),
             new ItemDrop("Tofu.RunescapeSpellbook_EasyCasket",1,0.05f),
             new ItemDrop("Tofu.RunescapeSpellbook_HardCasket",1,0.02f),
         } },
         { "Hot Head", new(){ //Ginger Island/Volcano
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",3,0.2f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureCatalytic",2,0.2f),
         } },
+        { "Tiger Slime", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureWaterPack",2,0.1f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneNature",5,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureChaosPack",3,0.3f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",2,0.1f),
+        } },
+        { "Magma Sprite", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureAirPack",3,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",3,0.3f),
+        } },
         { "Dwarvish Sentry", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneLaw",4,0.24f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",10,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureDeathPack",3,0.3f),
             new ItemDrop("Tofu.RunescapeSpellbook_BarrowsCasket",1,0.07f),
         } },
         { "Magma Duggy", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",2,0.3f),
             new ItemDrop("Tofu.RunescapeSpellbook_TreasureElemental",5,0.3f),
             new ItemDrop("Tofu.RunescapeSpellbook_BarrowsCasket",1,0.07f),
         } },
+        { "Magma Sparker", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureFirePack",3,0.3f),
+        } },
+        { "False Magma Cap", new(){
+            new ItemDrop("Tofu.RunescapeSpellbook_TreasureEarthPack",1,0.2f),
+            new ItemDrop("Tofu.RunescapeSpellbook_RuneCosmic",10,0.2f),
+        } },
     };
     
+    /*
     
     public static readonly Dictionary<string, List<ItemDrop>> monsterEssence = new()
     {
@@ -214,4 +300,5 @@ public class DropTable
             new ItemDrop("Tofu.RunescapeSpellbook_EssCosmic",10,0.2f),
         } },
     };
+    */
 }

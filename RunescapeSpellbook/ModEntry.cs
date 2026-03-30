@@ -21,6 +21,7 @@ using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
 using StardewValley.GameData.Machines;
 using StardewValley.GameData.Objects;
+using StardewValley.GameData.Powers;
 using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
@@ -578,6 +579,7 @@ namespace RunescapeSpellbook
                 );
             }
             
+            /*
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
             {
                 e.Edit(asset =>
@@ -587,6 +589,20 @@ namespace RunescapeSpellbook
                     foreach (BuildingObject buildObj in ModAssets.buildingItems)
                     {
                         buildDict.Add(buildObj.id,buildObj);
+                    }
+                });
+            }
+            */
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/Powers"))
+            {
+                e.Edit(asset =>
+                {
+                    var powerDict = asset.AsDictionary<string, PowersData>().Data;
+
+                    foreach (LoadablePower powerObj in ModAssets.loadablePowers)
+                    {
+                        powerObj.AppendPowerData(powerDict);
                     }
                 });
             }
@@ -1145,7 +1161,7 @@ namespace RunescapeSpellbook
         {
             public static void Postfix(Monster monster, int x, int y, Farmer who)
             {
-                if (DropTable.monsterEssence.TryGetValue(monster.Name, out var dropSet))
+                if (DropTable.monsterDrops.TryGetValue(monster.Name, out var dropSet))
                 {
                     foreach (ItemDrop drop in dropSet)
                     {

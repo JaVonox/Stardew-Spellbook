@@ -14,7 +14,7 @@ public class SpellbookPage : IClickableMenu
     
     private Texture2D runesTextures;
 
-    private const int spellsPerRow = 6;
+    private const int spellsPerRow = 7;
     
     private bool hasMagic = false;
     public SpellbookPage(int x, int y, int width, int height)
