@@ -15,7 +15,6 @@ using StardewValley.Extensions;
 using StardewValley.GameData;
 using StardewValley.GameData.BigCraftables;
 using StardewValley.GameData.Buffs;
-using StardewValley.GameData.Buildings;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
@@ -24,7 +23,6 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Powers;
 using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
-using StardewValley.ItemTypeDefinitions;
 using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.Objects;
@@ -95,10 +93,12 @@ namespace RunescapeSpellbook
         {
             ModAssets.ClearBonusHealth(Game1.player);
 
+            /*
             foreach (RunesCurrency currency in ModAssets.modItems.Where(x=>x.Value is RunesCurrency).Select(y=>y.Value as RunesCurrency))
             {
                 currency.handler.TruncateToDailyCap(Game1.player);
             }
+            */
         }
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -567,6 +567,7 @@ namespace RunescapeSpellbook
                 });
             }
             
+            /*
             if (e.NameWithoutLocale.IsEquivalentTo("spacechase0.SpaceCore/VirtualCurrencyData"))
             {
                 e.Edit(asset =>
@@ -579,6 +580,7 @@ namespace RunescapeSpellbook
                     }
                 );
             }
+            */
             
             /*
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
@@ -1156,6 +1158,7 @@ namespace RunescapeSpellbook
             }
         }
         
+        /*
         [HarmonyPatch(typeof(GameLocation), "monsterDrop")]
         [HarmonyPatch(new Type[] { typeof(Monster), typeof(int), typeof(int), typeof(Farmer) })]
         public class MonsterEssenceDropsPatcher
@@ -1170,6 +1173,7 @@ namespace RunescapeSpellbook
                         {
                             StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{drop.itemID}");
                             spawnObj.Stack = drop.amount;
+                            
                             RunesCurrency cur = ((RunesCurrency)ModAssets.modItems[drop.itemID]);
                             Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,monster.Position,cur.effectColour,cur.volatility));
                         }
@@ -1177,6 +1181,7 @@ namespace RunescapeSpellbook
                 }
             }
         }
+        */
         
         [HarmonyPatch(typeof(BuffManager), "IsApplied")]
         [HarmonyPatch(new Type[] { typeof(string) })]
@@ -1826,6 +1831,7 @@ namespace RunescapeSpellbook
             {
                 if (HasNoWorldContextReady()){return;}
             
+                /*
                 Point pos = Game1.player.GetBoundingBox().Center;
                 pos.X -= 100;
                 foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
@@ -1837,6 +1843,7 @@ namespace RunescapeSpellbook
                 }
                 
                 Instance.Monitor.Log("Spawned Floats",LogLevel.Info);
+                */
             }
             private void DebugCommand(string command, string[] args)
             {

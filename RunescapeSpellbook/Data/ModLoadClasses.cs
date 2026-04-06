@@ -54,6 +54,7 @@ public class RunesObjects : ModLoadObjects
     }
     
 }
+/*
 public class RunesCurrency : ModLoadObjects
 {
     public VirtualCurrencyHandler handler;
@@ -68,6 +69,7 @@ public class RunesCurrency : ModLoadObjects
     }
     
 }
+*/
 public class SlingshotItem : ModLoadObjects
 {
     public int extraDamage = 0;

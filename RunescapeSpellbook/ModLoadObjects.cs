@@ -26,44 +26,25 @@ public static class ModAssets
         
         {"Tofu.RunescapeSpellbook_RuneAir",new RunesObjects("Tofu.RunescapeSpellbook_RuneAir","RuneAir",1,-429,
             new Dictionary<string, PrefType>(){{"Emily",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssAir",new RunesCurrency("Tofu.RunescapeSpellbook_EssAir","EssenceAir",54,"Tofu.RunescapeSpellbook_RuneAir", Color.Yellow)},
-        
         {"Tofu.RunescapeSpellbook_RuneWater",new RunesObjects("Tofu.RunescapeSpellbook_RuneWater","RuneWater",2,-429,
             new(){{"Emily",PrefType.Neutral},{"Willy",PrefType.Neutral},{"Elliott",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssWater",new RunesCurrency("Tofu.RunescapeSpellbook_EssWater","EssenceWater",53,"Tofu.RunescapeSpellbook_RuneWater", Color.Blue)},
-
         {"Tofu.RunescapeSpellbook_RuneFire",new RunesObjects("Tofu.RunescapeSpellbook_RuneFire","RuneFire",3,-429,
             new(){{"Emily",PrefType.Neutral},{"Sam",PrefType.Neutral},{"Vincent",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssFire",new RunesCurrency("Tofu.RunescapeSpellbook_EssFire","EssenceFire",52,"Tofu.RunescapeSpellbook_RuneFire", Color.Red)},
-        
         {"Tofu.RunescapeSpellbook_RuneEarth",new RunesObjects("Tofu.RunescapeSpellbook_RuneEarth","RuneEarth",4,-429,
             new(){{"Emily",PrefType.Neutral},{"Dwarf",PrefType.Neutral},{"Demetrius",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssEarth",new RunesCurrency("Tofu.RunescapeSpellbook_EssEarth","EssenceEarth",55,"Tofu.RunescapeSpellbook_RuneEarth", Color.Green)},
-        
         {"Tofu.RunescapeSpellbook_RuneLaw",new RunesObjects("Tofu.RunescapeSpellbook_RuneLaw","RuneLaw",5,-431,
             new(){{"Emily",PrefType.Neutral},{"Wizard",PrefType.Like}})},
-        {"Tofu.RunescapeSpellbook_EssLaw",new RunesCurrency("Tofu.RunescapeSpellbook_EssLaw","EssenceLaw",56,"Tofu.RunescapeSpellbook_RuneLaw", Color.DarkBlue,1.5f)},
-        
         {"Tofu.RunescapeSpellbook_RuneNature",new RunesObjects("Tofu.RunescapeSpellbook_RuneNature","RuneNature",6,-431,
             new(){{"Emily",PrefType.Neutral},{"Leo",PrefType.Neutral},{"Linus",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssNature",new RunesCurrency("Tofu.RunescapeSpellbook_EssNature","EssenceNature",57,"Tofu.RunescapeSpellbook_RuneNature", Color.ForestGreen,1.5f)},
-
         {"Tofu.RunescapeSpellbook_RuneCosmic",new RunesObjects("Tofu.RunescapeSpellbook_RuneCosmic","RuneCosmic",7,-431,
             new(){{"Emily",PrefType.Neutral},{"Maru",PrefType.Like},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssCosmic",new RunesCurrency("Tofu.RunescapeSpellbook_EssCosmic","EssenceCosmic",58,"Tofu.RunescapeSpellbook_RuneCosmic", Color.Yellow,1.5f)},
-
         {"Tofu.RunescapeSpellbook_RuneAstral",new RunesObjects("Tofu.RunescapeSpellbook_RuneAstral","RuneAstral",8,-431,
             new(){{"Emily",PrefType.Like},{"Maru",PrefType.Neutral},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssAstral",new RunesCurrency("Tofu.RunescapeSpellbook_EssAstral","EssenceAstral",59,"Tofu.RunescapeSpellbook_RuneAstral", Color.Purple,1.5f)},
-        
         {"Tofu.RunescapeSpellbook_RuneChaos",new RunesObjects("Tofu.RunescapeSpellbook_RuneChaos","RuneChaos",9,-430,
             new(){{"Emily",PrefType.Hate},{"Kent",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssChaos",new RunesCurrency("Tofu.RunescapeSpellbook_EssChaos","EssenceChaos",60,"Tofu.RunescapeSpellbook_RuneChaos", Color.DarkOrange,1.5f)},
-
         {"Tofu.RunescapeSpellbook_RuneDeath",new RunesObjects("Tofu.RunescapeSpellbook_RuneDeath","RuneDeath",10,-430,
             new(){{"Sebastian",PrefType.Like},{"Emily",PrefType.Hate},{"George",PrefType.Hate},{"Evelyn",PrefType.Hate},{"Wizard",PrefType.Neutral}})},
-        {"Tofu.RunescapeSpellbook_EssDeath",new RunesCurrency("Tofu.RunescapeSpellbook_EssDeath","EssenceDeath",61,"Tofu.RunescapeSpellbook_RuneDeath", Color.Black,1.5f)},
-        
+
         {"Tofu.RunescapeSpellbook_AmmoFire",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoFire","AmmoFire",30,15,2)},
         {"Tofu.RunescapeSpellbook_AmmoEarth",new SlingshotItem("Tofu.RunescapeSpellbook_AmmoEarth","AmmoEarth",31,25,1,true)},
         
