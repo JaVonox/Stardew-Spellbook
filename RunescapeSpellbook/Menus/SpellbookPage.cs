@@ -10,7 +10,6 @@ public class SpellbookPage : IClickableMenu
     public List<ClickableComponent> spellIcons = new();
     
     private int hoverSpellID = -1;
-    private int magicLevel;
     
     private Texture2D runesTextures;
 
@@ -51,10 +50,6 @@ public class SpellbookPage : IClickableMenu
                 spellsPlaced++;
                 
             }
-
-            magicLevel = LevelsHandler.GetFarmerMagicLevel(Game1.player);
-            
-            //TODO spellbooks need checking on controllers now perks are gone
         }
     }
     

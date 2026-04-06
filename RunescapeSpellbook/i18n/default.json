@@ -229,12 +229,23 @@
 	"perk.Dragonstone.display-name":"Dragonstone",
 	"perk.Dragonstone.description-1":"20% chance of combat spells firing extra projectiles, Does not stack with charge.",
 	
-	"mail.SpellMail.text": "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff.^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. ^^   -M. Rasmodius, Wizard[letterbg 2]%item object Tofu.RunescapeSpellbook_StaffMagic 1 %%[#]Wizard's Battlestaff Gift",
-	"mail.ClintPackService.text":"@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes.^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it^^   -Clint^^P.S I've included some samples with this letter%item object Tofu.RunescapeSpellbook_TreasureAirPack 3 %%[#]Clint's Pack Opening Service",
-	"mail.WillyCasket.text":"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas.^^It seems like something ya might get some use out of, it'd make some fine firewood!^^   -Willy%item object Tofu.RunescapeSpellbook_EasyCasket 1 %%[#]Willy's Casket",
-	"mail.ClintTerribleGift.text":"@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable.^^Maybe you'll get something out of them.^^   -Clint%item object Tofu.RunescapeSpellbook_RuneDeath 60 %%[#]Clint's Terrible Gift",
-	"mail.LinusStones.text":"@,^An old friend gave me some of these, but I don't have enough space to keep all of them.^^I hope you'll think of the great outdoors when you use them.^^   -Linus%item object Tofu.RunescapeSpellbook_RuneNature 40 %%[#]Linus' Nature Stones",
-	"mail.SomeoneElse.text":"Coco,^^Beef Soup^^   -Tofu%item object Tofu.RunescapeSpellbook_HardCasket 1 %%[#]Letter For Someone Else",
+	"mail.SpellMail.title": "Wizard's Battlestaff Gift",
+	"mail.SpellMail.text": "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff.^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. ^^   -M. Rasmodius, Wizard",
+	
+	"mail.ClintPackService.title": "Clint's Pack Opening Service",
+	"mail.ClintPackService.text":"@,^Have you come across some strange packages in the mines lately? They seem to be full of those weird painted rocks that Emily likes.^^They're pretty hard to open, but my geode hammer seems to do the trick. If you find any, swing by and I'll help you open it^^   -Clint^^P.S I've included some samples with this letter",
+
+	"mail.WillyCasket.title":"Willy's Casket",
+	"mail.WillyCasket.text":"Ahoy @,^This was floating around in the ocean so I fished it up, some people have no respect for the seas.^^It seems like something ya might get some use out of, it'd make some fine firewood!^^   -Willy",
+
+	"mail.ClintTerribleGift.title":"Clint's Terrible Gift",
+	"mail.ClintTerribleGift.text":"@,^I sent some of these to Emily as an anonymous gift but came in yesterday and sold them to my shop.^^She said the design made her uncomfortable.^^Maybe you'll get something out of them.^^   -Clint",
+
+	"mail.LinusStones.title":"Linus' Nature Stones",
+	"mail.LinusStones.text":"@,^An old friend gave me some of these, but I don't have enough space to keep all of them.^^I hope you'll think of the great outdoors when you use them.^^   -Linus",
+	
+	"mail.SomeoneElse.title":"Letter For Someone Else",
+	"mail.SomeoneElse.text":"Coco,^^Beef Soup^^   -Tofu",
 	
 	"tvchannel.Gobcast.channel-name":"My Goblin My Goblin and also Grubfoot",
 	"tvchannel.Gobcast.intro":"Hello! This My Goblin My Goblin and also Grubfoot. Me General Bentnoze. Me joined by General Wartface and also Grubfoot. We solve goblin problems. You send us problems. Grubfoot! Get problem for today.",
@@ -267,9 +278,30 @@
 	"tvbroadcast.Gobcast9.text-2":"This last episode, network say they do thing called 'rerun'. Me not understand how they get Goblin that look and talk like me but me not really care. Maybe one day me find imposter and crush him. Have not decided yet.",
 	"tvbroadcast.Gobcast9.text-3":"This all for today. You all terrible. Do not send in questions.",
 
-	"event.GetSpellbook.data":"continue/64 15/farmer 64 16 2 Wizard 64 18 0/pause 1500/speak Wizard \"Greetings, @. I hope I am not interrupting your work on the farm.\"/speak Wizard \"I've made great progress with my research as of late, thanks to your generous gifts.\"/speak Wizard \"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"/stopMusic /itemAboveHead Tofu.RunescapeSpellbook_RuneSpellbook /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail Tofu.RunescapeSpellbook_SpellMail/speak Wizard \"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"/pause 600/speak Wizard \"Well, that was all. I'll be on my way now.\"/pause 300/end",
-	"event.RunesFound.data":"continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3/skippable /pause 1000/speak Gunther \"Marlon, you know I can't accept a sword as payment for your late return fees...\"/speak Marlon \"This is an antique! I've been using this blade for decades now!\"/warp farmer 3 14 /playSound doorClose /pause 1000/move farmer 0 -1 1 /move farmer 3 0 2 /move farmer 0 1 1 /move farmer 5 0 0 /move Marlon 0 0 2 /move farmer 0 -3 0/move Gunther 0 0 2 /speak Gunther \"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"/move Gunther 0 0 0 /pause 500 /jump Gunther 8 /pause 500 /textAboveHead Gunther \"*huff* *puff*\" /pause 2000 /move Gunther 0 0 2/speak Gunther \"Perhaps the books can wait. What do you need today, @?\"/question null \"#I found this underground#Can you tell me about this?\"/speak Gunther \"Let me have a look...\" /pause 1000/speak Gunther \"Hmm... I'm not quite sure what that is... \"/speak Gunther \"The runes aren't any I recognise either...\"/move Marlon 0 0 3 /speak Marlon \"Ah, well isn't that nostalgic.\"/move Gunther 0 0 1 /speak Gunther \"You're familiar with these?\"/speak Marlon \"Not myself, but an old friend of mine used to be obsessed with them.\"/move Marlon 0 0 2 /speak Marlon \"Could you bring it over here, @? I'd like to have a closer look.\"/move farmer 1 0 0 /move Marlon 0 0 2 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000/speak Marlon \"As I suspected, these are definitely guthixian runestones. Or rather, they contain guthixian runestones.\"/speak Marlon \"Ol' Ras used to spend hours trying to crack these things open, until I showed up. Turns out a strike with the trusty hammer does the job in seconds.\"/move Marlon 0 1 2 /move Gunther 0 0 2/speak Marlon \"I'd take these down to the blacksmith, If he's worth his prices, he'll be able to open them.\"/speak Marlon \"If you want to actually use the things, you'll have to pry it out of Rasmodius. He's a secretive old man, but get on his good side and he'll talk your ear off.\"/pause 500 /end",
-
+	"event.GetSpellbook.text-1": "\"Greetings, @. I hope I am not interrupting your work on the farm.\"",
+	"event.GetSpellbook.text-2": "\"I've made great progress with my research as of late, thanks to your generous gifts.\"",
+	"event.GetSpellbook.text-3": "\"As thanks, I wanted to give you this old tome of runic magic from my personal library, I have no use for it anymore.\"",
+	"event.GetSpellbook.text-4": "\"This form of magic should be suitable for a novice. You need only some runestones, I'm sure you've come across some in the mines already.\"",
+	"event.GetSpellbook.text-5": "\"Well, that was all. I'll be on my way now.\"",
+	
+	"event.RunesFound.text-1": "\"Marlon, you know I can't accept a sword as payment for your late return fees...\"",
+	"event.RunesFound.text-2": "\"This is an antique! I've been using this blade for decades now!\"",
+	"event.RunesFound.text-3": "\"Ah! Welcome! Just let me finish putting these books away and I'll be right with you!\"",
+	"event.RunesFound.text-4": "\"*huff* *puff*\"",
+	"event.RunesFound.text-5": "\"Perhaps the books can wait. What do you need today, @?\"",
+	"event.RunesFound.text-6": "\"#I found this underground#Can you tell me about this?\"",
+	"event.RunesFound.text-7": "\"Let me have a look...\"",
+	"event.RunesFound.text-8": "\"Hmm... I'm not quite sure what that is... \"",
+	"event.RunesFound.text-9": "\"The runes aren't any I recognise either...\"",
+	"event.RunesFound.text-10": "\"Ah, well isn't that nostalgic.\"",
+	"event.RunesFound.text-11": "\"You're familiar with these?\"",
+	"event.RunesFound.text-12": "\"Not myself, but an old friend of mine used to be obsessed with them.\"",
+	"event.RunesFound.text-13": "\"Could you bring it over here, @? I'd like to have a closer look.\"",
+	"event.RunesFound.text-14": "\"As I suspected, these are definitely guthixian runestones. Or rather, they contain guthixian runestones.\"",
+	"event.RunesFound.text-15": "\"Ol' Ras used to spend hours trying to crack these things open, until I showed up. Turns out a strike with the trusty hammer does the job in seconds.\"",
+	"event.RunesFound.text-16": "\"I'd take these down to the blacksmith, If he's worth his prices, he'll be able to open them.\"",
+	"event.RunesFound.text-17": "\"If you want to actually use the things, you'll have to pry it out of Rasmodius. He's a secretive old man, but get on his good side and he'll talk your ear off.\"",
+	
 	"minievent.FindRunePack.text":"Your hands tingle as you pick up the mysterious object. Maybe the archaeologist will know something about this?",
 	
 	"buff.Charge.display-name":"Charge",

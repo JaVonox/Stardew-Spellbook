@@ -461,75 +461,79 @@ public static class ModAssets
     public static List<LoadableText> loadableText = new()
     {
         {
-            new LoadableMail("Tofu.RunescapeSpellbook_SpellMail","mail.SpellMail.text")
+            new LoadableMail("Tofu.RunescapeSpellbook_SpellMail",new()
+            {
+                ("{0}[letterbg 2]%item object Tofu.RunescapeSpellbook_StaffMagic 1 %%[#]{1}",new (){"mail.SpellMail.text","mail.SpellMail.title"})
+            })
         },
         {
-            new LoadableMail(15,Season.Summer,1,"mail.ClintPackService.text")
+            new LoadableMail(15,Season.Summer,1,new()
+                {("{0}%item object Tofu.RunescapeSpellbook_TreasureAirPack 3 %%[#]{1}",new (){"mail.ClintPackService.text","mail.ClintPackService.title"})})
         },
         {
-            new LoadableMail(3,Season.Spring,2,"mail.WillyCasket.text")
+            new LoadableMail(3,Season.Spring,2,new(){("{0}%item object Tofu.RunescapeSpellbook_EasyCasket 1 %%[#]{1}",new (){"mail.WillyCasket.text","mail.WillyCasket.title"})})
         },
         {
-            new LoadableMail(1,Season.Summer,3,"mail.ClintTerribleGift.text")
+            new LoadableMail(1,Season.Summer,3,new(){("{0}%item object Tofu.RunescapeSpellbook_RuneDeath 60 %%[#]{1}",new (){"mail.ClintTerribleGift.text","mail.ClintTerribleGift.title"})})
         },
         {
-            new LoadableMail(9,Season.Spring,2,"mail.LinusStones.text")
+            new LoadableMail(9,Season.Spring,2,new(){("{0}%item object Tofu.RunescapeSpellbook_RuneNature 40 %%[#]{1}",new (){"mail.LinusStones.text","mail.LinusStones.title"})})
         },
         {
-            new LoadableMail(27,Season.Fall,2,"mail.SomeoneElse.text")
+            new LoadableMail(27,Season.Fall,2,new(){("{0}%item object Tofu.RunescapeSpellbook_HardCasket 1 %%[#]{1}",new (){"mail.SomeoneElse.text","mail.SomeoneElse.title"})})
         },
         {
             new Gobcast(21,Season.Spring,1, new()
             {
-                "tvbroadcast.Gobcast1.text-1","tvbroadcast.Gobcast1.text-2","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast1.text-1",new()),("tvbroadcast.Gobcast1.text-2",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(7,Season.Fall,1,new()
             {
-                "tvbroadcast.Gobcast2.text-1","tvbroadcast.Gobcast2.text-2","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast2.text-1",new()),("tvbroadcast.Gobcast2.text-2",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(4,Season.Summer,2,new()
             {
-                "tvbroadcast.Gobcast3.text-1","tvbroadcast.Gobcast3.text-2","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast3.text-1",new()),("tvbroadcast.Gobcast3.text-2",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(24,Season.Fall,1,new()
             {
-                "tvbroadcast.Gobcast4.text-1","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast4.text-1",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(2,Season.Winter,1,new()
             {
-                "tvbroadcast.Gobcast5.text-1","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast5.text-1",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(3,Season.Spring,2,new()
             {
-                "tvbroadcast.Gobcast6.text-1","tvbroadcast.Gobcast6.text-2","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast6.text-1",new()),("tvbroadcast.Gobcast6.text-2",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(11,Season.Winter,1,new()
             {
-                "tvbroadcast.Gobcast7.text-1","tvbroadcast.Gobcast7.text-2","tvbroadcast.Gobcast7.text-3","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast7.text-1",new()),("tvbroadcast.Gobcast7.text-2",new()),("tvbroadcast.Gobcast7.text-3",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(2,Season.Summer,3,new()
             {
-                "tvbroadcast.Gobcast8.text-1","tvbroadcast.Gobcast8.text-2","tvchannel.Gobcast.outro"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast8.text-1",new()),("tvbroadcast.Gobcast8.text-2",new()),("tvchannel.Gobcast.outro",new())
             })
         },
         {  
             new Gobcast(22,Season.Winter,3,new()
             {
-                "tvbroadcast.Gobcast9.text-1","tvbroadcast.Gobcast9.text-2","tvbroadcast.Gobcast9.text-3"
+                ("tvchannel.Gobcast.intro",new()),("tvbroadcast.Gobcast9.text-1",new()),("tvbroadcast.Gobcast9.text-2",new()),("tvbroadcast.Gobcast9.text-3",new())
             })
         }
         
@@ -542,7 +546,10 @@ public static class ModAssets
             "Data/Events/Farm", new()
             {
                 {
-                    new LoadableEvent("Tofu.RunescapeSpellbook_Event0/f Wizard 1000/t 600 1200","event.GetSpellbook.data")
+                    new LoadableEvent("Tofu.RunescapeSpellbook_Event0/f Wizard 1000/t 600 1200",new()
+                        {("continue/64 15/farmer 64 16 2 Wizard 64 18 0/pause 1500/speak Wizard {0} /speak Wizard {1} /speak Wizard {2} /stopMusic /itemAboveHead Tofu.RunescapeSpellbook_RuneSpellbook /pause 1500 /glow 24 107 97 /playsound RunescapeSpellbook.MagicLevel /pause 2000 /mail Tofu.RunescapeSpellbook_SpellMail/speak Wizard {3} /pause 600/speak Wizard {4} /pause 300/end",
+                            new()
+                            {"event.GetSpellbook.text-1","event.GetSpellbook.text-2","event.GetSpellbook.text-3","event.GetSpellbook.text-4","event.GetSpellbook.text-5"})})
                 }
             }
         },
@@ -550,7 +557,14 @@ public static class ModAssets
             "Data/Events/ArchaeologyHouse", new()
             {
                 {
-                    new LoadableEvent("Tofu.RunescapeSpellbook_Event1/n Tofu.RunescapeSpellbook_RunesFound","event.RunesFound.data")
+                    new LoadableEvent("Tofu.RunescapeSpellbook_Event1/n Tofu.RunescapeSpellbook_RunesFound",new()
+                    {("continue/11 9/farmer 50 50 0 Gunther 11 9 0 Marlon 12 9 3/skippable /pause 1000/speak Gunther {0} /speak Marlon {1} /warp farmer 3 14 /playSound doorClose /pause 1000/move farmer 0 -1 1 /move farmer 3 0 2 /move farmer 0 1 1 /move farmer 5 0 0 /move Marlon 0 0 2 /move farmer 0 -3 0/move Gunther 0 0 2 /speak Gunther {2} /move Gunther 0 0 0 /pause 500 /jump Gunther 8 /pause 500 /textAboveHead Gunther {3} /pause 2000 /move Gunther 0 0 2/speak Gunther {4} /question null {5} /speak Gunther {6} /pause 1000/speak Gunther {7} /speak Gunther {8} /move Marlon 0 0 3 /speak Marlon {9} /move Gunther 0 0 1 /speak Gunther {10} /speak Marlon {11} /move Marlon 0 0 2 /speak Marlon {12} /move farmer 1 0 0 /move Marlon 0 0 2 /move farmer 0 -1 0 /pause 1000 /move farmer 0 1 0 /pause 1000/speak Marlon {13} /speak Marlon {14} /move Marlon 0 1 2 /move Gunther 0 0 2/speak Marlon {15} /speak Marlon {16} /pause 500 /end",
+                        new(){
+                        "event.RunesFound.text-1","event.RunesFound.text-2","event.RunesFound.text-3","event.RunesFound.text-4","event.RunesFound.text-5",
+                        "event.RunesFound.text-6","event.RunesFound.text-7","event.RunesFound.text-8","event.RunesFound.text-9","event.RunesFound.text-10",
+                        "event.RunesFound.text-11","event.RunesFound.text-12","event.RunesFound.text-13","event.RunesFound.text-14","event.RunesFound.text-15",
+                        "event.RunesFound.text-16","event.RunesFound.text-17"
+                    })})
                 }
             }
         }

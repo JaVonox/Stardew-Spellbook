@@ -615,49 +615,57 @@ public class BuildingObject : BuildingData
 public abstract class LoadableText : ITranslatable
 {
     public string id;
-    public List<string> contents;
+    public List<string> contents = new List<string>();
+    public List<(string baseText,List<string> implaceTranslationKeys)> contentKeys;
     public LoadableText()
     {
     }
 
     public virtual void ApplyTranslations()
     {
-        for (int i = 0; i < contents.Count; i++)
+        contents.Clear();
+        for (int x = 0; x < contentKeys.Count; x++)
         {
-            contents[i] = KeyTranslator.GetTranslation(contents[i]);
+            List<string> implaceTranslatedKeys = new List<string>();
+            if(contentKeys[x].implaceTranslationKeys.Count != 0)
+            {
+                for (int y = 0; y < contentKeys[x].implaceTranslationKeys.Count; y++)
+                {
+                    implaceTranslatedKeys.Add(KeyTranslator.GetTranslation(contentKeys[x].implaceTranslationKeys[y]));
+                }
+                contents.Add(string.Format(contentKeys[x].baseText,implaceTranslatedKeys.ToArray()));
+            }
+            else
+            {
+                contents.Add(KeyTranslator.GetTranslation(contentKeys[x].baseText));
+            }
         }
     }
 
-    public LoadableText(string id, List<string> contents)
+    public LoadableText(string id, List<(string baseText,List<string> implaceTranslationKeys)> contentKeys)
     {
         this.id = id;
-        this.contents = contents;
+        this.contentKeys = contentKeys;
     }
-    
-    public LoadableText(string id, string contents)
-    {
-        this.id = id;
-        this.contents = new(){contents};
-    }
+
 }
 
 public class LoadableMail : LoadableText
 {
-    public LoadableMail(int day, Season season, int reqYear, string contents) : base(
-        $"{season.ToString().ToLower()}_{day}_{reqYear}",contents) { }
-    public LoadableMail(string mailID, string translationKey) : base(mailID, translationKey) { }
+    public LoadableMail(int day, Season season, int reqYear, List<(string baseText,List<string> implaceTranslationKeys)> contentKeys) : base(
+        $"{season.ToString().ToLower()}_{day}_{reqYear}",contentKeys) { }
+    public LoadableMail(string mailID, List<(string baseText,List<string> implaceTranslationKeys)> contentKeys) : base(mailID, contentKeys) { }
 }
 
 public class LoadableEvent : LoadableText
 {
-    public LoadableEvent(string id, string translationKey) : base(id, new List<string>() { translationKey })
+    public LoadableEvent(string id, List<(string baseText,List<string> implaceTranslationKeys)> contentKeys) : base(id, contentKeys)
     {
         
     }
 }
 public abstract class LoadableTV : LoadableText
 {
-    protected abstract string introText { get; set; }
     public abstract string channelName { get; set; }
     public abstract bool isBasicsTranslated { get; set; }
     
@@ -665,53 +673,28 @@ public abstract class LoadableTV : LoadableText
     public Season season;
     public int firstYear;
 
-    public LoadableTV(int channelID, int day, Season season, int firstYear, List<string> contents)
+    public LoadableTV(int channelID, int day, Season season, int firstYear, List<(string baseText,List<string> implaceTranslationKeys)> contentKeys)
     {
         base.id = $"{channelID}";
-        base.contents = CreateContentsWithIntro(contents);
+        base.contentKeys = contentKeys;
         this.day = day;
         this.season = season;
         this.firstYear = firstYear;
-    }
-
-    protected List<string> CreateContentsWithIntro(List<string> contents)
-    {
-        List<string> result = new() { introText };
-        result.AddRange(contents);
-        return result;
     }
     
     public override void ApplyTranslations()
     {
         if (!isBasicsTranslated)
         {
-            introText = KeyTranslator.GetTranslation(introText);
             channelName = KeyTranslator.GetTranslation(channelName);
             isBasicsTranslated = true;
         }
-
-        for (int i = 0; i < contents.Count; i++)
-        {
-            contents[i] = KeyTranslator.GetTranslation(contents[i]);
-        }
+        base.ApplyTranslations();
     }
 }
 
 public class Gobcast : LoadableTV
 {
-    private static string staticIntroText = "tvchannel.Gobcast.intro"; 
-    protected override string introText
-    {
-        get
-        {
-            return staticIntroText;
-        }
-        set
-        {
-            staticIntroText = value;
-        }
-    }
-    
     private static string staticChannelName = "tvchannel.Gobcast.channel-name"; 
     public override string channelName
     {
@@ -739,8 +722,8 @@ public class Gobcast : LoadableTV
     }
 
     private static int channelID = 429;
-    public Gobcast(int day, Season season, int firstYear, List<string> contents) :
-        base(channelID,day, season, firstYear, contents) { }
+    public Gobcast(int day, Season season, int firstYear, List<(string baseText,List<string> implaceTranslationKeys)> contentKeys) :
+        base(channelID,day, season, firstYear, contentKeys) { }
 }
 public class ShopListings
 {
