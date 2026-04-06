@@ -24,6 +24,7 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Powers;
 using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
+using StardewValley.ItemTypeDefinitions;
 using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.Objects;

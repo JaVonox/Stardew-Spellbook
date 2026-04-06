@@ -265,9 +265,9 @@ public class FishObject : ModLoadObjects
         this.catchChance = catchChance;
         this.minFishingLevel = minFishingLevel;
         base.Price = price;
-        base.ExcludeFromFishingCollection = true;
         base.Edibility = edibility;
         base.ContextTags = new() {$"item_{id}",roeColour};
+        base.Type = "Fish";
         
         this.fishTypeWaterColour = waterColour;
         this.populationGates = populationGates;
@@ -520,6 +520,7 @@ public class MachinesObject : BigCraftableData, ITranslatable
     
     public void AddMachineRules(IDictionary<string,MachineData> machineDict)
     {
+        //TODO this seems specialised to the pack shredder, might want to abstract this.
         MachineData targetMachineData = new MachineData();
         targetMachineData.OutputRules = new List<MachineOutputRule>();
         
