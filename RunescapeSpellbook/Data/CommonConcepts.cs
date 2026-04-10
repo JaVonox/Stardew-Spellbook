@@ -1,4 +1,6 @@
-﻿namespace RunescapeSpellbook;
+﻿using Microsoft.Xna.Framework;
+
+namespace RunescapeSpellbook;
 
 public struct ItemDrop
 {
@@ -28,7 +30,6 @@ public struct ItemDrop
         this.chance = weight;
         this.quality = quality;
     }
-    
 }
 public enum PrefType
 {

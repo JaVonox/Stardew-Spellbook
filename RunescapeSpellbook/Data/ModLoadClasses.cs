@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SpaceCore.VanillaAssetExpansion;
 using StardewValley;
 using StardewValley.GameData;
 using StardewValley.GameData.BigCraftables;
@@ -12,12 +13,13 @@ using StardewValley.GameData.Objects;
 using StardewValley.GameData.Powers;
 using StardewValley.GameData.Shops;
 
-namespace RunescapeSpellbook;
+namespace RunescapeSpellbook; 
 public class ModLoadObjects : ObjectData, ITranslatable
 {
     public string id;
     public Dictionary<string, PrefType>? characterPreferences;
     protected string translationKey;
+    protected ObjectExtensionData extendableData;
     public ModLoadObjects(string id, string translationKey, int spriteIndex, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -2)
     {
         this.id = id;
@@ -32,17 +34,28 @@ public class ModLoadObjects : ObjectData, ITranslatable
         base.ExcludeFromRandomSale = true;
         this.characterPreferences = characterPreferences ?? new();
         base.Price = 1;
+        this.extendableData = new ObjectExtensionData();
     }
 
     public virtual void ApplyTranslations()
     {
         base.DisplayName = KeyTranslator.GetTranslation($"item.{this.translationKey}.display-name");
         base.Description = KeyTranslator.GetTranslation($"item.{this.translationKey}.description");
+        
+        if (base.Category < -200 && base.Category > -999) //Get all custom categories (these ranges exist for modded items
+        {
+            this.extendableData.CategoryTextOverride = KeyTranslator.GetTranslation($"ui.Category{this.Category}.text");
+        }
     }
     
     public void AppendObject(IDictionary<string,ObjectData> ObjectsSet)
     {
         ObjectsSet[$"{id}"] = this;
+    }
+
+    public void AppendExtensionData(IDictionary<string, ObjectExtensionData> ExtensionDataSet)
+    {
+        ExtensionDataSet[$"{id}"] = this.extendableData;
     }
 }
 public class RunesObjects : ModLoadObjects
@@ -51,6 +64,18 @@ public class RunesObjects : ModLoadObjects
         base(id,translationKey,spriteIndex,characterPreferences,"Basic",category)
     {
         base.Price = 2;
+        switch (base.Category)
+        {
+            case -429:
+                base.extendableData.CategoryColorOverride = new Color(124,149,101);
+                break;
+            case -430:
+                base.extendableData.CategoryColorOverride = new Color(135,92,17);
+                break;
+            case -431:
+                base.extendableData.CategoryColorOverride = new Color(114,34,28);
+                break;
+        }
     }
     
 }

@@ -183,7 +183,9 @@ namespace RunescapeSpellbook
             Skills.RegisterSkill(new LevelsHandler.MagicSkill());
             LevelsHandler.Load(SpaceCoreApi);
             VirtualCurrencyHandler.Load(SpaceCoreApi);
-            
+
+            SpaceCore.Events.SpaceEvents.OnItemEaten += FarmerEatItem; //Add extra command for when farmer eats
+
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
         {
@@ -288,6 +290,20 @@ namespace RunescapeSpellbook
                             newObject.AppendObject(objectDict);
                         }
                         
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("spacechase0.SpaceCore/ObjectExtensionData"))
+            {
+                e.Edit(asset =>
+                    {
+                        var objectDict = asset.AsDictionary<string, ObjectExtensionData>().Data;
+                        
+                        foreach (ModLoadObjects newObject in ModAssets.modItems.Values)
+                        {
+                            newObject.AppendExtensionData(objectDict);
+                        }
                     }
                 );
             }
@@ -764,54 +780,6 @@ namespace RunescapeSpellbook
             }
         }
         
-        [HarmonyPatch(typeof(Farmer), "doneEating")]
-        public class FarmerEatingPatch
-        {
-            public static bool Prefix(ref Farmer __instance)
-            {
-                if (__instance.mostRecentlyGrabbedItem != null && __instance.IsLocalPlayer)
-                {
-                    Object consumed = __instance.itemToEat as Object;
-                    string consumedID = consumed.QualifiedItemId;
-                    if (ModAssets.modItems.Any(x=> x.Value is PotionObject && consumedID == $"(O){x.Key}"))
-                    {
-                        PotionObject pot = (PotionObject)ModAssets.modItems[consumed.ItemId];
-                        __instance.isEating = false;
-                        __instance.tempFoodItemTextureName.Value = null;
-                        __instance.completelyStopAnimatingOrDoingAction();
-                        __instance.forceCanMove();
-
-                        if (consumedID == "(O)Tofu.RunescapeSpellbook_PotGuthix" || consumedID == "(O)Tofu.RunescapeSpellbook_PotSara")
-                        {
-                            int addAmount = (int)Math.Floor((float)__instance.maxHealth * (pot.healPercent + ((float)__instance.itemToEat.Quality * pot.extraHealthPerQuality)));
-                            int newTotal = __instance.health + addAmount;
-
-                            int currentBonusHealth = ModAssets.GetBonusHealth(__instance);
-                            
-                            if (__instance.health + currentBonusHealth < newTotal)
-                            {
-                                ModAssets.AddBonusHealth(__instance,
-                                     (newTotal <= __instance.maxHealth
-                                        ? 0
-                                        : newTotal - __instance.maxHealth) - currentBonusHealth);
-                                
-                                __instance.health = Math.Min(newTotal, __instance.maxHealth);
-                            }
-                        }
-                        
-                        foreach (Buff buff in consumed.GetFoodOrDrinkBuffs())
-                        {
-                            __instance.applyBuff(buff);
-                        }
-                        
-                        return false;
-                    }
-                }
-                
-                return true;
-            }
-        }
-        
         [HarmonyPatch(typeof(BobberBar), MethodType.Constructor)]
         [HarmonyPatch(new Type[] { typeof(string), typeof(float),typeof(bool),typeof(List<string>),typeof(string),typeof(bool),typeof(string),typeof(bool)})]
         public class BobberConstructPatcher
@@ -936,13 +904,7 @@ namespace RunescapeSpellbook
                     
                     DrawBonusHealthBar(healthDepth - 1,Game1.player.maxHealth,topOfBar,barFullHeight);
                     DrawBonusHealthBar(healthDepth,bonusHealth % Game1.player.maxHealth,topOfBar,barFullHeight);
-                    
-                    //Extra health draw code
-                    /*
-                    string bonusHealth = $"+{ModAssets.localFarmerData.bonusHealth}";
-                    Vector2 stringSize = Game1.dialogueFont.MeasureString(bonusHealth);
-                    Game1.drawWithBorder(bonusHealth, Color.Black * 0f, healthTiers[1], new Vector2(topOfBar.X - stringSize.X, barFullHeight + 128f + stringSize.Y));
-                    */
+
                 }
             }
 
@@ -1065,9 +1027,7 @@ namespace RunescapeSpellbook
                 if (__instance.type.Value == 429) //Staff type
                 {
                     StaffWeaponData staffWeaponData = (StaffWeaponData)Traverse.Create(__instance).Field("cachedData").GetValue();
-
-                    __result = KeyTranslator.GetTranslation("ui.BattlestaffDescription.text",
-                        new { StaffLevel = staffWeaponData.level });
+                    __result = staffWeaponData.levelText;
                 }
             }
         }
@@ -1246,7 +1206,7 @@ namespace RunescapeSpellbook
             {
                 if (f.hasBuff($"Tofu.RunescapeSpellbook_BuffDark")) //If we have dark lure, make the result extremely low for this player, so we can increase their priority
                 {
-                    __result *= 0.1;
+                    __result *= 0.1f;
                 }
             }
         }
@@ -1298,48 +1258,6 @@ namespace RunescapeSpellbook
             }
         }
         
-        [HarmonyPatch(typeof(Object), "GetCategoryDisplayName")]
-        [HarmonyPatch(new Type[] { typeof(int)})]
-        public class DisplayNamePatcher
-        {
-            public static void Postfix(ref string __result, int category)
-            {
-                switch (category)
-                {
-                    case -429:
-                        __result = KeyTranslator.GetTranslation("ui.CategoryElemental.text");
-                        break;
-                    case -430:
-                        __result = KeyTranslator.GetTranslation("ui.CategoryCombat.text");
-                        break;
-                    case -431:
-                        __result = KeyTranslator.GetTranslation("ui.CategoryCatalytic.text");
-                        break;
-                } 
-            }
-        }
-        
-        [HarmonyPatch(typeof(Object), "GetCategoryColor")]
-        [HarmonyPatch(new Type[] { typeof(int)})]
-        public class ColourPatcher
-        {
-            public static void Postfix(ref Color __result, int category)
-            {
-                switch (category)
-                {
-                    case -429:
-                        __result = new Color(124,149,101);
-                        break;
-                    case -430:
-                        __result = new Color(135,92,17);
-                        break;
-                    case -431:
-                        __result = new Color(114,34,28);
-                        break;
-                } 
-            }
-        }
-        
         [HarmonyPatch(typeof(Slingshot), "GetAmmoCollisionBehavior")]
         [HarmonyPatch(new Type[] { typeof(Object)})]
         public class SlingshotExplodePatcher
@@ -1372,7 +1290,6 @@ namespace RunescapeSpellbook
         {
             public static bool Prefix(BasicProjectile __instance, NPC n, GameLocation location)
             {
-                //TODO check ammo works still
                 if (__instance.itemId.Value != null && (__instance.damagesMonsters.Value && n is Monster))
                 {
                     Farmer player = __instance.GetPlayerWhoFiredMe(location);
@@ -1468,464 +1385,502 @@ namespace RunescapeSpellbook
         }
 
         [HarmonyPatch(typeof(TV), "checkForAction")]
-            public class TVChannelTranspiler
+        public class TVChannelTranspiler
+        {
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                try
                 {
-                    try
-                    {
-                        var codes = new List<CodeInstruction>(instructions);
+                    var codes = new List<CodeInstruction>(instructions);
 
-                        var toArrayMethod = AccessTools.Method(typeof(List<Response>), "ToArray");
-                        var modifyChannelsMethod = AccessTools.Method(typeof(TVChannelTranspiler), "ModifyChannelsList");
+                    var toArrayMethod = AccessTools.Method(typeof(List<Response>), "ToArray");
+                    var modifyChannelsMethod = AccessTools.Method(typeof(TVChannelTranspiler), "ModifyChannelsList");
 
-                        if (toArrayMethod == null)
-                        {
-                            return instructions;
-                        }
-
-                        for (int i = 0; i < codes.Count; i++)
-                        {
-                            var current = codes[i];
-                            var next = codes[i + 1];
-
-                            if (next.opcode == OpCodes.Callvirt &&
-                                next.operand is MethodInfo method &&
-                                method == toArrayMethod &&
-                                (current.opcode == OpCodes.Ldloc_S ||
-                                 current.opcode == OpCodes.Ldloc_0 ||
-                                 current.opcode == OpCodes.Ldloc_1 ||
-                                 current.opcode == OpCodes.Ldloc_2 ||
-                                 current.opcode == OpCodes.Ldloc_3 ||
-                                 current.opcode == OpCodes.Ldloc))
-                            {
-                                var insertPoint = i + 1;
-                            
-                                var dupInstruction = new CodeInstruction(OpCodes.Dup);
-                                var callInstruction = new CodeInstruction(OpCodes.Call, modifyChannelsMethod);
-                            
-                                if (codes[insertPoint].labels.Count > 0)
-                                {
-                                    dupInstruction.labels.AddRange(codes[insertPoint].labels);
-                                    codes[insertPoint].labels.Clear();
-                                }
-                            
-                                codes.Insert(insertPoint, dupInstruction);
-                                codes.Insert(insertPoint + 1, callInstruction);
-                                break;
-                            }
-                        }
-                    
-                        return codes;
-
-                    }
-                    catch (Exception e)
+                    if (toArrayMethod == null)
                     {
                         return instructions;
                     }
-                }
-                public static void ModifyChannelsList(List<Response> channels)
-                {
-                    foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
-                                 x is LoadableTV tvChannel && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season && Game1.year >= tvChannel.firstYear))
-                    {
-                        string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : KeyTranslator.GetTranslation("ui.Rerun.text"));
-                        channels.Insert(channels.Count - 1, new Response($"RS_{addChannel.id}", channelName));
-                    }
-                }
 
-                [HarmonyPatch(typeof(TV), "selectChannel")]
-                [HarmonyPatch(new Type[] { typeof(Farmer), typeof(string)})]
-                public class ChannelSelectPatcher
-                {
-                    public static void Postfix(TV __instance, Farmer who, string answer)
+                    for (int i = 0; i < codes.Count; i++)
                     {
-                        var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
-                        var currentChannelValue = currentChannelTraverse.GetValue<int>();
-                    
-                        if (currentChannelValue == 0)
+                        var current = codes[i];
+                        var next = codes[i + 1];
+
+                        if (next.opcode == OpCodes.Callvirt &&
+                            next.operand is MethodInfo method &&
+                            method == toArrayMethod &&
+                            (current.opcode == OpCodes.Ldloc_S ||
+                             current.opcode == OpCodes.Ldloc_0 ||
+                             current.opcode == OpCodes.Ldloc_1 ||
+                             current.opcode == OpCodes.Ldloc_2 ||
+                             current.opcode == OpCodes.Ldloc_3 ||
+                             current.opcode == OpCodes.Ldloc))
                         {
-                            LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && $"RS_{x.id}" == answer && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
-
-                            if (modChannel != null)
+                            var insertPoint = i + 1;
+                        
+                            var dupInstruction = new CodeInstruction(OpCodes.Dup);
+                            var callInstruction = new CodeInstruction(OpCodes.Call, modifyChannelsMethod);
+                        
+                            if (codes[insertPoint].labels.Count > 0)
                             {
-                                currentChannelTraverse.SetValue(int.Parse(modChannel.id));
-                            
-                                var screenTraverse = Traverse.Create(__instance).Field("screen");
-                                screenTraverse.SetValue(new TemporaryAnimatedSprite("Mods.RunescapeSpellbook.Assets.spellanimations", new Rectangle(64, 0, 42, 28), 3000f, 2, 999999, __instance.getScreenPosition(), flicker: false, flipped: false, (float)(__instance.boundingBox.Bottom - 1) / 10000f + 1E-05f, 0f, Color.White, __instance.getScreenSizeModifier(), 0f, 0f, 0f));
-                                Game1.drawObjectDialogue(modChannel.contents[0]);
-                                Game1.afterDialogues = __instance.proceedToNextScene;
+                                dupInstruction.labels.AddRange(codes[insertPoint].labels);
+                                codes[insertPoint].labels.Clear();
                             }
-
+                        
+                            codes.Insert(insertPoint, dupInstruction);
+                            codes.Insert(insertPoint + 1, callInstruction);
+                            break;
                         }
                     }
-                }
+                
+                    return codes;
 
-                [HarmonyPatch(typeof(TV), "proceedToNextScene")]
-                public class ChannelNextDialoguePatcher
+                }
+                catch (Exception e)
                 {
-                    private static int lastIndex = 0;
-                    public static void Postfix(TV __instance)
+                    return instructions;
+                }
+            }
+            public static void ModifyChannelsList(List<Response> channels)
+            {
+                foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
+                             x is LoadableTV tvChannel && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season && Game1.year >= tvChannel.firstYear))
+                {
+                    string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : KeyTranslator.GetTranslation("ui.Rerun.text"));
+                    channels.Insert(channels.Count - 1, new Response($"RS_{addChannel.id}", channelName));
+                }
+            }
+
+            [HarmonyPatch(typeof(TV), "selectChannel")]
+            [HarmonyPatch(new Type[] { typeof(Farmer), typeof(string)})]
+            public class ChannelSelectPatcher
+            {
+                public static void Postfix(TV __instance, Farmer who, string answer)
+                {
+                    var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
+                    var currentChannelValue = currentChannelTraverse.GetValue<int>();
+                
+                    if (currentChannelValue == 0)
                     {
-                        var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
-                        var currentChannelValue = currentChannelTraverse.GetValue<int>();
-                    
-                        LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && int.Parse(x.id) == currentChannelValue && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
+                        LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && $"RS_{x.id}" == answer && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
+
                         if (modChannel != null)
                         {
-                            int maxDialogue = modChannel.contents.Count - 1;
-
-                            if (maxDialogue == lastIndex)
-                            {
-                                __instance.turnOffTV();
-                                lastIndex = 0;
-                            }
-                            else
-                            {
-                                lastIndex++;
-                                Game1.drawObjectDialogue(modChannel.contents[lastIndex]);
-                                Game1.afterDialogues = __instance.proceedToNextScene;
-                            }
+                            currentChannelTraverse.SetValue(int.Parse(modChannel.id));
+                        
+                            var screenTraverse = Traverse.Create(__instance).Field("screen");
+                            screenTraverse.SetValue(new TemporaryAnimatedSprite("Mods.RunescapeSpellbook.Assets.spellanimations", new Rectangle(64, 0, 42, 28), 3000f, 2, 999999, __instance.getScreenPosition(), flicker: false, flipped: false, (float)(__instance.boundingBox.Bottom - 1) / 10000f + 1E-05f, 0f, Color.White, __instance.getScreenSizeModifier(), 0f, 0f, 0f));
+                            Game1.drawObjectDialogue(modChannel.contents[0]);
+                            Game1.afterDialogues = __instance.proceedToNextScene;
                         }
+
                     }
                 }
             }
 
-            //Console Commands
-            private bool HasNoMagic()
+            [HarmonyPatch(typeof(TV), "proceedToNextScene")]
+            public class ChannelNextDialoguePatcher
             {
-                if (!LevelsHandler.HasMagic(Game1.player))
+                private static int lastIndex = 0;
+                public static void Postfix(TV __instance)
                 {
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.NoMagic.text"),LogLevel.Warn);
-                    return true;
-                }
+                    var currentChannelTraverse = Traverse.Create(__instance).Field("currentChannel");
+                    var currentChannelValue = currentChannelTraverse.GetValue<int>();
+                
+                    LoadableText? modChannel = ModAssets.loadableText.Find(x => x is LoadableTV tvChannel && int.Parse(x.id) == currentChannelValue && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season);
+                    if (modChannel != null)
+                    {
+                        int maxDialogue = modChannel.contents.Count - 1;
 
-                return false;
+                        if (maxDialogue == lastIndex)
+                        {
+                            __instance.turnOffTV();
+                            lastIndex = 0;
+                        }
+                        else
+                        {
+                            lastIndex++;
+                            Game1.drawObjectDialogue(modChannel.contents[lastIndex]);
+                            Game1.afterDialogues = __instance.proceedToNextScene;
+                        }
+                    }
+                }
             }
+        }
         
-            private bool HasNoWorldContextReady()
+        //Spacecore Event Handlers
+        public void FarmerEatItem(object? assocFarmer, EventArgs args)
+        {
+            if (assocFarmer == null || !(assocFarmer is Farmer farmer) || !farmer.IsLocalPlayer || farmer.itemToEat == null || !(farmer.itemToEat is Object consumed))
             {
-                if (!Context.IsWorldReady)
-                {
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.NoWorld.text"),LogLevel.Warn);
-                    return true;
-                }
-
-                return false;
+                return;
             }
-
-            //TODO Most of these dont work now cuz of the switch to spacecore
-            private void GrantMagic(string command, string[] args)
-            {
-                if(HasNoWorldContextReady()){return;}
             
-                if (LevelsHandler.HasMagic(Game1.player))
+            string consumedID = consumed.QualifiedItemId;
+            if (ModAssets.modItems.Any(x=> x.Value is PotionObject && consumedID == $"(O){x.Key}"))
+            {
+                PotionObject pot = (PotionObject)ModAssets.modItems[consumed.ItemId];
+
+                if (consumedID == "(O)Tofu.RunescapeSpellbook_PotGuthix" || consumedID == "(O)Tofu.RunescapeSpellbook_PotSara")
                 {
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.AlreadyHaveMagic.text"),LogLevel.Warn);
-                    return;
+                    int addAmount = (int)Math.Floor((float)farmer.maxHealth * (pot.healPercent + ((float)farmer.itemToEat.Quality * pot.extraHealthPerQuality)));
+                    int newTotal = farmer.health + addAmount;
+
+                    int currentBonusHealth = ModAssets.GetBonusHealth(farmer);
+                    
+                    if (farmer.health + currentBonusHealth < newTotal)
+                    {
+                        ModAssets.AddBonusHealth(farmer,
+                             (newTotal <= farmer.maxHealth
+                                ? 0
+                                : newTotal - farmer.maxHealth) - currentBonusHealth);
+                        
+                        farmer.health = Math.Min(newTotal, farmer.maxHealth);
+                    }
                 }
-                Game1.player.eventsSeen.Add("Tofu.RunescapeSpellbook_Event0");
-                Monitor.Log(KeyTranslator.GetTranslation("log.AddedMagic.text"),LogLevel.Info);
-                if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
+                
+                foreach (Buff buff in consumed.GetFoodOrDrinkBuffs())
                 {
-                    reqLevel = Math.Clamp(reqLevel, 0, 10);
-                    ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicLevel",reqLevel.ToString());
-                    ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicExp",(Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
+                    farmer.applyBuff(buff);
                 }
             }
+        }
+
+        //Console Commands
+        private bool HasNoMagic()
+        {
+            if (!LevelsHandler.HasMagic(Game1.player))
+            {
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.NoMagic.text"),LogLevel.Warn);
+                return true;
+            }
+
+            return false;
+        }
     
-            private void SetLevel(string command, string[] args)
+        private bool HasNoWorldContextReady()
+        {
+            if (!Context.IsWorldReady)
             {
-                if (HasNoWorldContextReady() || HasNoMagic()){return;}
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.NoWorld.text"),LogLevel.Warn);
+                return true;
+            }
 
-                if (args.Length == 0)
+            return false;
+        }
+
+        //TODO Most of these dont work now cuz of the switch to spacecore
+        private void GrantMagic(string command, string[] args)
+        {
+            if(HasNoWorldContextReady()){return;}
+        
+            if (LevelsHandler.HasMagic(Game1.player))
+            {
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.AlreadyHaveMagic.text"),LogLevel.Warn);
+                return;
+            }
+            Game1.player.eventsSeen.Add("Tofu.RunescapeSpellbook_Event0");
+            Monitor.Log(KeyTranslator.GetTranslation("log.AddedMagic.text"),LogLevel.Info);
+            if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
+            {
+                reqLevel = Math.Clamp(reqLevel, 0, 10);
+                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicLevel",reqLevel.ToString());
+                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicExp",(Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
+            }
+        }
+
+        private void SetLevel(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+            if (args.Length == 0)
+            {
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyMagicLevel.text"),LogLevel.Error);
+                return;
+            }
+        
+            if (int.TryParse(args[0], out int reqLevel))
+            {
+                reqLevel = Math.Clamp(reqLevel, 0, 10);
+                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", (reqLevel).ToString());
+                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", (Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
+            }
+        }
+    
+        private void SetExp(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+            if (args.Length == 0)
+            {
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyExpSet.text"),LogLevel.Error);
+                return;
+            }
+        
+            if (double.TryParse(args[0], out double reqExp))
+            {
+                reqExp = Math.Clamp(reqExp, 0, Farmer.getBaseExperienceForLevel(10));
+                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", "0");
+                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", "0");
+                LevelsHandler.IncrementMagicExperience(Game1.player, reqExp,false);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.SetExperienceLevel.text", new {RequestedExp = reqExp}),LogLevel.Info);
+            }
+        }
+    
+        private void AddExp(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+
+            if (args.Length == 0)
+            {
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyExpAdd.text"),LogLevel.Error);
+                return;
+            }
+        
+            if (double.TryParse(args[0], out double reqAddExp))
+            {
+                LevelsHandler.IncrementMagicExperience(Game1.player, reqAddExp,false);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.AddExperienceLevel.text", new {RequestedExp = reqAddExp}),LogLevel.Info);
+            }
+        }
+    
+        private void ResetPerks(string command, string[] args)
+        {
+            if (HasNoWorldContextReady() || HasNoMagic()){return;}
+        
+            ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf1","-1");
+            ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf2","-1");
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.RemovePerks.text"),LogLevel.Info);
+        }
+    
+        private void PlayerInfo(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+
+            foreach (Farmer farmerRoot in ModAssets.GetFarmers())
+            {
+                Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-name", new {Value = farmerRoot.Name}),LogLevel.Info);
+                Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-hasmagic", new {Value = LevelsHandler.HasMagic(farmerRoot)}),LogLevel.Info);
+                Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-level", new {Value = LevelsHandler.GetFarmerMagicLevel(farmerRoot)}),LogLevel.Info);
+                Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-multiplier",new {Value = ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier")}),LogLevel.Info);
+            }
+        }
+        private void GrantRunes(string command, string[] args)
+        {
+            if(HasNoWorldContextReady()){return;}
+        
+            string runeReq = args.Length == 0 ? "default" : args[0].ToLower();
+
+            List<int> runeReqs;
+        
+            if (runeReq == "default")
+            {
+                runeReqs = new List<int>() { -429, -431, -430 };
+            }
+            else if (runeReq == "elemental" || runeReq == "elem")
+            {
+                runeReqs = new List<int>() { -429 };
+            }
+            else if (runeReq == "catalytic" || runeReq == "cat" || runeReq == "cata")
+            {
+                runeReqs = new List<int>() { -431, -430 };
+            }
+            else if (runeReq == "teleport" || runeReq == "tele")
+            {
+                runeReqs = new List<int>() { -429};
+            
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneLaw");
+                item.Stack = 255;
+                Game1.player.addItemToInventory(item);
+            }
+            else if (runeReq == "utility" || runeReq == "util")
+            {
+                runeReqs = new List<int>() { -429,-431};
+            }
+            else if (runeReq == "combat" || runeReq == "comb")
+            {
+                runeReqs = new List<int>() { -429,-430};
+            }
+            else if (runeReq == "combat2" || runeReq == "com2" || runeReq == "comb2")
+            {
+                runeReqs = new List<int>() { -429,-430};
+            
+                StardewValley.Object cosmRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneCosmic");
+                cosmRune.Stack = 255;
+                Game1.player.addItemToInventory(cosmRune);
+            
+                StardewValley.Object astRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneAstral");
+                astRune.Stack = 255;
+                Game1.player.addItemToInventory(astRune);
+            }
+            else
+            {
+                List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.DisplayName.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
+                if (matchList.Count == 0)
                 {
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyMagicLevel.text"),LogLevel.Error);
+                    this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantRune.text-fail", new {RuneReq = runeReq}),LogLevel.Error);
                     return;
-                }
-            
-                if (int.TryParse(args[0], out int reqLevel))
-                {
-                    reqLevel = Math.Clamp(reqLevel, 0, 10);
-                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", (reqLevel).ToString());
-                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", (Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
-                }
-            }
-        
-            private void SetExp(string command, string[] args)
-            {
-                if (HasNoWorldContextReady() || HasNoMagic()){return;}
-
-                if (args.Length == 0)
-                {
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyExpSet.text"),LogLevel.Error);
-                    return;
-                }
-            
-                if (double.TryParse(args[0], out double reqExp))
-                {
-                    reqExp = Math.Clamp(reqExp, 0, Farmer.getBaseExperienceForLevel(10));
-                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", "0");
-                    ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", "0");
-                    LevelsHandler.IncrementMagicExperience(Game1.player, reqExp,false);
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SetExperienceLevel.text", new {RequestedExp = reqExp}),LogLevel.Info);
-                }
-            }
-        
-            private void AddExp(string command, string[] args)
-            {
-                if (HasNoWorldContextReady() || HasNoMagic()){return;}
-
-                if (args.Length == 0)
-                {
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyExpAdd.text"),LogLevel.Error);
-                    return;
-                }
-            
-                if (double.TryParse(args[0], out double reqAddExp))
-                {
-                    LevelsHandler.IncrementMagicExperience(Game1.player, reqAddExp,false);
-                    this.Monitor.Log(KeyTranslator.GetTranslation("log.AddExperienceLevel.text", new {RequestedExp = reqAddExp}),LogLevel.Info);
-                }
-            }
-        
-            private void ResetPerks(string command, string[] args)
-            {
-                if (HasNoWorldContextReady() || HasNoMagic()){return;}
-            
-                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf1","-1");
-                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf2","-1");
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.RemovePerks.text"),LogLevel.Info);
-            }
-        
-            private void PlayerInfo(string command, string[] args)
-            {
-                if (HasNoWorldContextReady()){return;}
-
-                foreach (Farmer farmerRoot in ModAssets.GetFarmers())
-                {
-                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-name", new {Value = farmerRoot.Name}),LogLevel.Info);
-                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-hasmagic", new {Value = LevelsHandler.HasMagic(farmerRoot)}),LogLevel.Info);
-                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-level", new {Value = LevelsHandler.GetFarmerMagicLevel(farmerRoot)}),LogLevel.Info);
-                    Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-multiplier",new {Value = ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier")}),LogLevel.Info);
-                }
-            }
-            private void GrantRunes(string command, string[] args)
-            {
-                if(HasNoWorldContextReady()){return;}
-            
-                string runeReq = args.Length == 0 ? "default" : args[0].ToLower();
-
-                List<int> runeReqs;
-            
-                if (runeReq == "default")
-                {
-                    runeReqs = new List<int>() { -429, -431, -430 };
-                }
-                else if (runeReq == "elemental" || runeReq == "elem")
-                {
-                    runeReqs = new List<int>() { -429 };
-                }
-                else if (runeReq == "catalytic" || runeReq == "cat" || runeReq == "cata")
-                {
-                    runeReqs = new List<int>() { -431, -430 };
-                }
-                else if (runeReq == "teleport" || runeReq == "tele")
-                {
-                    runeReqs = new List<int>() { -429};
-                
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneLaw");
-                    item.Stack = 255;
-                    Game1.player.addItemToInventory(item);
-                }
-                else if (runeReq == "utility" || runeReq == "util")
-                {
-                    runeReqs = new List<int>() { -429,-431};
-                }
-                else if (runeReq == "combat" || runeReq == "comb")
-                {
-                    runeReqs = new List<int>() { -429,-430};
-                }
-                else if (runeReq == "combat2" || runeReq == "com2" || runeReq == "comb2")
-                {
-                    runeReqs = new List<int>() { -429,-430};
-                
-                    StardewValley.Object cosmRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneCosmic");
-                    cosmRune.Stack = 255;
-                    Game1.player.addItemToInventory(cosmRune);
-                
-                    StardewValley.Object astRune = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneAstral");
-                    astRune.Stack = 255;
-                    Game1.player.addItemToInventory(astRune);
                 }
                 else
                 {
-                    List<ModLoadObjects> matchList = ModAssets.modItems.Where(x=>x.Value is RunesObjects && x.Value.DisplayName.ToLower().Contains(runeReq)).Select(y=>y.Value).ToList();
-                    if (matchList.Count == 0)
-                    {
-                        this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantRune.text-fail", new {RuneReq = runeReq}),LogLevel.Error);
-                        return;
-                    }
-                    else
-                    {
-                        StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{matchList[0].id}");
-                        item.Stack = 255;
-                        Game1.player.addItemToInventory(item);
-                    }
-                    return;
-                
-                }
-                foreach (string id in ModAssets.modItems.Where(x => runeReqs.Contains(x.Value.Category)).Select(y=>y.Key))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O){id}");
+                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{matchList[0].id}");
                     item.Stack = 255;
                     Game1.player.addItemToInventory(item);
                 }
+                return;
             
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantRune.text-works", new {RuneReq = runeReq}),LogLevel.Info);
+            }
+            foreach (string id in ModAssets.modItems.Where(x => runeReqs.Contains(x.Value.Category)).Select(y=>y.Key))
+            {
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O){id}");
+                item.Stack = 255;
+                Game1.player.addItemToInventory(item);
             }
         
-            private void GrantAmmo(string command, string[] args)
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantRune.text-works", new {RuneReq = runeReq}),LogLevel.Info);
+        }
+    
+        private void GrantAmmo(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SlingshotItem).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
-            
-                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SlingshotItem).Select(y=>y.Value))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                    item.Stack = 255;
-                    Game1.player.addItemToInventory(item);
-                }
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 255;
+                Game1.player.addItemToInventory(item);
+            }
 
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedAmmo.text"),LogLevel.Info);
-            }
-            private void GrantStaffs(string command, string[] args)
-            {
-                if (HasNoWorldContextReady()){return;}
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedAmmo.text"),LogLevel.Info);
+        }
+        private void GrantStaffs(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
 
-                foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
-                {
-                    MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id);
-                    Game1.player.addItemToInventory(item);
-                }
-            
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedWeps.text"),LogLevel.Info);
+            foreach (StaffWeaponData newWeapon in ModAssets.staffWeapons)
+            {
+                MeleeWeapon item = ItemRegistry.Create<MeleeWeapon>(newWeapon.id);
+                Game1.player.addItemToInventory(item);
             }
         
-            private void GrantTreasures(string command, string[] args)
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedWeps.text"),LogLevel.Info);
+        }
+    
+        private void GrantTreasures(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is TreasureObjects and not PackObject).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
-            
-                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is TreasureObjects and not PackObject).Select(y=>y.Value))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                    item.Stack = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-            
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedTreasures.text"),LogLevel.Info);
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
             }
         
-            private void DebugSpawnFloaters(string command, string[] args)
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedTreasures.text"),LogLevel.Info);
+        }
+    
+        private void DebugSpawnFloaters(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            /*
+            Point pos = Game1.player.GetBoundingBox().Center;
+            pos.X -= 100;
+            foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
-            
-                /*
-                Point pos = Game1.player.GetBoundingBox().Center;
-                pos.X -= 100;
-                foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
-                {
-                    pos.X -= 100; 
-                    StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{item.id}");
-                    RunesCurrency cur = ((RunesCurrency)ModAssets.modItems[item.id]);
-                    Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2(),cur.effectColour,cur.volatility));
-                }
-                
-                Instance.Monitor.Log("Spawned Floats",LogLevel.Info);
-                */
+                pos.X -= 100; 
+                StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{item.id}");
+                RunesCurrency cur = ((RunesCurrency)ModAssets.modItems[item.id]);
+                Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2(),cur.effectColour,cur.volatility));
             }
-            private void DebugCommand(string command, string[] args)
+            
+            Instance.Monitor.Log("Spawned Floats",LogLevel.Info);
+            */
+        }
+        private void DebugCommand(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        }
+    
+        private void DebugPosition(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            Farmer player = Game1.player;
+            Monitor.Log($"{player.currentLocation.Name}\n x: {player.Tile.X}\n y: {player.Tile.Y}",LogLevel.Info);
+        }
+    
+        private void GrantPacks(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PackObject).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
             }
         
-            private void DebugPosition(string command, string[] args)
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantPacks.text"),LogLevel.Info);
+        }
+    
+        private void GrantFish(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
-            
-                Farmer player = Game1.player;
-                Monitor.Log($"{player.currentLocation.Name}\n x: {player.Tile.X}\n y: {player.Tile.Y}",LogLevel.Info);
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
             }
         
-            private void GrantPacks(string command, string[] args)
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantFish.text"),LogLevel.Info);
+        }
+        
+        private void GrantSeeds(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SeedObject).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
-            
-                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PackObject).Select(y=>y.Value))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                    item.Stack = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-            
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantPacks.text"),LogLevel.Info);
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
             }
         
-            private void GrantFish(string command, string[] args)
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantSeeds.text"),LogLevel.Info);
+        }
+        
+        private void GrantCrops(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is CropObject).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
-            
-                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is FishObject).Select(y=>y.Value))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                    item.Stack = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-            
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantFish.text"),LogLevel.Info);
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
             }
-            
-            private void GrantSeeds(string command, string[] args)
+        
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantCrops.text"),LogLevel.Info);
+        }
+        
+        private void GrantPotions(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+        
+            foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PotionObject).Select(y=>y.Value))
             {
-                if (HasNoWorldContextReady()){return;}
-            
-                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is SeedObject).Select(y=>y.Value))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                    item.Stack = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-            
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantSeeds.text"),LogLevel.Info);
+                StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
+                item.Stack = 20;
+                Game1.player.addItemToInventory(item);
             }
-            
-            private void GrantCrops(string command, string[] args)
-            {
-                if (HasNoWorldContextReady()){return;}
-            
-                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is CropObject).Select(y=>y.Value))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                    item.Stack = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-            
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantCrops.text"),LogLevel.Info);
-            }
-            
-            private void GrantPotions(string command, string[] args)
-            {
-                if (HasNoWorldContextReady()){return;}
-            
-                foreach (ModLoadObjects foundItem in ModAssets.modItems.Where(x=>x.Value is PotionObject).Select(y=>y.Value))
-                {
-                    StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"{foundItem.id}");
-                    item.Stack = 20;
-                    Game1.player.addItemToInventory(item);
-                }
-            
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantPots.text"),LogLevel.Info);
-            }
+        
+            this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantPots.text"),LogLevel.Info);
+        }
     }
 }

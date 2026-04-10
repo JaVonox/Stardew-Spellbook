@@ -1,4 +1,5 @@
-﻿using StardewValley.GameData.Weapons;
+﻿using SpaceCore.VanillaAssetExpansion;
+using StardewValley.GameData.Weapons;
 
 namespace RunescapeSpellbook;
 
@@ -9,7 +10,7 @@ public class StaffWeaponData : WeaponData, ITranslatable
     public string? providesRune; //Which rune ID to grant infinite of for the sake of spells
     public int level;
     protected string translationKey;
-    
+    public string levelText;
     public StaffWeaponData(string id, string translationKey, int minSwingDamage, int maxSwingDamage, int spriteIndex, int level = 10, float projectileDamageModifier = 1.0f,
         string providesRune = "", int speedMod = 0, int precision = 0, int defenseMod = 0, float critChanceMod = 0.02f, float critDamageMod = 3f)
     {
@@ -41,6 +42,7 @@ public class StaffWeaponData : WeaponData, ITranslatable
     {
         base.DisplayName = KeyTranslator.GetTranslation($"weapon.{this.translationKey}.display-name");
         base.Description = KeyTranslator.GetTranslation($"weapon.{this.translationKey}.description");
+        levelText = KeyTranslator.GetTranslation("ui.BattlestaffDescription.text", new { StaffLevel = level });
     }
     
 }

@@ -334,10 +334,11 @@
 	"ui.NotMagic.text-1":"I don't know any runic spells yet",
 	"ui.NotMagic.text-2":"I might be able to learn some if I reach level 4",
 	"ui.NotMagic.text-3":"friendship with someone with experience in magic",
-	
-	"ui.CategoryElemental.text":"Elemental Rune",
-	"ui.CategoryCombat.text":"Combat Rune",
-	"ui.CategoryCatalytic.text":"Catalytic Rune",
+
+	"ui.Category-999.text":"Debug Object",
+	"ui.Category-429.text":"Elemental Rune",
+	"ui.Category-430.text":"Combat Rune",
+	"ui.Category-431.text":"Catalytic Rune",
 	
 	"ui.Rerun.text":" (Re-run)",
 	
