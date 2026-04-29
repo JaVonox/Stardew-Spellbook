@@ -312,6 +312,8 @@
 	"buff.Hunters.description":"Creates a second bar while fishing which provides 1.5x progress",
 	"buff.Battlemage.display-name":"Battlemage's Spark",
 	"buff.Battlemage.description":"Combat spells have a 10% chance of not costing any runes",
+	"buff.Overheal.display-name":"Overheal",
+	"buff.Overheal.description":"Your health is over its maximum!",
 	
 	"ui.LevelDisplay.text":"Level {{MagicLevel}}",
 	"ui.RequiresLevel.text":"Requires Lvl. {{MagicLevel}}",

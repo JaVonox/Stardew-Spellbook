@@ -421,7 +421,6 @@ public class PotionObject : ModLoadObjects
 {
     public float healPercent = 0;
     public float extraHealthPerQuality = 0;
-    
     /// <summary>
     /// 0 is Craftable, 1 is Keg, 2 is Preserve
     /// </summary>
@@ -445,6 +444,13 @@ public class PotionObject : ModLoadObjects
         this.Price = price;
         base.Edibility = 0;
         base.IsDrink = true;
+        
+        base.Buffs = new List<ObjectBuffData>(); 
+        ObjectBuffData newBuff = new ObjectBuffData();
+        newBuff.BuffId = "Tofu.RunescapeSpellbook_OverhealApplier";
+        //TODO can we pass buff health data as custom fields?
+        base.Buffs.Add(newBuff);
+
     }
     
     //Preservable (Unusable)
@@ -788,40 +794,32 @@ public class ShopListings
     }
 }
 
-public class CustomBuff : ITranslatable
+public class CustomBuff : BuffData, ITranslatable
 {
     private string buffID;
-    private string displayName;
-    private string description;
     private string translationKey;
-    private int duration;
-    private int spriteIndex;
 
-    public CustomBuff(string buffId, string translationKey, int duration, int spriteIndex)
+    public CustomBuff(string buffId, string translationKey, int duration, int spriteIndex, List<string>? actionsToApply = null)
     {
         this.buffID = buffId;
         this.translationKey = translationKey;
-        this.displayName = translationKey;
-        this.description = translationKey;
-        this.duration = duration;
-        this.spriteIndex = spriteIndex;
+        base.DisplayName = translationKey;
+        base.Description = translationKey;
+        base.Duration = duration;
+        base.IconTexture = "Mods.RunescapeSpellbook.Assets.buffsprites";
+        base.IconSpriteIndex = spriteIndex;
+        base.ActionsOnApply = actionsToApply;
     }
 
     public void AppendBuff(IDictionary<string, BuffData> buffDict)
     {
-        BuffData buffInfo = new BuffData();
-        buffInfo.DisplayName = displayName;
-        buffInfo.Description = description;
-        buffInfo.Duration = duration;
-        buffInfo.IconTexture = "Mods.RunescapeSpellbook.Assets.buffsprites";
-        buffInfo.IconSpriteIndex = spriteIndex;
-        buffDict.Add(this.buffID,buffInfo);
+        buffDict[this.buffID] = this;
     }
 
     public void ApplyTranslations()
     {
-        this.displayName = KeyTranslator.GetTranslation($"buff.{this.translationKey}.display-name");
-        this.description = KeyTranslator.GetTranslation($"buff.{this.translationKey}.description");
+        base.DisplayName = KeyTranslator.GetTranslation($"buff.{this.translationKey}.display-name");
+        base.Description = KeyTranslator.GetTranslation($"buff.{this.translationKey}.description");
     }
 }
 

@@ -11,6 +11,7 @@ using SpaceCore;
 using SpaceCore.VanillaAssetExpansion;
 using SpaceShared.APIs;
 using StardewValley.Buffs;
+using StardewValley.Delegates;
 using StardewValley.Extensions;
 using StardewValley.GameData;
 using StardewValley.GameData.BigCraftables;
@@ -28,6 +29,7 @@ using StardewValley.Monsters;
 using StardewValley.Objects;
 using StardewValley.Projectiles;
 using StardewValley.Tools;
+using StardewValley.Triggers;
 using IBetterGameMenuApi = Leclair.Stardew.BetterGameMenu.IBetterGameMenuApi;
 using IGenericModConfigMenuApi = GenericModConfigMenu.IGenericModConfigMenuApi;
 using Object = StardewValley.Object;
@@ -75,6 +77,9 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
             helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
+            
+            //Custom triggers
+            TriggerActionManager.RegisterAction("Tofu.RunescapeSpellbook_OnOverhealApplied",TriggerOverheal);
         }
 
         private void OnLocaleChanged(object? sender, LocaleChangedEventArgs e)
@@ -183,8 +188,6 @@ namespace RunescapeSpellbook
             Skills.RegisterSkill(new LevelsHandler.MagicSkill());
             LevelsHandler.Load(SpaceCoreApi);
             VirtualCurrencyHandler.Load(SpaceCoreApi);
-
-            SpaceCore.Events.SpaceEvents.OnItemEaten += FarmerEatItem; //Add extra command for when farmer eats
 
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
@@ -1508,42 +1511,66 @@ namespace RunescapeSpellbook
             }
         }
         
-        //Spacecore Event Handlers
-        public void FarmerEatItem(object? assocFarmer, EventArgs args)
+        /// <inheritdoc cref="TriggerActionDelegate" />
+        public static bool TriggerOverheal(string[] args, TriggerActionContext context, out string error)
         {
-            if (assocFarmer == null || !(assocFarmer is Farmer farmer) || !farmer.IsLocalPlayer || farmer.itemToEat == null || !(farmer.itemToEat is Object consumed))
+            error = null;
+            if (Game1.player.itemToEat == null || !Game1.objectData.TryGetValue(Game1.player.itemToEat.ItemId, out var objectData) || !(objectData is PotionObject potData))
             {
-                return;
+                error = "Overheal item is invalid";
+                return false;
             }
             
-            string consumedID = consumed.QualifiedItemId;
-            if (ModAssets.modItems.Any(x=> x.Value is PotionObject && consumedID == $"(O){x.Key}"))
+            var buffDict = Game1.player.buffs.AppliedBuffs;
+
+            if (!Game1.player.buffs.IsApplied("Tofu.RunescapeSpellbook_OverhealApplier"))
             {
-                PotionObject pot = (PotionObject)ModAssets.modItems[consumed.ItemId];
+                error = "Overheal applier buff has not been correctly initialised";
+                return false;
+            }
 
-                if (consumedID == "(O)Tofu.RunescapeSpellbook_PotGuthix" || consumedID == "(O)Tofu.RunescapeSpellbook_PotSara")
+            int playerHealthDeficit = Game1.player.maxHealth - Game1.player.health; //The amount of health the player is currently missing
+            int itemHealthBonus = (int)Math.Floor((float)(Game1.player.maxHealth) * (potData.healPercent + (potData.extraHealthPerQuality * (Game1.player.itemToEat.Quality)))); //The amount of healing we should apply, as well as the maximum we can heal with this
+            int bonusHealthToApply = itemHealthBonus - playerHealthDeficit; //The real amount of bonus health we give to the player.
+
+            if (bonusHealthToApply <= 0)
+            {
+                Game1.player.health += itemHealthBonus; //Add all the extra health we can give without giving overheal
+            }
+            else
+            {
+                Game1.player.health = Game1.player.maxHealth; //Max out health
+                
+                if (!Game1.player.buffs.IsApplied("Tofu.RunescapeSpellbook_Overheal")) //Do we have an overheal
                 {
-                    int addAmount = (int)Math.Floor((float)farmer.maxHealth * (pot.healPercent + ((float)farmer.itemToEat.Quality * pot.extraHealthPerQuality)));
-                    int newTotal = farmer.health + addAmount;
+                    Game1.player.applyBuff("Tofu.RunescapeSpellbook_Overheal");
+                }
 
-                    int currentBonusHealth = ModAssets.GetBonusHealth(farmer);
-                    
-                    if (farmer.health + currentBonusHealth < newTotal)
+                if (buffDict["Tofu.RunescapeSpellbook_Overheal"].customFields.TryGetValue("Tofu.RunescapeSpellbook_OverhealAmount", out string? overhealAmount)) //Existing overheal amount
+                {
+                    if (!int.TryParse(overhealAmount, out int existingOverheal))
                     {
-                        ModAssets.AddBonusHealth(farmer,
-                             (newTotal <= farmer.maxHealth
-                                ? 0
-                                : newTotal - farmer.maxHealth) - currentBonusHealth);
-                        
-                        farmer.health = Math.Min(newTotal, farmer.maxHealth);
+                        error = "Existing overheal buff is incorrectly assigned";
+                        return false;
+                    }
+                    
+                    //Logic for applying the right amount of overheal
+                    //Overheal stacks with existing overheal, but cannot exceed the maximum overheal the item can give.
+                    //If the overheal we already have is greater than the amount the item can give, no overheal is applied.
+
+                    if (!(existingOverheal >= bonusHealthToApply))
+                    {
+                        buffDict["Tofu.RunescapeSpellbook_Overheal"].customFields["Tofu.RunescapeSpellbook_OverhealAmount"] = Math.Min(existingOverheal + bonusHealthToApply,itemHealthBonus).ToString();
                     }
                 }
-                
-                foreach (Buff buff in consumed.GetFoodOrDrinkBuffs())
+                else //No existing overheal amount
                 {
-                    farmer.applyBuff(buff);
+                    buffDict["Tofu.RunescapeSpellbook_Overheal"].customFields.Add("Tofu.RunescapeSpellbook_OverhealAmount",bonusHealthToApply.ToString());
                 }
             }
+            
+            Game1.player.buffs.Remove("Tofu.RunescapeSpellbook_OverhealApplier"); //Remove the overheal Buff
+            return true;
         }
 
         //Console Commands

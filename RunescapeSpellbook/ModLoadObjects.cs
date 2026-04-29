@@ -557,6 +557,8 @@ public static class ModAssets
         new CustomBuff("Tofu.RunescapeSpellbook_BuffDark", "DarkLure", 180_000, 1),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffHunters", "Hunters", 300_000, 2),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffBattlemage", "Battlemage", 540_000, 3),
+        new CustomBuff("Tofu.RunescapeSpellbook_OverhealApplier", "Overheal", -2, 3, new List<string>(){"Tofu.RunescapeSpellbook_OnOverhealApplied"}), //Only applies overheals, gets removed immediately after. needed so that we can combine overheals properly.
+        new CustomBuff("Tofu.RunescapeSpellbook_Overheal", "Overheal", -2, 3),
     };
 
     public static List<LoadablePower> loadablePowers = new()
@@ -566,7 +568,6 @@ public static class ModAssets
     };
     
     private static MethodInfo cachedBroadcastMethod;
-    private static MethodInfo cachedGlobalChatMethod;
     public static void Load(IModHelper helper)
     {
         extraTextures = helper.ModContent.Load<Texture2D>("assets\\modsprites"); 
@@ -585,7 +586,6 @@ public static class ModAssets
         
         multiplayer = helper.Reflection.GetField<object>(typeof(Game1), "multiplayer").GetValue();
         cachedBroadcastMethod = multiplayer.GetType().GetMethod("broadcastSprites", new[] { typeof(GameLocation), typeof(TemporaryAnimatedSprite[]) });
-        cachedGlobalChatMethod = multiplayer.GetType().GetMethod("globalChatInfoMessage", new[] { typeof(string), typeof(string[]) });
 
         KeyTranslator.TranslationFunc = (key, replacementsSet) => helper.Translation.Get(key, replacementsSet);
         
@@ -619,11 +619,6 @@ public static class ModAssets
     {
         var spriteArray = new TemporaryAnimatedSprite[] { sprite };
         cachedBroadcastMethod.Invoke(multiplayer, new object[] { location, spriteArray });
-    }
-    
-    public static void GlobalChatMessage(string messageKey, params string[] args)
-    {
-        cachedGlobalChatMethod.Invoke(multiplayer, new object[] { messageKey, args });
     }
 
     public static List<Farmer> GetFarmers()
