@@ -57,7 +57,6 @@ namespace RunescapeSpellbook
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
-            helper.Events.GameLoop.DayStarted += this.OnNewDay;
             
             helper.ConsoleCommands.Add("rs_grantmagic", KeyTranslator.GetTranslation("console.grantmagic.text"), this.GrantMagic);
             helper.ConsoleCommands.Add("rs_setlevel", KeyTranslator.GetTranslation("console.setlevel.text"), this.SetLevel);
@@ -93,19 +92,6 @@ namespace RunescapeSpellbook
             ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_SelectedSpellID","-1");
             LevelsHandler.hasCheckedForMigration = false;
         }
-        
-        private void OnNewDay(object? sender, DayStartedEventArgs e)
-        {
-            ModAssets.ClearBonusHealth(Game1.player);
-
-            /*
-            foreach (RunesCurrency currency in ModAssets.modItems.Where(x=>x.Value is RunesCurrency).Select(y=>y.Value as RunesCurrency))
-            {
-                currency.handler.TruncateToDailyCap(Game1.player);
-            }
-            */
-        }
-
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
             try
@@ -757,28 +743,39 @@ namespace RunescapeSpellbook
                         return false;
                     }
                 }
-
+    
                 return true;
             }
         }
         
-        //TODO maybe see if we can make this apply on farmer takedamage instead?
-        [HarmonyPatch(typeof(Farmer), "Update")]
-        [HarmonyPatch(new Type[] { typeof(GameTime),typeof(GameLocation)})]
+        [HarmonyPatch(typeof(Farmer), "takeDamage")]
+        [HarmonyPatch(new Type[] { typeof(int),typeof(bool),typeof(Monster)})]
         public class FarmerBonusHealthPatcher
         {
-            public static void Prefix(ref Farmer __instance, GameTime time, GameLocation location)
+            public static void Postfix(ref Farmer __instance, int damage, bool overrideParry, Monster damager)
             {
-                //Handle Bonus Health
-                if (__instance.health > __instance.maxHealth)
+                if (__instance.health < __instance.maxHealth && __instance.buffs.IsApplied("Tofu.RunescapeSpellbook_Overheal"))
                 {
-                    ModAssets.AddBonusHealth(__instance, __instance.health - __instance.maxHealth);
-                    __instance.health = __instance.maxHealth;
-                }
-                else if (__instance.health < __instance.maxHealth && ModAssets.GetBonusHealth(__instance) > 0)
-                {
-                    int newTotal = ModAssets.AddBonusHealth(__instance, -1 * (__instance.maxHealth - __instance.health));
-                    __instance.health = __instance.maxHealth + (newTotal < 0 ? newTotal : 0);
+                    if (!__instance.buffs.AppliedBuffs["Tofu.RunescapeSpellbook_Overheal"].customFields
+                            .TryGetValue("Tofu.RunescapeSpellbook_OverhealAmount", out string buffRHealthString) || !int.TryParse(buffRHealthString, out int buffRemainingHealth))
+                    {
+                        __instance.buffs.Remove("Tofu.RunescapeSpellbook_Overheal");
+                        return;
+                    }
+
+                    int buffHealthChange = Math.Min(buffRemainingHealth,
+                        Math.Abs(__instance.health - __instance.maxHealth)); //Find how much we can heal. Either all the remaining health or enough to max the health
+
+                    __instance.health += buffHealthChange;
+                    __instance.buffs.AppliedBuffs["Tofu.RunescapeSpellbook_Overheal"]
+                            .customFields["Tofu.RunescapeSpellbook_OverhealAmount"] =
+                        (buffRemainingHealth - buffHealthChange).ToString();
+
+                    if (buffRemainingHealth - buffHealthChange <= 0)
+                    {
+                        __instance.buffs.Remove("Tofu.RunescapeSpellbook_Overheal");
+                        return;
+                    }
                 }
             }
         }
@@ -873,49 +870,31 @@ namespace RunescapeSpellbook
         [HarmonyPatch(typeof(Game1), "drawHUD")]
         public class FarmerHealthImage
         {
-            private static readonly List<Color> healthTiers = new()
-            {
-                new Color(0,255,0),
-                new Color(0,128,255),
-                new Color(255,0,255),
-                new Color(255,128,0),
-                new Color(0,0,255),
-                new Color(0,255,127),
-                new Color(255,0,128),
-                new Color(128,0,255),
-            };
-
-            public static void Prefix(ref Game1 __instance)
-            {
-                if (Game1.hitShakeTimer > 0 && ModAssets.GetBonusHealth(Game1.player) > 0)
-                {
-                    Game1.hitShakeTimer = 0;
-                }
-            }
+            private static readonly int healthIconSize = 128;
+            private static readonly Color healthTextColour = new(50, 221, 31);
             public static void Postfix(ref Game1 __instance)
             {
-                int bonusHealth = ModAssets.GetBonusHealth(Game1.player);
-                if (Game1.showingHealthBar && bonusHealth > 0)
+                if (Game1.showingHealthBar && Game1.player.buffs.IsApplied("Tofu.RunescapeSpellbook_Overheal") && Game1.player.buffs.AppliedBuffs["Tofu.RunescapeSpellbook_Overheal"].customFields.TryGetValue("Tofu.RunescapeSpellbook_OverhealAmount", out string healthVal))
                 {
-                    //Get how many times we go over the healthbar
-                    int healthDepth = (1 + bonusHealth / Game1.player.maxHealth);
+                    var viewport = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea();
+                    float iconX = viewport.Right - 144 - healthIconSize;
+                    float iconY = viewport.Bottom - 58 - Game1.player.maxHealth / 2f - healthIconSize / 2f;
                     
-                    Vector2 topOfBar = new Vector2(Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Right - 48 - 8, Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (int)((float)(Game1.player.MaxStamina - 270) * 0.625f));
-                    topOfBar.X -= 56;
-                    topOfBar.Y = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea().Bottom - 224 - 16 - (Game1.player.maxHealth - 100);
-                    int barFullHeight = 168 + (Game1.player.maxHealth - 100);
-                    
-                    DrawBonusHealthBar(healthDepth - 1,Game1.player.maxHealth,topOfBar,barFullHeight);
-                    DrawBonusHealthBar(healthDepth,bonusHealth % Game1.player.maxHealth,topOfBar,barFullHeight);
+                    Game1.spriteBatch.Draw(
+                        ModAssets.extraTextures,
+                        new Rectangle((int)iconX, (int)iconY, healthIconSize, healthIconSize),
+                        new Rectangle(160,902,80,80),
+                        Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0f
+                    );
+
+                    Vector2 textSize = Game1.dialogueFont.MeasureString(healthVal);
+                    Vector2 textPos = new Vector2(
+                        iconX + healthIconSize / 2f - textSize.X / 2f,
+                        iconY + healthIconSize / 2f - textSize.Y / 2f
+                    );
+                    Game1.spriteBatch.DrawString(Game1.dialogueFont, healthVal, textPos, healthTextColour);
 
                 }
-            }
-
-            private static void DrawBonusHealthBar(int colorIndex, int healthAmount, Vector2 topOfBar, int barFullHeight)
-            {
-                int height = (int)((float)healthAmount / (float)Game1.player.maxHealth * (float)barFullHeight);
-                Rectangle health_bar_rect = new Microsoft.Xna.Framework.Rectangle((int)topOfBar.X + 12, (int)topOfBar.Y + 48 + barFullHeight - height, 24, height);
-                Game1.spriteBatch.Draw(Game1.staminaRect, health_bar_rect, Game1.staminaRect.Bounds, healthTiers[colorIndex % healthTiers.Count], 0f, Vector2.Zero, SpriteEffects.None, 0f);
             }
         }
 

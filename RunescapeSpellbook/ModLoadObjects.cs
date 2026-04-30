@@ -668,46 +668,6 @@ public static class ModAssets
             farmer.modData[dataKey] = newValue;
         }
     }
-    public static int GetBonusHealth(Farmer farmer)
-    {
-        if (farmer.modData.TryGetValue("Tofu.RunescapeSpellbook_BonusHealth", out string parseString))
-        {
-            return int.TryParse(parseString, out int result) ? result : 0;
-        }
-        return 0;
-    }
-    public static int AddBonusHealth(Farmer farmer, int amountToAdd)
-    {
-        int newTotal = amountToAdd;
-        bool keyExists = farmer.modData.TryGetValue("Tofu.RunescapeSpellbook_BonusHealth", out string parseString);
-        if (keyExists && int.TryParse(parseString, out int existingValue)) //Value exists
-        {
-            newTotal += existingValue;
-        }
-
-        if (keyExists && newTotal > 0)
-        {
-            farmer.modData["Tofu.RunescapeSpellbook_BonusHealth"] = newTotal.ToString();
-        }
-        else if(newTotal > 0)
-        {
-            farmer.modData.Add("Tofu.RunescapeSpellbook_BonusHealth", newTotal.ToString());
-        }
-        else
-        {
-            farmer.modData.Remove("Tofu.RunescapeSpellbook_BonusHealth");
-        }
-
-        return newTotal;
-    }
-    
-    public static void ClearBonusHealth(Farmer farmer)
-    {
-        if (farmer.modData.ContainsKey("Tofu.RunescapeSpellbook_BonusHealth"))
-        {
-            farmer.modData.Remove("Tofu.RunescapeSpellbook_BonusHealth");
-        }
-    }
 }
 
 //TODO add config to remove effects like particles from the mod
