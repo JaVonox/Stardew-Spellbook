@@ -1319,7 +1319,8 @@ namespace RunescapeSpellbook
                     }
                 }
             }
-
+            
+            //TODO could we use Spacecore RegisterCustomProperty for this?
             private static readonly int DEBUFFHITS = 5;
             private static readonly int DEBUFFDELAY = 3000;
             private static void ApplyPoisonEffect(Monster target, int debuffIndex, int hitsRemaining)
@@ -1366,6 +1367,7 @@ namespace RunescapeSpellbook
             }
         }
 
+        //TODO this may be way more reliable using Spacecores GetLocalIndexForMethod
         [HarmonyPatch(typeof(TV), "checkForAction")]
         public class TVChannelTranspiler
         {
@@ -1609,6 +1611,7 @@ namespace RunescapeSpellbook
             if (int.TryParse(args[0], out int reqLevel))
             {
                 reqLevel = Math.Clamp(reqLevel, 0, 10);
+                
                 ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", (reqLevel).ToString());
                 ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", (Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
                 this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
@@ -1809,6 +1812,11 @@ namespace RunescapeSpellbook
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
+
+            if (Game1.activeClickableMenu == null)
+            {
+                PouchInventoryHandler.LoadMenu();
+            }
         }
     
         private void DebugPosition(string command, string[] args)
