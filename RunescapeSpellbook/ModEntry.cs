@@ -25,6 +25,7 @@ using StardewValley.GameData.Powers;
 using StardewValley.GameData.Shops;
 using StardewValley.GameData.Weapons;
 using StardewValley.Menus;
+using StardewValley.Mods;
 using StardewValley.Monsters;
 using StardewValley.Objects;
 using StardewValley.Projectiles;
@@ -39,7 +40,7 @@ namespace RunescapeSpellbook
     internal sealed class ModEntry : Mod
     {
         public static ModEntry Instance;
-        private ModConfig Config;
+        public ModConfig Config;
         internal IBetterGameMenuApi? BetterGameMenuApi;
         public override void Entry(IModHelper helper)
         {
@@ -57,7 +58,8 @@ namespace RunescapeSpellbook
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
-            
+            helper.Events.Display.RenderedStep += DrawHandler.PostHudStepHandler;
+
             helper.ConsoleCommands.Add("rs_grantmagic", KeyTranslator.GetTranslation("console.grantmagic.text"), this.GrantMagic);
             helper.ConsoleCommands.Add("rs_setlevel", KeyTranslator.GetTranslation("console.setlevel.text"), this.SetLevel);
             helper.ConsoleCommands.Add("rs_setexp", KeyTranslator.GetTranslation("console.setexp.text"), this.SetExp);
@@ -77,8 +79,15 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
             helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
             
-            //Custom triggers
+            //Custom GSQ triggers + actions
             TriggerActionManager.RegisterAction("Tofu.RunescapeSpellbook_OnOverhealApplied",TriggerOverheal);
+            //TriggerActionManager.RegisterAction("spacechase0.SpaceCore_OnItemUsed",TriggerA);
+            //TriggerActionManager.RegisterAction("spacechase0.SpaceCore_OnItemUsed",TriggerB);
+        }
+
+        private void DisplayOnRenderedStep(object? sender, RenderedStepEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void OnLocaleChanged(object? sender, LocaleChangedEventArgs e)
@@ -693,39 +702,6 @@ namespace RunescapeSpellbook
             }
         }
 
-        [HarmonyPatch(typeof(GameMenu), "draw")]
-        [HarmonyPatch(new Type[] { typeof(SpriteBatch) })]
-        public class GameMenuDrawPatch
-        {
-            public static void Postfix(GameMenu __instance, SpriteBatch b)
-            {
-                if(!__instance.invisible && Instance.Config.SpellbookTabStyle != "Only Keybind")
-                {
-                    //this is used to ensure that we dont overlap any big menus
-                    if ((__instance.pages[__instance.currentTab] as CollectionsPage)?.letterviewerSubMenu == null)
-                    {
-                        ClickableComponent c = __instance.tabs.First(x=>x.name == "RSspellbook");
-
-                        if (c.visible)
-                        {
-                            b.Draw(ModAssets.extraTextures,
-                                new Vector2(c.bounds.X,
-                                    c.bounds.Y +
-                                    ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)),
-                                new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None,
-                                0.0001f);
-                        }
-                    }
-
-                    if (!__instance.hoverText.Equals(""))
-                    {
-                        IClickableMenu.drawHoverText(b, __instance.hoverText, Game1.smallFont);
-                    }
-                    __instance.drawMouse(b, ignore_transparency: true);
-                }
-            }
-        }
-
         //Prevent Geode crushing for special items
         [HarmonyPatch(typeof(Utility), "IsGeode")]
         [HarmonyPatch(new Type[] { typeof(Item),typeof(bool)})]
@@ -864,37 +840,6 @@ namespace RunescapeSpellbook
             {
                 float halfZone = __instance.bobberBarHeight * (zonePercent / 2.0f);
                 return (int)halfZone + (Game1.dayOfMonth * __instance.maxFishSize * (int)Math.Floor(Game1.player.stamina)) % (int)(__instance.bobberBarHeight - 2 * halfZone);
-            }
-        }
-
-        [HarmonyPatch(typeof(Game1), "drawHUD")]
-        public class FarmerHealthImage
-        {
-            private static readonly int healthIconSize = 128;
-            private static readonly Color healthTextColour = new(50, 221, 31);
-            public static void Postfix(ref Game1 __instance)
-            {
-                if (Game1.showingHealthBar && Game1.player.buffs.IsApplied("Tofu.RunescapeSpellbook_Overheal") && Game1.player.buffs.AppliedBuffs["Tofu.RunescapeSpellbook_Overheal"].customFields.TryGetValue("Tofu.RunescapeSpellbook_OverhealAmount", out string healthVal))
-                {
-                    var viewport = Game1.graphics.GraphicsDevice.Viewport.GetTitleSafeArea();
-                    float iconX = viewport.Right - 144 - healthIconSize;
-                    float iconY = viewport.Bottom - 58 - Game1.player.maxHealth / 2f - healthIconSize / 2f;
-                    
-                    Game1.spriteBatch.Draw(
-                        ModAssets.extraTextures,
-                        new Rectangle((int)iconX, (int)iconY, healthIconSize, healthIconSize),
-                        new Rectangle(160,902,80,80),
-                        Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0f
-                    );
-
-                    Vector2 textSize = Game1.dialogueFont.MeasureString(healthVal);
-                    Vector2 textPos = new Vector2(
-                        iconX + healthIconSize / 2f - textSize.X / 2f,
-                        iconY + healthIconSize / 2f - textSize.Y / 2f
-                    );
-                    Game1.spriteBatch.DrawString(Game1.dialogueFont, healthVal, textPos, healthTextColour);
-
-                }
             }
         }
 
@@ -1554,6 +1499,29 @@ namespace RunescapeSpellbook
             return true;
         }
 
+        /*
+        /// <inheritdoc cref="TriggerActionDelegate" />
+        public static bool TriggerA(string[] args, TriggerActionContext context, out string error)
+        {
+            StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneLaw");
+            item.Stack = 255;
+            Game1.player.addItemToInventory(item);
+            error = "A FAIL";
+            return true;
+        }
+        
+        /// <inheritdoc cref="TriggerActionDelegate" />
+        public static bool TriggerB(string[] args, TriggerActionContext context, out string error)
+        {
+            StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_PotBattlemage");
+            item.Stack = 255;
+            Game1.player.addItemToInventory(item);
+            error = "B FAIL";
+            return true;
+        }
+        
+        */
+        
         //Console Commands
         private bool HasNoMagic()
         {
@@ -1576,7 +1544,7 @@ namespace RunescapeSpellbook
 
             return false;
         }
-
+        
         //TODO Most of these dont work now cuz of the switch to spacecore
         private void GrantMagic(string command, string[] args)
         {

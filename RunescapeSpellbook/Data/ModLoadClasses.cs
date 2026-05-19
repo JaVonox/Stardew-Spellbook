@@ -513,6 +513,15 @@ public class PotionObject : ModLoadObjects
     }
 }
 
+public class PouchObject : ModLoadObjects
+{
+    public PouchObject(string id, string translationKey, int spriteIndex, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -432) : base(id,translationKey,spriteIndex,characterPreferences,type,category)
+    {
+        this.CanBeGivenAsGift = false;
+        this.extendableData.UseForTriggerAction = true;
+        //TODO TRIGGER ACTION NOT YET SETUP
+    }
+}
 public class MachinesObject : BigCraftableData, ITranslatable
 {
     public string id;
