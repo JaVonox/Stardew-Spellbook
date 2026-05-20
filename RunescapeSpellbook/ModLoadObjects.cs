@@ -264,7 +264,7 @@ public static class ModAssets
             new(){{"Willy",PrefType.Like},{"Linus",PrefType.Like},{"Penny",PrefType.Hate}})},
         {"Tofu.RunescapeSpellbook_PotBattlemage", new PotionObject("Tofu.RunescapeSpellbook_PotBattlemage","PotBattlemage",46,500,"Tofu.RunescapeSpellbook_CropLanta 1 807 1 90 3",new(){"Tofu.RunescapeSpellbook_BuffBattlemage"},
             new(){{"Wizard",PrefType.Love}})},
-        {"Tofu.RunescapeSpellbook_PackPouch",new PouchObject("Tofu.RunescapeSpellbook_PackPouch","PackPouch",64)}
+        {"Tofu.RunescapeSpellbook_PackPouch",new PouchObject("Tofu.RunescapeSpellbook_PackPouch","PackPouch",64,"Tofu.RunescapeSpellbook_RuneLaw 1 Tofu.RunescapeSpellbook_TreasureAirPack 1/Field/Tofu.RunescapeSpellbook_PackPouch/false/s Combat 1/")}
     };
     
     //These are custom melee weapons that use 

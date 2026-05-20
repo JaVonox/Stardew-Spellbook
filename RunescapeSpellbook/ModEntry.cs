@@ -408,6 +408,11 @@ namespace RunescapeSpellbook
                         {
                             newKegItem.AddCraftingRecipe(craftingRecipe);
                         }
+                        
+                        foreach (ModLoadObjects craftableObject in ModAssets.modItems.Where(x=>x.Value.craftingString != null).Select(y=>y.Value).ToList())
+                        {
+                            craftableObject.AddCraftingRecipe(craftingRecipe);
+                        }
                     }
                 );
             }
