@@ -110,6 +110,8 @@
 	"item.PotHunter.description":"A potion that imbues the user with the power of a hunter. Adds a second smaller bar to fishing that gives 1.5x progress",
 	"item.PotBattlemage.display-name":"Battlemage Potion",
 	"item.PotBattlemage.description":"A potion that imbues the user with the power of a battlemage. Combat spells have a 10% chance of costing no runes. Spells cast with no cost grant no experience",
+	"item.PackPouch.display-name":"Pack Looting Bag",
+	"item.PackPouch.description":"A magical pouch that lets you store and retrieve any packs you've collected, courtesy of the Bank of Gielinor.",
 	
 	"weapon.StaffMagic.display-name":"Magic Staff",
 	"weapon.StaffMagic.description":"A magical battlestaff",
@@ -341,6 +343,7 @@
 	"ui.Category-429.text":"Elemental Rune",
 	"ui.Category-430.text":"Combat Rune",
 	"ui.Category-431.text":"Catalytic Rune",
+	"ui.Category-432.text":"Portable Pack Bank",
 	
 	"ui.Rerun.text":" (Re-run)",
 	

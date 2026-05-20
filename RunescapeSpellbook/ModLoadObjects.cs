@@ -264,6 +264,7 @@ public static class ModAssets
             new(){{"Willy",PrefType.Like},{"Linus",PrefType.Like},{"Penny",PrefType.Hate}})},
         {"Tofu.RunescapeSpellbook_PotBattlemage", new PotionObject("Tofu.RunescapeSpellbook_PotBattlemage","PotBattlemage",46,500,"Tofu.RunescapeSpellbook_CropLanta 1 807 1 90 3",new(){"Tofu.RunescapeSpellbook_BuffBattlemage"},
             new(){{"Wizard",PrefType.Love}})},
+        {"Tofu.RunescapeSpellbook_PackPouch",new PouchObject("Tofu.RunescapeSpellbook_PackPouch","PackPouch",64)}
     };
     
     //These are custom melee weapons that use 
@@ -290,7 +291,6 @@ public static class ModAssets
         new StaffWeaponData("Tofu.RunescapeSpellbook_StaffAncient",  "StaffAncient",
             25, 40, 16,
             13,1.4f,"",0,0,0,0.05f),
-        
         
         new StaffWeaponData("Tofu.RunescapeSpellbook_StaffAhrims", "StaffAhrims", 30, 45, 17,
             15,1.6f),

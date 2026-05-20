@@ -18,9 +18,6 @@ public class DrawHandler
             case(RenderSteps.HUD):
                 DrawOverheal(e);
                 break;
-            case(RenderSteps.Menu):
-                AttemptDrawSpellbookTab(e);
-                break;
         }
 
     }
@@ -49,34 +46,6 @@ public class DrawHandler
             );
             e.SpriteBatch.DrawString(Game1.dialogueFont, healthVal, textPos, healthTextColour);
 
-        }
-    }
-
-    private static void AttemptDrawSpellbookTab(RenderedStepEventArgs e)
-    {
-        if(Game1.activeClickableMenu is GameMenu gameMenu && ModEntry.Instance.Config.SpellbookTabStyle != "Only Keybind")
-        {
-            IClickableMenu curTab = gameMenu.pages[gameMenu.currentTab];
-            //this is used to ensure that we dont overlap any big menus
-            if (Game1.activeClickableMenu.GetChildMenu() == null && (curTab as CollectionsPage)?.letterviewerSubMenu == null && !(curTab is MapPage))
-            {
-                ClickableComponent c = gameMenu.tabs.First(x=>x.name == "RSspellbook");
-
-                if (c.visible)
-                {
-                    e.SpriteBatch.Draw(ModAssets.extraTextures,
-                        new Vector2(c.bounds.X,
-                            c.bounds.Y +
-                            ((gameMenu.currentTab == gameMenu.getTabNumberFromName(c.name)) ? 8 : 0)),
-                        new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None,
-                        0.0001f);
-                }
-                if (!gameMenu.hoverText.Equals(""))
-                {
-                    IClickableMenu.drawHoverText(e.SpriteBatch, gameMenu.hoverText, Game1.smallFont);
-                }
-                gameMenu.drawMouse(e.SpriteBatch, ignore_transparency: true);
-            }
         }
     }
     

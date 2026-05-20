@@ -81,8 +81,7 @@ namespace RunescapeSpellbook
             
             //Custom GSQ triggers + actions
             TriggerActionManager.RegisterAction("Tofu.RunescapeSpellbook_OnOverhealApplied",TriggerOverheal);
-            //TriggerActionManager.RegisterAction("spacechase0.SpaceCore_OnItemUsed",TriggerA);
-            //TriggerActionManager.RegisterAction("spacechase0.SpaceCore_OnItemUsed",TriggerB);
+            TriggerActionManager.RegisterAction("Tofu.RunescapeSpellbook_PouchUsed",OpenPouch);
         }
 
         private void DisplayOnRenderedStep(object? sender, RenderedStepEventArgs e)
@@ -288,6 +287,23 @@ namespace RunescapeSpellbook
                             newObject.AppendObject(objectDict);
                         }
                         
+                    }
+                );
+            }
+            
+            if (e.NameWithoutLocale.IsEquivalentTo("Data/TriggerActions"))
+            {
+                e.Edit(asset =>
+                    {
+                        IList<TriggerActionData> triggerList = (IList<TriggerActionData>)(asset.GetData<object>());
+
+                        TriggerActionData triggerOpenPouch = new TriggerActionData();
+                        triggerOpenPouch.Id = "Tofu.RunescapeSpellbook_TA_PouchUsed";
+                        triggerOpenPouch.Condition = "ITEM_ID Input (O)Tofu.RunescapeSpellbook_PackPouch";
+                        triggerOpenPouch.Trigger = "spacechase0.SpaceCore_OnItemUsed";
+                        triggerOpenPouch.Action = "Tofu.RunescapeSpellbook_PouchUsed";
+                        triggerOpenPouch.MarkActionApplied = false;
+                        triggerList.Add(triggerOpenPouch);
                     }
                 );
             }
@@ -785,6 +801,39 @@ namespace RunescapeSpellbook
                         __instance.bobbers.Contains("Tofu.RunescapeSpellbook_BuffHunters"))
                     {
                         __instance.distanceFromCatching += 0.001f;
+                    }
+                }
+            }
+            
+            [HarmonyPatch(typeof(GameMenu), "draw")]
+            [HarmonyPatch(new Type[] { typeof(SpriteBatch) })]
+            public class GameMenuDrawPatch
+            {
+                public static void Postfix(GameMenu __instance, SpriteBatch b)
+                {
+                    if(!__instance.invisible && Instance.Config.SpellbookTabStyle != "Only Keybind")
+                    {
+                        //this is used to ensure that we dont overlap any big menus
+                        if ((__instance.pages[__instance.currentTab] as CollectionsPage)?.letterviewerSubMenu == null)
+                        {
+                            ClickableComponent c = __instance.tabs.First(x=>x.name == "RSspellbook");
+
+                            if (c.visible)
+                            {
+                                b.Draw(ModAssets.extraTextures,
+                                    new Vector2(c.bounds.X,
+                                        c.bounds.Y +
+                                        ((__instance.currentTab == __instance.getTabNumberFromName(c.name)) ? 8 : 0)),
+                                    new Rectangle(0, 0, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None,
+                                    0.0001f);
+                            }
+                        }
+
+                        if (!__instance.hoverText.Equals(""))
+                        {
+                            IClickableMenu.drawHoverText(b, __instance.hoverText, Game1.smallFont);
+                        }
+                        __instance.drawMouse(b, ignore_transparency: true);
                     }
                 }
             }
@@ -1498,29 +1547,17 @@ namespace RunescapeSpellbook
             Game1.player.buffs.Remove("Tofu.RunescapeSpellbook_OverhealApplier"); //Remove the overheal Buff
             return true;
         }
-
-        /*
-        /// <inheritdoc cref="TriggerActionDelegate" />
-        public static bool TriggerA(string[] args, TriggerActionContext context, out string error)
-        {
-            StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_RuneLaw");
-            item.Stack = 255;
-            Game1.player.addItemToInventory(item);
-            error = "A FAIL";
-            return true;
-        }
         
         /// <inheritdoc cref="TriggerActionDelegate" />
-        public static bool TriggerB(string[] args, TriggerActionContext context, out string error)
+        public static bool OpenPouch(string[] args, TriggerActionContext context, out string error)
         {
-            StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>($"(O)Tofu.RunescapeSpellbook_PotBattlemage");
-            item.Stack = 255;
-            Game1.player.addItemToInventory(item);
-            error = "B FAIL";
+            error = null;
+            if (Game1.activeClickableMenu == null)
+            {
+                PouchInventoryHandler.LoadMenu();
+            }
             return true;
         }
-        
-        */
         
         //Console Commands
         private bool HasNoMagic()

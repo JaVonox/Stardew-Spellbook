@@ -515,11 +515,13 @@ public class PotionObject : ModLoadObjects
 
 public class PouchObject : ModLoadObjects
 {
-    public PouchObject(string id, string translationKey, int spriteIndex, Dictionary<string, PrefType>? characterPreferences, string type = "Basic", int category = -432) : base(id,translationKey,spriteIndex,characterPreferences,type,category)
+    public PouchObject(string id, string translationKey, int spriteIndex, string type = "Basic", int category = -432) : base(id,translationKey,spriteIndex,null,type,category)
     {
         this.CanBeGivenAsGift = false;
         this.extendableData.UseForTriggerAction = true;
-        //TODO TRIGGER ACTION NOT YET SETUP
+        this.extendableData.CanBeShipped = false;
+        this.extendableData.MaxStackSizeOverride = 1;
+        base.extendableData.CategoryColorOverride = new Color(0,96,45);
     }
 }
 public class MachinesObject : BigCraftableData, ITranslatable
