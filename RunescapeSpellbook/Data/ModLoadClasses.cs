@@ -4,7 +4,6 @@ using StardewValley;
 using StardewValley.GameData;
 using StardewValley.GameData.BigCraftables;
 using StardewValley.GameData.Buffs;
-using StardewValley.GameData.Buildings;
 using StardewValley.GameData.Crops;
 using StardewValley.GameData.FishPonds;
 using StardewValley.GameData.Locations;
@@ -86,22 +85,6 @@ public class RunesObjects : ModLoadObjects
     }
     
 }
-/*
-public class RunesCurrency : ModLoadObjects
-{
-    public VirtualCurrencyHandler handler;
-    public Color effectColour;
-    public float volatility;
-    public RunesCurrency(string id,string translationKey, int spriteIndex,string tiedRuneObject, Color effectColour, float volatility = 1.0f) : 
-        base(id,translationKey,spriteIndex,null,"Basic",0)
-    {
-        handler = new VirtualCurrencyHandler(id,tiedRuneObject);
-        this.effectColour = effectColour;
-        this.volatility = volatility;
-    }
-    
-}
-*/
 public class SlingshotItem : ModLoadObjects
 {
     public int extraDamage = 0;
@@ -650,20 +633,6 @@ public class MachinesObject : BigCraftableData, ITranslatable
     public void AddCraftingRecipe(IDictionary<string, string> craftingDict)
     {
         craftingDict[base.Name] = $"{this.creationString}/1 /{this.id}";
-    }
-}
-
-public class BuildingObject : BuildingData
-{
-    public string id;
-    public BuildingObject(string id, string name,string desc,Rectangle sourceRect, Point tileSize)
-    {
-        this.id = id;
-        this.Name = name;
-        this.Description = desc;
-        this.Texture = "Mods.RunescapeSpellbook.Assets.modmachines";
-        this.SourceRect = sourceRect;
-        this.Size = tileSize;
     }
 }
 public abstract class LoadableText : ITranslatable

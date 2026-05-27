@@ -77,18 +77,12 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addpots", KeyTranslator.GetTranslation("console.addpots.text"), this.GrantPotions);
             helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
-            helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
+            //helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
             
             //Custom GSQ triggers + actions
             TriggerActionManager.RegisterAction("Tofu.RunescapeSpellbook_OnOverhealApplied",TriggerOverheal);
             TriggerActionManager.RegisterAction("Tofu.RunescapeSpellbook_PouchUsed",OpenPouch);
         }
-
-        private void DisplayOnRenderedStep(object? sender, RenderedStepEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         private void OnLocaleChanged(object? sender, LocaleChangedEventArgs e)
         {
             ModAssets.ApplyMassTranslations();
@@ -181,7 +175,6 @@ namespace RunescapeSpellbook
             ISpaceCoreApi SpaceCoreApi = ModEntry.Instance.Helper.ModRegistry.GetApi<ISpaceCoreApi>("spacechase0.SpaceCore");
             Skills.RegisterSkill(new LevelsHandler.MagicSkill());
             LevelsHandler.Load(SpaceCoreApi);
-            VirtualCurrencyHandler.Load(SpaceCoreApi);
 
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
@@ -601,36 +594,6 @@ namespace RunescapeSpellbook
                     }
                 });
             }
-            
-            /*
-            if (e.NameWithoutLocale.IsEquivalentTo("spacechase0.SpaceCore/VirtualCurrencyData"))
-            {
-                e.Edit(asset =>
-                    {
-                        var currenciesSet = asset.AsDictionary<string, SpaceCore.VanillaAssetExpansion.VirtualCurrencyData>().Data;
-                        foreach (ModLoadObjects essenceCurrency in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
-                        {
-                            currenciesSet.Add(essenceCurrency.Name,new VirtualCurrencyData());
-                        }
-                    }
-                );
-            }
-            */
-            
-            /*
-            if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
-            {
-                e.Edit(asset =>
-                {
-                    var buildDict = asset.AsDictionary<string, BuildingData>().Data;
-
-                    foreach (BuildingObject buildObj in ModAssets.buildingItems)
-                    {
-                        buildDict.Add(buildObj.id,buildObj);
-                    }
-                });
-            }
-            */
             
             if (e.NameWithoutLocale.IsEquivalentTo("Data/Powers"))
             {
@@ -1559,6 +1522,7 @@ namespace RunescapeSpellbook
             error = null;
             if (Game1.activeClickableMenu == null)
             {
+                Game1.playSound("bigSelect", null);
                 PouchInventoryHandler.LoadMenu();
             }
             return true;
@@ -1801,11 +1765,11 @@ namespace RunescapeSpellbook
             this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedTreasures.text"),LogLevel.Info);
         }
     
+        /*
         private void DebugSpawnFloaters(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
-        
-            /*
+            
             Point pos = Game1.player.GetBoundingBox().Center;
             pos.X -= 100;
             foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
@@ -1817,8 +1781,8 @@ namespace RunescapeSpellbook
             }
             
             Instance.Monitor.Log("Spawned Floats",LogLevel.Info);
-            */
         }
+        */
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}

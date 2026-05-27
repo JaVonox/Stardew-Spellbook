@@ -338,7 +338,8 @@
 	"ui.NotMagic.text-1":"I don't know any runic spells yet",
 	"ui.NotMagic.text-2":"I might be able to learn some if I reach level 4",
 	"ui.NotMagic.text-3":"friendship with someone with experience in magic",
-
+	"ui.Pouch.text":"I can't fit anything else in the bag!",
+	
 	"ui.Category-999.text":"Debug Object",
 	"ui.Category-429.text":"Elemental Rune",
 	"ui.Category-430.text":"Combat Rune",

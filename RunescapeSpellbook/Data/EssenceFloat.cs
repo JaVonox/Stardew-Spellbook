@@ -6,6 +6,7 @@ using StardewValley.Monsters;
 
 namespace RunescapeSpellbook;
 
+/*
 public class EssenceSparkle
 {
     private Vector2 offset;
@@ -139,3 +140,4 @@ public class EssenceFloat : BigSlime
     
     //TODO check audio
 }
+*/
