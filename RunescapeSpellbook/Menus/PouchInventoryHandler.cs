@@ -115,6 +115,6 @@ public static class PouchInventoryHandler
 
     private static void RecalculateItemCap(Farmer who)
     {
-        pouchLimit = 50 * (LevelsHandler.GetFarmerMagicLevel(who) * 10);
+        pouchLimit = 50 + (LevelsHandler.GetFarmerMagicLevel(who) * 10);
     }
 }
