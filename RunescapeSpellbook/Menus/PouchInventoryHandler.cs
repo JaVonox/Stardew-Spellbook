@@ -15,7 +15,7 @@ public static class PouchInventoryHandler
     private static int pouchLimit = 50;
     public static void LoadMenu()
     {
-        pouchLimit = 50;
+        RecalculateItemCap(Game1.player);
         Game1.activeClickableMenu = new ItemGrabMenu(GetItemsForPlayer(), reverseGrab: false, showReceivingMenu: true,
             highlightPacks, grabItemFromInventory, null, grabItemFromChest, snapToBottom: false,
             canBeExitedWithKey: true, playRightClickSound: true, allowRightClick: true, showOrganizeButton: false, 1,
@@ -83,6 +83,7 @@ public static class PouchInventoryHandler
         
         return item;
     }
+    
     public static void grabItemFromChest(Item item, Farmer who)
     {
         if (who.couldInventoryAcceptThisItem(item))
@@ -96,5 +97,24 @@ public static class PouchInventoryHandler
     public static bool highlightPacks(Item i)
     {
         return i.Category == -28 && ModAssets.modItems.TryGetValue(i.ItemId, out ModLoadObjects val) && val is PackObject;
+    }
+    
+    public static Item GroundCollect(Item item, Farmer who)
+    {
+        RecalculateItemCap(who);
+        IInventory localInv = GetItemsForPlayer();
+        int slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x.Stack) : pouchLimit;
+        if (slotsRemaining <= 0)
+        {
+            return item;
+        }
+
+        Item tmp = addItem(item,slotsRemaining);
+        return tmp;
+    }
+
+    private static void RecalculateItemCap(Farmer who)
+    {
+        pouchLimit = 50 * (LevelsHandler.GetFarmerMagicLevel(who) * 10);
     }
 }

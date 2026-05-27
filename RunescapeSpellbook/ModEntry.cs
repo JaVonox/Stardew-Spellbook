@@ -42,6 +42,8 @@ namespace RunescapeSpellbook
         public static ModEntry Instance;
         public ModConfig Config;
         internal IBetterGameMenuApi? BetterGameMenuApi;
+        internal static ISpaceCoreApi SpaceCoreApi;
+        
         public override void Entry(IModHelper helper)
         {
             var harmony = new Harmony(this.ModManifest.UniqueID);
@@ -172,9 +174,14 @@ namespace RunescapeSpellbook
                 Instance.Monitor.Log(KeyTranslator.GetTranslation("log.GameMenuAPIError.text",new{Exception = exception.Message}),LogLevel.Error);
             }
             
-            ISpaceCoreApi SpaceCoreApi = ModEntry.Instance.Helper.ModRegistry.GetApi<ISpaceCoreApi>("spacechase0.SpaceCore");
+            SpaceCoreApi = ModEntry.Instance.Helper.ModRegistry.GetApi<ISpaceCoreApi>("spacechase0.SpaceCore");
             Skills.RegisterSkill(new LevelsHandler.MagicSkill());
             LevelsHandler.Load(SpaceCoreApi);
+            SpaceCoreApi.RegisterEquipmentSlot(this.ModManifest, "Tofu.RunescapeSpellbook.PouchSlot",
+                (item) => (item == null || item.ItemId == "Tofu.RunescapeSpellbook_PackPouch"),
+                () => (KeyTranslator.GetTranslation("ui.PouchSlot.text")),
+                ModAssets.extraTextures,
+                new Rectangle(0, 0, 16, 16));
 
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
@@ -1062,31 +1069,6 @@ namespace RunescapeSpellbook
             }
         }
         
-        /*
-        [HarmonyPatch(typeof(GameLocation), "monsterDrop")]
-        [HarmonyPatch(new Type[] { typeof(Monster), typeof(int), typeof(int), typeof(Farmer) })]
-        public class MonsterEssenceDropsPatcher
-        {
-            public static void Postfix(Monster monster, int x, int y, Farmer who)
-            {
-                if (DropTable.monsterDrops.TryGetValue(monster.Name, out var dropSet))
-                {
-                    foreach (ItemDrop drop in dropSet)
-                    {
-                        if (Game1.random.NextDouble() < drop.chance) //TODO handle multiple drops?
-                        {
-                            StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{drop.itemID}");
-                            spawnObj.Stack = drop.amount;
-                            
-                            RunesCurrency cur = ((RunesCurrency)ModAssets.modItems[drop.itemID]);
-                            Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,monster.Position,cur.effectColour,cur.volatility));
-                        }
-                    }
-                }
-            }
-        }
-        */
-        
         [HarmonyPatch(typeof(BuffManager), "IsApplied")]
         [HarmonyPatch(new Type[] { typeof(string) })]
         public class BuffIsAppliedPatcher
@@ -1097,6 +1079,29 @@ namespace RunescapeSpellbook
                 {
                     __result = __instance.AppliedBuffIds.Contains("Tofu.RunescapeSpellbook_BuffDark");
                 }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Debris), "collect")]
+        [HarmonyPatch(new Type[] { typeof(Farmer), typeof(Chunk)})]
+        public class FarmerPickupDebrisItemPatcher
+        {
+            public static bool Prefix(ref bool __result, Debris __instance,Farmer farmer, Chunk chunk)
+            {
+                //Check if we should attempt to add this item to a pack inventory
+                if (__instance.item != null && farmer.hasOrWillReceiveMail("Tofu.RunescapeSpellbook_RunesFound") &&
+                    SpaceCoreApi.GetItemInEquipmentSlot(farmer, "Tofu.RunescapeSpellbook.PouchSlot") != null && PouchInventoryHandler.highlightPacks(__instance.item))
+                {
+                    __instance.item = PouchInventoryHandler.GroundCollect(__instance.item, farmer);
+
+                    if (__instance.item == null)
+                    {
+                        __result = true;
+                        return false;
+                    }
+                }
+
+                return true;
             }
         }
         
@@ -1764,25 +1769,6 @@ namespace RunescapeSpellbook
         
             this.Monitor.Log(KeyTranslator.GetTranslation("log.GrantedTreasures.text"),LogLevel.Info);
         }
-    
-        /*
-        private void DebugSpawnFloaters(string command, string[] args)
-        {
-            if (HasNoWorldContextReady()){return;}
-            
-            Point pos = Game1.player.GetBoundingBox().Center;
-            pos.X -= 100;
-            foreach (ModLoadObjects item in ModAssets.modItems.Where(x=> x.Value is RunesCurrency).Select(y=>y.Value))
-            {
-                pos.X -= 100; 
-                StardewValley.Object spawnObj = ItemRegistry.Create<StardewValley.Object>($"{item.id}");
-                RunesCurrency cur = ((RunesCurrency)ModAssets.modItems[item.id]);
-                Game1.player.currentLocation.characters.Add(new EssenceFloat(spawnObj,pos.ToVector2(),cur.effectColour,cur.volatility));
-            }
-            
-            Instance.Monitor.Log("Spawned Floats",LogLevel.Info);
-        }
-        */
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}

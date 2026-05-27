@@ -111,7 +111,7 @@
 	"item.PotBattlemage.display-name":"Battlemage Potion",
 	"item.PotBattlemage.description":"A potion that imbues the user with the power of a battlemage. Combat spells have a 10% chance of costing no runes. Spells cast with no cost grant no experience",
 	"item.PackPouch.display-name":"Pack Looting Bag",
-	"item.PackPouch.description":"A magical pouch that lets you store and retrieve any packs you've collected, courtesy of the Bank of Gielinor.",
+	"item.PackPouch.description":"A magical pouch that lets you store and retrieve any packs you've collected, courtesy of the Bank of Gielinor. Equip it to automatically pick up packs from the ground!",
 	
 	"weapon.StaffMagic.display-name":"Magic Staff",
 	"weapon.StaffMagic.description":"A magical battlestaff",
@@ -339,6 +339,7 @@
 	"ui.NotMagic.text-2":"I might be able to learn some if I reach level 4",
 	"ui.NotMagic.text-3":"friendship with someone with experience in magic",
 	"ui.Pouch.text":"I can't fit anything else in the bag!",
+	"ui.PouchSlot.text":"Pack Pouch",
 	
 	"ui.Category-999.text":"Debug Object",
 	"ui.Category-429.text":"Elemental Rune",
