@@ -2,9 +2,12 @@
 using StardewValley;
 using StardewValley.Extensions;
 using StardewValley.GameData.Machines;
+using StardewValley.Inventories;
 using StardewValley.Locations;
+using StardewValley.Menus;
 using StardewValley.Monsters;
 using StardewValley.TerrainFeatures;
+using Object = StardewValley.Object;
 
 namespace RunescapeSpellbook;
 
@@ -374,24 +377,28 @@ public class SpellEffects : BaseSpellEffects
 
         return new SpellResponse(true);
     }
-
     public static SpellResponse BakePie(int animOffset)
     {
-        CraftingRecipe? selectedRecipe = Game1.player.cookingRecipes.Keys
-            .Select(x => new CraftingRecipe(x, true))
-            .Where(x => x.doesFarmerHaveIngredientsInInventory()).OrderBy(x => Game1.random.Next()).FirstOrDefault();
-
-        if (selectedRecipe == null)
-        {
-            return new SpellResponse(false, "spell-error.BuffPieMakeNoRecipe.text");
-        }
-
         PlayAnimation(() =>
         {
-            Item crafted = selectedRecipe.createItem();
-            selectedRecipe.consumeIngredients(new() { Game1.player.Items });
-            Utility.CollectOrDrop(crafted);
-
+            //Make a new inventory with a lot of useful items
+            IList<Item> cheapResources = new List<Item>
+            {
+                new Object("Tofu.RunescapeSpellbook_RuneSpellbook",429), //This is used as a quick check to see if this is a spell 
+                new Object("246",999),
+                new Object("245",999),
+                new Object("247",999),
+                new Object("423",999),
+                new Object("419",999),
+            };
+            
+            IInventory cheapItems = new Inventory();
+            cheapItems.AddRange(cheapResources);
+            List<IInventory> cheapItemInterface = new List<IInventory>();
+            cheapItemInterface.Add(cheapItems);
+            
+            Vector2 center = Utility.getTopLeftPositionForCenteringOnScreen(800 + IClickableMenu.borderWidth * 2, 600 + IClickableMenu.borderWidth * 2);
+            Game1.activeClickableMenu = new CraftingPage((int)center.X, (int)center.Y, 800 + IClickableMenu.borderWidth * 2, 600 + IClickableMenu.borderWidth * 2, cooking: true, standaloneMenu: true, cheapItemInterface);
         }, "RunescapeSpellbook.BakePie", 800,animOffset);
 
         return new SpellResponse(true);

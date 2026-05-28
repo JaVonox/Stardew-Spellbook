@@ -62,10 +62,7 @@ namespace RunescapeSpellbook
             helper.Events.Display.RenderedStep += DrawHandler.PostHudStepHandler;
 
             helper.ConsoleCommands.Add("rs_grantmagic", KeyTranslator.GetTranslation("console.grantmagic.text"), this.GrantMagic);
-            helper.ConsoleCommands.Add("rs_setlevel", KeyTranslator.GetTranslation("console.setlevel.text"), this.SetLevel);
-            helper.ConsoleCommands.Add("rs_setexp", KeyTranslator.GetTranslation("console.setexp.text"), this.SetExp);
             helper.ConsoleCommands.Add("rs_addexp", KeyTranslator.GetTranslation("console.addexp.text"), this.AddExp);
-            helper.ConsoleCommands.Add("rs_clearperks", KeyTranslator.GetTranslation("console.clearperks.text"), this.ResetPerks);
             helper.ConsoleCommands.Add("rs_info", KeyTranslator.GetTranslation("console.info.text"), this.PlayerInfo);
             helper.ConsoleCommands.Add("rs_addrunes", KeyTranslator.GetTranslation("console.addrunes.text"), this.GrantRunes);
             helper.ConsoleCommands.Add("rs_addweps", KeyTranslator.GetTranslation("console.addweps.text"), this.GrantStaffs);
@@ -78,6 +75,7 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addpots", KeyTranslator.GetTranslation("console.addpots.text"), this.GrantPotions);
             helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
+            helper.ConsoleCommands.Add("rs_openpouch", "Opens the pack pouch", this.OpenPouch);
             //helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
             
             //Custom GSQ triggers + actions
@@ -181,7 +179,6 @@ namespace RunescapeSpellbook
                 () => (KeyTranslator.GetTranslation("ui.PouchSlot.text")),
                 ModAssets.extraTextures,
                 new Rectangle(0, 0, 16, 16));
-
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
         {
@@ -1458,6 +1455,25 @@ namespace RunescapeSpellbook
             }
         }
         
+        [HarmonyPatch(typeof(CraftingPage), "clickCraftingRecipe")]
+        [HarmonyPatch(new Type[] { typeof(ClickableTextureComponent),typeof(bool)})]
+        public class BakePieClosePatcher
+        {
+            public static void Postfix(CraftingPage __instance, ClickableTextureComponent c, bool playSound = true)
+            {
+                if (__instance.cooking == true && __instance._materialContainers != null && __instance._materialContainers[0].ContainsId("Tofu.RunescapeSpellbook_RuneSpellbook"))
+                {
+                    if (__instance.heldItem != null)
+                    {
+                        Game1.player.addItemToInventoryBool(__instance.heldItem);
+                        __instance.heldItem = null;
+                    }
+                    
+                    __instance.exitThisMenu(true);
+                }
+            }
+        }
+        
         /// <inheritdoc cref="TriggerActionDelegate" />
         public static bool TriggerOverheal(string[] args, TriggerActionContext context, out string error)
         {
@@ -1555,7 +1571,6 @@ namespace RunescapeSpellbook
             return false;
         }
         
-        //TODO Most of these dont work now cuz of the switch to spacecore
         private void GrantMagic(string command, string[] args)
         {
             if(HasNoWorldContextReady()){return;}
@@ -1565,38 +1580,11 @@ namespace RunescapeSpellbook
                 this.Monitor.Log(KeyTranslator.GetTranslation("log.AlreadyHaveMagic.text"),LogLevel.Warn);
                 return;
             }
+            
             Game1.player.eventsSeen.Add("Tofu.RunescapeSpellbook_Event0");
             Monitor.Log(KeyTranslator.GetTranslation("log.AddedMagic.text"),LogLevel.Info);
-            if (args.Length > 0 && int.TryParse(args[0], out int reqLevel))
-            {
-                reqLevel = Math.Clamp(reqLevel, 0, 10);
-                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicLevel",reqLevel.ToString());
-                ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicExp",(Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
-            }
         }
-
-        private void SetLevel(string command, string[] args)
-        {
-            if (HasNoWorldContextReady() || HasNoMagic()){return;}
-
-            if (args.Length == 0)
-            {
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyMagicLevel.text"),LogLevel.Error);
-                return;
-            }
-        
-            if (int.TryParse(args[0], out int reqLevel))
-            {
-                reqLevel = Math.Clamp(reqLevel, 0, 10);
-                
-                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", (reqLevel).ToString());
-                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", (Farmer.getBaseExperienceForLevel(reqLevel)).ToString());
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.SetMagicLevel.text", new {RequestedLevel = reqLevel}),LogLevel.Info);
-            }
-        }
-    
-        private void SetExp(string command, string[] args)
+        private void AddExp(string command, string[] args)
         {
             if (HasNoWorldContextReady() || HasNoMagic()){return;}
 
@@ -1608,38 +1596,10 @@ namespace RunescapeSpellbook
         
             if (double.TryParse(args[0], out double reqExp))
             {
-                reqExp = Math.Clamp(reqExp, 0, Farmer.getBaseExperienceForLevel(10));
-                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicLevel", "0");
-                ModAssets.TrySetModVariable(Game1.player, "Tofu.RunescapeSpellbook_MagicExp", "0");
-                LevelsHandler.IncrementMagicExperience(Game1.player, reqExp,false);
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.SetExperienceLevel.text", new {RequestedExp = reqExp}),LogLevel.Info);
+                int nXP = (int)Math.Floor(Math.Clamp(reqExp, 0, Farmer.getBaseExperienceForLevel(10) * 100));
+                LevelsHandler.IncrementMagicExperience(Game1.player, nXP,false);
+                this.Monitor.Log(KeyTranslator.GetTranslation("log.AddExperienceLevel.text", new {RequestedExp = nXP}),LogLevel.Info);
             }
-        }
-    
-        private void AddExp(string command, string[] args)
-        {
-            if (HasNoWorldContextReady() || HasNoMagic()){return;}
-
-            if (args.Length == 0)
-            {
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.SpecifyExpAdd.text"),LogLevel.Error);
-                return;
-            }
-        
-            if (double.TryParse(args[0], out double reqAddExp))
-            {
-                LevelsHandler.IncrementMagicExperience(Game1.player, reqAddExp,false);
-                this.Monitor.Log(KeyTranslator.GetTranslation("log.AddExperienceLevel.text", new {RequestedExp = reqAddExp}),LogLevel.Info);
-            }
-        }
-    
-        private void ResetPerks(string command, string[] args)
-        {
-            if (HasNoWorldContextReady() || HasNoMagic()){return;}
-        
-            ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf1","-1");
-            ModAssets.TrySetModVariable(Game1.player,"Tofu.RunescapeSpellbook_MagicProf2","-1");
-            this.Monitor.Log(KeyTranslator.GetTranslation("log.RemovePerks.text"),LogLevel.Info);
         }
     
         private void PlayerInfo(string command, string[] args)
@@ -1771,19 +1731,23 @@ namespace RunescapeSpellbook
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
-
-            if (Game1.activeClickableMenu == null)
-            {
-                PouchInventoryHandler.LoadMenu();
-            }
         }
-    
         private void DebugPosition(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
         
             Farmer player = Game1.player;
             Monitor.Log($"{player.currentLocation.Name}\n x: {player.Tile.X}\n y: {player.Tile.Y}",LogLevel.Info);
+        }
+        
+        private void OpenPouch(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+
+            if (Game1.activeClickableMenu == null)
+            {
+                PouchInventoryHandler.LoadMenu();
+            }
         }
     
         private void GrantPacks(string command, string[] args)

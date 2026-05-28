@@ -161,7 +161,7 @@
 	"spell.BuffVileVigour.display-name":"Vile Vigour",
 	"spell.BuffVileVigour.description":"Sacrifices a third of your max health to fill your energy",
 	"spell.BuffPieMake.display-name":"Bake Pie",
-	"spell.BuffPieMake.description":"Cooks a random recipe that you know using your held ingredients",
+	"spell.BuffPieMake.description":"Lets you cook one item. some basic ingredients are provided",
 	"spell.TeleportDesert.display-name":"Desert Teleport",
 	"spell.TeleportDesert.description":"Teleports you to the desert, if you have access to it",
 	"spell.TeleportGinger.display-name":"Ginger Island Teleport",
@@ -350,7 +350,7 @@
 	"ui.Rerun.text":" (Re-run)",
 	
 	//Unfortunately these wont ever translate, but I kept them in this file for consistency
-	"console.grantmagic.text":"Gives the player magic.\n\nUsage: rs_grantmagic <value>\n\nValue: the level to set to",
+	"console.grantmagic.text":"Gives the player magic.\n\nUsage: rs_grantmagic",
 	"console.setlevel.text":"Sets the players magic level.\n\nUsage: rs_setlevel <value>\n\nValue: the level to set to",
 	"console.setexp.text":"Sets the players experience level.\n\nUsage: rs_setexp <value>\n\nValue: the experience to set to",
 	"console.addexp.text":"Adds to the players experience level.\n\nUsage: rs_addexp <value>\n\nValue: the experience to add",

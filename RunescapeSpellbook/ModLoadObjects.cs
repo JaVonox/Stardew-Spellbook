@@ -321,7 +321,7 @@ public static class ModAssets
         new TeleportSpell(0,"Teleport_Valley","TeleportValley",0,
             new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneWater",2} },800,"Town", 43, 60,0),
         
-        new TeleportSpell(1,"Teleport_Home","TeleportHome",4,
+        new TeleportSpell(1,"Teleport_Home","TeleportHome",8,
             new() { {"Tofu.RunescapeSpellbook_RuneLaw", 1},{"Tofu.RunescapeSpellbook_RuneAir",3},{"Tofu.RunescapeSpellbook_RuneEarth",3} },1000, "FarmHouse"),
         
         new InventorySpell(2,"Menu_Superheat","MenuSuperheat",1,
@@ -346,7 +346,7 @@ public static class ModAssets
             7,"Vile","spell-error.BuffVileVigourEnergyFull.text"),
         
         new BuffSpell(7,"Buff_PieMake","BuffPieMake",3,
-            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",1},{"Tofu.RunescapeSpellbook_RuneWater",1}}, 1500,
+            new() { {"Tofu.RunescapeSpellbook_RuneAstral", 1},{"Tofu.RunescapeSpellbook_RuneFire",5},{"Tofu.RunescapeSpellbook_RuneWater",4}}, 1500,
             (f=> f is Farmer farmer && farmer.cookingRecipes.Length > 0), SpellEffects.BakePie, 8,"BakePie","spell-error.BuffPieMakeNoRecipes.text"),
         
         new TeleportSpell(8,"Teleport_Desert","TeleportDesert",5,
