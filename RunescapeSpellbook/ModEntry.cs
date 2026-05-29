@@ -75,7 +75,10 @@ namespace RunescapeSpellbook
             helper.ConsoleCommands.Add("rs_addpots", KeyTranslator.GetTranslation("console.addpots.text"), this.GrantPotions);
             helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
             helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
+            helper.ConsoleCommands.Add("rs_addpouch", "Gives the player a pouch", this.GrantPouch);
             helper.ConsoleCommands.Add("rs_openpouch", "Opens the pack pouch", this.OpenPouch);
+            helper.ConsoleCommands.Add("rs_debug_ut", "Does a unit test. Do not use this",
+                (string command, string[] args) => { this.DebugUnitTest(helper); });
             //helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
             
             //Custom GSQ triggers + actions
@@ -1646,7 +1649,7 @@ namespace RunescapeSpellbook
             {
                 runeReqs = new List<int>() { -429,-431};
             }
-            else if (runeReq == "combat" || runeReq == "comb")
+            else if (runeReq == "combat" || runeReq == "com" || runeReq == "comb")
             {
                 runeReqs = new List<int>() { -429,-430};
             }
@@ -1740,6 +1743,21 @@ namespace RunescapeSpellbook
             Monitor.Log($"{player.currentLocation.Name}\n x: {player.Tile.X}\n y: {player.Tile.Y}",LogLevel.Info);
         }
         
+        private void DebugUnitTest(IModHelper helper)
+        {
+            if (HasNoWorldContextReady()){return;}
+
+            MassUnitTest test = new MassUnitTest(helper,this.Monitor);
+            test.OperateUnitTest();
+        }
+        
+        private void GrantPouch(string command, string[] args)
+        {
+            if (HasNoWorldContextReady()){return;}
+
+            StardewValley.Object item = ItemRegistry.Create<StardewValley.Object>("(O)Tofu.RunescapeSpellbook_PackPouch");
+            Game1.player.addItemToInventory(item);
+        }
         private void OpenPouch(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
