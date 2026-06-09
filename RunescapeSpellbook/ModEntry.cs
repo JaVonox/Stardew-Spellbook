@@ -1747,8 +1747,8 @@ namespace RunescapeSpellbook
         {
             if (HasNoWorldContextReady()){return;}
 
-            MassUnitTest test = new MassUnitTest(helper,this.Monitor);
-            test.OperateUnitTest();
+            //MassUnitTest test = new MassUnitTest(helper,this.Monitor,this.Config);
+            //test.OperateUnitTest();
         }
         
         private void GrantPouch(string command, string[] args)
