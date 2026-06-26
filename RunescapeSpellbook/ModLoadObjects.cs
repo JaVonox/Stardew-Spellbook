@@ -550,8 +550,8 @@ public static class ModAssets
         new CustomBuff("Tofu.RunescapeSpellbook_BuffDark", "DarkLure", 180_000, 1),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffHunters", "Hunters", 300_000, 2),
         new CustomBuff("Tofu.RunescapeSpellbook_BuffBattlemage", "Battlemage", 540_000, 3),
-        new CustomBuff("Tofu.RunescapeSpellbook_OverhealApplier", "Overheal", -2, 3, new List<string>(){"Tofu.RunescapeSpellbook_OnOverhealApplied"}), //Only applies overheals, gets removed immediately after. needed so that we can combine overheals properly.
-        new CustomBuff("Tofu.RunescapeSpellbook_Overheal", "Overheal", -2, 3),
+        new CustomBuff("Tofu.RunescapeSpellbook_OverhealApplier", "Overheal", -2, 4, new List<string>(){"Tofu.RunescapeSpellbook_OnOverhealApplied"}), //Only applies overheals, gets removed immediately after. needed so that we can combine overheals properly.
+        new CustomBuff("Tofu.RunescapeSpellbook_Overheal", "Overheal", -2, 4),
     };
 
     public static List<LoadablePower> loadablePowers = new()

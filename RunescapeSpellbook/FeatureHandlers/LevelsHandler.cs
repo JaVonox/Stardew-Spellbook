@@ -124,12 +124,11 @@ public static class LevelsHandler
 
         public override List<string> GetExtraLevelUpInfo(int level)
         {
-            return new List<string>() { "Congratulations, you just advanced a Magic level.", "You've unlocked access to new spells!" }; //TODO translation
+            return new List<string>() { KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-1"), KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-2") };
         }
         
         //TODO add level up effects (sound etc.)
-    
-        public override string GetName() => "Runic Magic"; //TODO translation
+        public override string GetName() => KeyTranslator.GetTranslation("skill.RunescapeMagic.display-name");
     }
 
     public class MagicProfession : Skills.Skill.Profession

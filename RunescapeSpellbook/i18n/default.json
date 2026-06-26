@@ -221,7 +221,8 @@
 	"spell-error.BuffDarkLureActive.text":"I'm already luring monsters!",
 	"spell-error.BuffChargeActive.text":"I'm already charged!",
 	"spell-error.BuffVileVigourEnergyFull.text":"My energy is already full",
-	
+
+	"skill.RunescapeMagic.display-name":"Runic Magic",
 	"perk.Sapphire.display-name":"Sapphire",
 	"perk.Sapphire.description-1":"All teleportation spells are free.",
 	"perk.Emerald.display-name":"Emerald",
@@ -230,6 +231,8 @@
 	"perk.Ruby.description-1":"20% chance of non-combat spells casting for free.",
 	"perk.Dragonstone.display-name":"Dragonstone",
 	"perk.Dragonstone.description-1":"20% chance of combat spells firing extra projectiles, Does not stack with charge.",
+	"skill.RunescapeMagic.level-up-1":"Congratulations, you just advanced a Magic level",
+	"skill.RunescapeMagic.level-up-2":"You've unlocked access to new spells!",
 	
 	"mail.SpellMail.title": "Wizard's Battlestaff Gift",
 	"mail.SpellMail.text": "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff.^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. ^^   -M. Rasmodius, Wizard",
@@ -339,7 +342,7 @@
 	"ui.NotMagic.text-2":"I might be able to learn some if I reach level 4",
 	"ui.NotMagic.text-3":"friendship with someone with experience in magic",
 	"ui.Pouch.text":"I can't fit anything else in the bag!",
-	"ui.PouchSlot.text":"Pack Pouch",
+	"ui.PouchSlot.text":" Pouch Slot",
 	
 	"ui.Category-999.text":"Debug Object",
 	"ui.Category-429.text":"Elemental Rune",
@@ -348,25 +351,6 @@
 	"ui.Category-432.text":"Portable Pack Bank",
 	
 	"ui.Rerun.text":" (Re-run)",
-	
-	//Unfortunately these wont ever translate, but I kept them in this file for consistency
-	"console.grantmagic.text":"Gives the player magic.\n\nUsage: rs_grantmagic",
-	"console.setlevel.text":"Sets the players magic level.\n\nUsage: rs_setlevel <value>\n\nValue: the level to set to",
-	"console.setexp.text":"Sets the players experience level.\n\nUsage: rs_setexp <value>\n\nValue: the experience to set to",
-	"console.addexp.text":"Adds to the players experience level.\n\nUsage: rs_addexp <value>\n\nValue: the experience to add",
-	"console.clearperks.text":"Clears a players perks.\n\nUsage: rs_clearperks",
-	"console.info.text":"Dumps some info about all players to console.\n\nUsage: rs_info",
-	"console.addrunes.text":"Gives the player some runes.\n\nUsage: rs_addrunes <value>\n\nValue: default, rune name, elemental, catalytic, teleport, utility, combat, combat2",
-	"console.addweps.text":"Gives the player staves.\n\nUsage: rs_addweps",
-	"console.addammo.text":"Gives the player ammo.\n\nUsage: rs_addammo",
-	"console.addtreasures.text":"Gives the player treasures.\n\nUsage: rs_addtreasures",
-	"console.addpacks.text":"Gives the player packs.\n\nUsage: rs_addpacks",
-	"console.addfish.text":"Gives the player fish.\n\nUsage: rs_addfish",
-	"console.addseeds.text":"Gives the player seeds.\n\nUsage: rs_addseeds",
-	"console.addcrops.text":"Gives the player crops.\n\nUsage: rs_addcrops",
-	"console.addpots.text":"Gives the player potions.\n\nUsage: rs_addpots",
-	"console.debugmisc.text":"Runs a command left in for testing. Do not use. \n\nUsage: rs_debug_misc",
-	"console.debugpos.text":"Reports the position of the local player \n\nUsage: rs_debug_position",
 	
 	"log.ModConfigError.text":"Runescape Spellbook failed to setup GenericModConfigMenuAPI: {{Exception}",
 	"log.GameMenuAPIError.text":"Runescape Spellbook failed to setup BetterGameMenuAPI: {{Exception}",

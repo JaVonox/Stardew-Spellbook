@@ -61,24 +61,23 @@ namespace RunescapeSpellbook
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.Display.RenderedStep += DrawHandler.PostHudStepHandler;
 
-            helper.ConsoleCommands.Add("rs_grantmagic", KeyTranslator.GetTranslation("console.grantmagic.text"), this.GrantMagic);
-            helper.ConsoleCommands.Add("rs_addexp", KeyTranslator.GetTranslation("console.addexp.text"), this.AddExp);
-            helper.ConsoleCommands.Add("rs_info", KeyTranslator.GetTranslation("console.info.text"), this.PlayerInfo);
-            helper.ConsoleCommands.Add("rs_addrunes", KeyTranslator.GetTranslation("console.addrunes.text"), this.GrantRunes);
-            helper.ConsoleCommands.Add("rs_addweps", KeyTranslator.GetTranslation("console.addweps.text"), this.GrantStaffs);
-            helper.ConsoleCommands.Add("rs_addammo", KeyTranslator.GetTranslation("console.addammo.text"), this.GrantAmmo);
-            helper.ConsoleCommands.Add("rs_addtreasures", KeyTranslator.GetTranslation("console.addtreasures.text"), this.GrantTreasures);
-            helper.ConsoleCommands.Add("rs_addpacks", KeyTranslator.GetTranslation("console.addpacks.text"), this.GrantPacks);
-            helper.ConsoleCommands.Add("rs_addfish", KeyTranslator.GetTranslation("console.addfish.text"), this.GrantFish);
-            helper.ConsoleCommands.Add("rs_addseeds", KeyTranslator.GetTranslation("console.addseeds.text"), this.GrantSeeds);
-            helper.ConsoleCommands.Add("rs_addcrops", KeyTranslator.GetTranslation("console.addcrops.text"), this.GrantCrops);
-            helper.ConsoleCommands.Add("rs_addpots", KeyTranslator.GetTranslation("console.addpots.text"), this.GrantPotions);
-            helper.ConsoleCommands.Add("rs_debug_misc", KeyTranslator.GetTranslation("console.debugmisc.text"), this.DebugCommand);
-            helper.ConsoleCommands.Add("rs_debug_position", KeyTranslator.GetTranslation("console.debugpos.text"), this.DebugPosition);
-            helper.ConsoleCommands.Add("rs_addpouch", "Gives the player a pouch", this.GrantPouch);
-            helper.ConsoleCommands.Add("rs_openpouch", "Opens the pack pouch", this.OpenPouch);
-            helper.ConsoleCommands.Add("rs_debug_ut", "Does a unit test. Do not use this",
-                (string command, string[] args) => { this.DebugUnitTest(helper); });
+            helper.ConsoleCommands.Add("rs_grantmagic", "Gives the player magic.\nUsage: rs_grantmagic", this.GrantMagic);
+            helper.ConsoleCommands.Add("rs_addexp", "Adds to the players experience level.\nUsage: rs_addexp <value>\nValue: the experience to add", this.AddExp);
+            helper.ConsoleCommands.Add("rs_info", "Dumps some info about all players to console.\nUsage: rs_info", this.PlayerInfo);
+            helper.ConsoleCommands.Add("rs_addrunes", "Gives the player some runes.\nUsage: rs_addrunes <value>\nValue: default, rune name, elemental, catalytic, teleport, utility, combat, combat2", this.GrantRunes);
+            helper.ConsoleCommands.Add("rs_addweps", "Gives the player staves.\nUsage: rs_addweps", this.GrantStaffs);
+            helper.ConsoleCommands.Add("rs_addammo", "Gives the player ammo.\nUsage: rs_addammo", this.GrantAmmo);
+            helper.ConsoleCommands.Add("rs_addtreasures", "Gives the player treasures.\nUsage: rs_addtreasures", this.GrantTreasures);
+            helper.ConsoleCommands.Add("rs_addpacks", "Gives the player packs.\nUsage: rs_addpacks", this.GrantPacks);
+            helper.ConsoleCommands.Add("rs_addfish", "Gives the player fish.\nUsage: rs_addfish", this.GrantFish);
+            helper.ConsoleCommands.Add("rs_addseeds", "Gives the player seeds.\nUsage: rs_addseeds", this.GrantSeeds);
+            helper.ConsoleCommands.Add("rs_addcrops", "Gives the player crops.\nUsage: rs_addcrops", this.GrantCrops);
+            helper.ConsoleCommands.Add("rs_addpots", "Gives the player potions.\nUsage: rs_addpots", this.GrantPotions);
+            helper.ConsoleCommands.Add("rs_debug_misc", "Runs a command left in for testing. Do not use. \nUsage: rs_debug_misc", this.DebugCommand);
+            helper.ConsoleCommands.Add("rs_debug_position", "Reports the position of the local player \nUsage: rs_debug_position", this.DebugPosition);
+            helper.ConsoleCommands.Add("rs_addpouch", "Gives the player a pouch\nUsage: rs_addpouch", this.GrantPouch);
+            helper.ConsoleCommands.Add("rs_openpouch", "Opens the pack pouch\nUsage: rs_openpouch", this.OpenPouch);
+            //helper.ConsoleCommands.Add("rs_debug_ut", "Does a unit test. Do not use this\n\nUsage: rs_debug_ut",(string command, string[] args) => { this.DebugUnitTest(helper); });
             //helper.ConsoleCommands.Add("rs_debug_float", "Spawns in floaters for debug testing \\n\\nUsage: rs_debug_float", this.DebugSpawnFloaters);
             
             //Custom GSQ triggers + actions
@@ -181,7 +180,7 @@ namespace RunescapeSpellbook
                 (item) => (item == null || item.ItemId == "Tofu.RunescapeSpellbook_PackPouch"),
                 () => (KeyTranslator.GetTranslation("ui.PouchSlot.text")),
                 ModAssets.extraTextures,
-                new Rectangle(0, 0, 16, 16));
+                new Rectangle(80, 0, 16, 16));
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
         {
