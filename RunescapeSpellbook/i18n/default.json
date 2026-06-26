@@ -232,7 +232,7 @@
 	"perk.Dragonstone.display-name":"Dragonstone",
 	"perk.Dragonstone.description-1":"20% chance of combat spells firing extra projectiles, Does not stack with charge.",
 	"skill.RunescapeMagic.level-up-1":"Congratulations, you just advanced a Magic level",
-	"skill.RunescapeMagic.level-up-2":"You've unlocked access to new spells!",
+	"skill.RunescapeMagic.level-up-2":"You've unlocked access to new spells:",
 	
 	"mail.SpellMail.title": "Wizard's Battlestaff Gift",
 	"mail.SpellMail.text": "Dear @,^^I had forgotten one last thing about runic magic. Combat spells require a focus. In layman's terms, a battlestaff.^I've included one with this letter, and warned the mailcarrier of the consequences if you do not receive it in one piece. ^^   -M. Rasmodius, Wizard",

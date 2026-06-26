@@ -75,7 +75,8 @@ public static class LevelsHandler
 
     public static void IncrementMagicExperience(Farmer farmer, double gainedExperience, bool shouldUseMultiplier = true)
     {
-        if (GetFarmerMagicLevel(farmer) >= 10)
+        int startLevel = GetFarmerMagicLevel(farmer);
+        if (startLevel >= 10)
         {
             return;
         }
@@ -87,6 +88,11 @@ public static class LevelsHandler
         int newAddedExperience = (int)(Math.Floor((gainedExperience * multiplier)));
 
         SpaceCoreApi.AddExperienceForCustomSkill(farmer,"Tofu.RunescapeSpellbook.MagicSkill",newAddedExperience);
+        if (startLevel < GetFarmerMagicLevel(farmer))
+        {
+            farmer.currentLocation.localSound("RunescapeSpellbook.MagicLevel", null, null);
+            Game1.addHUDMessage(new HUDMessage(KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-1"),2));
+        }
     }
 
     public static bool HasPerk(Farmer farmer, string perkID)
@@ -124,10 +130,17 @@ public static class LevelsHandler
 
         public override List<string> GetExtraLevelUpInfo(int level)
         {
-            return new List<string>() { KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-1"), KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-2") };
+            List<string> levelUpInfo = new(){ KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-1")};
+
+            List<Spell>? newSpells = ModAssets.modSpells.Where(x => x.magicLevelRequirement == level).ToList();
+            if (newSpells != null && newSpells.Count > 0)
+            {
+                levelUpInfo.Add(KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-2"));
+                levelUpInfo.AddRange(ModAssets.modSpells.Where(x => x.magicLevelRequirement == level).Select(y=>y.displayName));
+            }
+
+            return levelUpInfo;
         }
-        
-        //TODO add level up effects (sound etc.)
         public override string GetName() => KeyTranslator.GetTranslation("skill.RunescapeMagic.display-name");
     }
 
