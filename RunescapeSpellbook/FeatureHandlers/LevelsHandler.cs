@@ -81,9 +81,11 @@ public static class LevelsHandler
             return;
         }
         
-        int expMultiplier = 100;
+        int expMultiplier = 0;
         int.TryParse(ModAssets.TryGetModVariable(Game1.player, "Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier"),
             out expMultiplier);
+        expMultiplier = expMultiplier == 0 ? 100 : expMultiplier;
+        
         double multiplier = shouldUseMultiplier ? expMultiplier / 100.0 : 1.0;
         int newAddedExperience = (int)(Math.Floor((gainedExperience * multiplier)));
 
@@ -136,7 +138,7 @@ public static class LevelsHandler
             if (newSpells != null && newSpells.Count > 0)
             {
                 levelUpInfo.Add(KeyTranslator.GetTranslation("skill.RunescapeMagic.level-up-2"));
-                levelUpInfo.AddRange(ModAssets.modSpells.Where(x => x.magicLevelRequirement == level).Select(y=>y.displayName));
+                levelUpInfo.AddRange(newSpells.Select(y=>y.displayName));
             }
 
             return levelUpInfo;

@@ -28,7 +28,7 @@ public static class PouchInventoryHandler
     public static void grabItemFromInventory(Item item, Farmer who)
     {
         IInventory localInv = GetItemsForPlayer();
-        int slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x.Stack) : pouchLimit;
+        int slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x?.Stack ?? 0) : pouchLimit;
         if (slotsRemaining <= 0)
         {
             Game1.showRedMessage(KeyTranslator.GetTranslation("ui.Pouch.text"));
