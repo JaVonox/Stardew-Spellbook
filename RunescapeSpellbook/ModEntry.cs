@@ -1087,9 +1087,14 @@ namespace RunescapeSpellbook
             public static bool Prefix(ref bool __result, Debris __instance,Farmer farmer, Chunk chunk)
             {
                 //Check if we should attempt to add this item to a pack inventory
-                if (__instance.item != null && farmer.hasOrWillReceiveMail("Tofu.RunescapeSpellbook_RunesFound") &&
-                    SpaceCoreApi.GetItemInEquipmentSlot(farmer, "Tofu.RunescapeSpellbook.PouchSlot") != null && PouchInventoryHandler.highlightPacks(__instance.item))
+                if (__instance.debrisType.Value == Debris.DebrisType.OBJECT && __instance.itemId.Value != null && farmer.hasOrWillReceiveMail("Tofu.RunescapeSpellbook_RunesFound") &&
+                    SpaceCoreApi.GetItemInEquipmentSlot(farmer, "Tofu.RunescapeSpellbook.PouchSlot") != null && PouchInventoryHandler.highlightPacksbyID(__instance.itemId.Value))
                 {
+                    if (__instance.item == null)
+                    {
+                        __instance.item = ItemRegistry.Create(__instance.itemId.Value, 1, __instance.itemQuality);
+                    }
+                    
                     __instance.item = PouchInventoryHandler.GroundCollect(__instance.item, farmer);
 
                     if (__instance.item == null)

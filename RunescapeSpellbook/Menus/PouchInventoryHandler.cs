@@ -99,6 +99,11 @@ public static class PouchInventoryHandler
         return i.Category == -28 && ModAssets.modItems.TryGetValue(i.ItemId, out ModLoadObjects val) && val is PackObject;
     }
     
+    public static bool highlightPacksbyID(string id)
+    {
+        return ModAssets.modItems.TryGetValue(id.Replace("(O)",""), out ModLoadObjects val) && val is PackObject && val.Category == -28;
+    }
+    
     public static Item GroundCollect(Item item, Farmer who)
     {
         RecalculateItemCap(who);
@@ -111,6 +116,14 @@ public static class PouchInventoryHandler
 
         Item tmp = addItem(item,slotsRemaining);
         return tmp;
+    }
+
+    public static bool IsPouchInventoryFull(Farmer who)
+    {
+        RecalculateItemCap(who);
+        IInventory localInv = GetItemsForPlayer();
+        int slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x.Stack) : pouchLimit;
+        return slotsRemaining <= 0;
     }
 
     private static void RecalculateItemCap(Farmer who)
