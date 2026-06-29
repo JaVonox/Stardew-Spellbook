@@ -1145,7 +1145,6 @@ namespace RunescapeSpellbook
                 }
                 catch (Exception e)
                 {
-                    Instance.Monitor.Log("Runescape Spellbook failed to setup debris transpiler changes. Falling back to original instructions",LogLevel.Error);
                     return instructions;
                 }
             }
@@ -1390,68 +1389,62 @@ namespace RunescapeSpellbook
         [HarmonyPatch(typeof(TV), "checkForAction")]
         public class TVChannelTranspiler
         {
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase original)
             {
                 try
                 {
+                    var func = AccessTools.Method(typeof(TVChannelTranspiler), nameof(ModifyChannelsList));
                     var codes = new List<CodeInstruction>(instructions);
+                    var newInstructions = new List<CodeInstruction>();
 
-                    var toArrayMethod = AccessTools.Method(typeof(List<Response>), "ToArray");
-                    var modifyChannelsMethod = AccessTools.Method(typeof(TVChannelTranspiler), "ModifyChannelsList");
-
-                    if (toArrayMethod == null)
+                    bool insertAfterNext = false;
+                    foreach (var code in codes)
                     {
-                        return instructions;
-                    }
-
-                    for (int i = 0; i < codes.Count; i++)
-                    {
-                        var current = codes[i];
-                        var next = codes[i + 1];
-
-                        if (next.opcode == OpCodes.Callvirt &&
-                            next.operand is MethodInfo method &&
-                            method == toArrayMethod &&
-                            (current.opcode == OpCodes.Ldloc_S ||
-                             current.opcode == OpCodes.Ldloc_0 ||
-                             current.opcode == OpCodes.Ldloc_1 ||
-                             current.opcode == OpCodes.Ldloc_2 ||
-                             current.opcode == OpCodes.Ldloc_3 ||
-                             current.opcode == OpCodes.Ldloc))
+                        newInstructions.Add(code);
+                        
+                        if (insertAfterNext)
                         {
-                            var insertPoint = i + 1;
+                            int stlocIndex = GetLocalIndex(code);
+                            newInstructions.Add(new CodeInstruction(OpCodes.Ldloc,stlocIndex)); //Load in the list
+                            newInstructions.Add(new CodeInstruction(OpCodes.Call, func)); //Modify the list using the function
+                            insertAfterNext = false;
+                        }
                         
-                            var dupInstruction = new CodeInstruction(OpCodes.Dup);
-                            var callInstruction = new CodeInstruction(OpCodes.Call, modifyChannelsMethod);
-                        
-                            if (codes[insertPoint].labels.Count > 0)
-                            {
-                                dupInstruction.labels.AddRange(codes[insertPoint].labels);
-                                codes[insertPoint].labels.Clear();
-                            }
-                        
-                            codes.Insert(insertPoint, dupInstruction);
-                            codes.Insert(insertPoint + 1, callInstruction);
-                            break;
+                        if (code.opcode == OpCodes.Newobj && code.operand is ConstructorInfo inf && inf.DeclaringType == typeof(List<Response>)) //is List<Response>
+                        {
+                            //Skip next item, as it stores the list. we want to adjust after this
+                            insertAfterNext = true;
                         }
                     }
-                
-                    return codes;
-
+                    return newInstructions;
+                    
                 }
                 catch (Exception e)
                 {
                     return instructions;
                 }
             }
+            
             public static void ModifyChannelsList(List<Response> channels)
             {
                 foreach (LoadableTV addChannel in ModAssets.loadableText.Where(x =>
                              x is LoadableTV tvChannel && tvChannel.day == Game1.dayOfMonth && tvChannel.season == Game1.season && Game1.year >= tvChannel.firstYear))
                 {
                     string channelName = addChannel.channelName + (Game1.year == addChannel.firstYear ? "" : KeyTranslator.GetTranslation("ui.Rerun.text"));
-                    channels.Insert(channels.Count - 1, new Response($"RS_{addChannel.id}", channelName));
+                    channels.Add(new Response($"RS_{addChannel.id}", channelName));
                 }
+            }
+            
+            public static int GetLocalIndex(CodeInstruction code)
+            {
+                if (code.opcode == OpCodes.Ldloc_0 || code.opcode == OpCodes.Stloc_0) return 0;
+                else if (code.opcode == OpCodes.Ldloc_1 || code.opcode == OpCodes.Stloc_1) return 1;
+                else if (code.opcode == OpCodes.Ldloc_2 || code.opcode == OpCodes.Stloc_2) return 2;
+                else if (code.opcode == OpCodes.Ldloc_3 || code.opcode == OpCodes.Stloc_3) return 3;
+                else if (code.opcode == OpCodes.Ldloc_S || code.opcode == OpCodes.Ldloc) return Convert.ToInt32(code.operand);
+                else if (code.opcode == OpCodes.Stloc_S || code.opcode == OpCodes.Stloc) return Convert.ToInt32(code.operand);
+                else if (code.opcode == OpCodes.Ldloca_S || code.opcode == OpCodes.Ldloca) return Convert.ToInt32(code.operand);
+                else throw new ArgumentException("Instruction is not a load or store", nameof(code));
             }
 
             [HarmonyPatch(typeof(TV), "selectChannel")]
