@@ -1,5 +1,6 @@
 ﻿using Force.DeepCloner;
 using Microsoft.Xna.Framework.Graphics;
+using SpaceShared.APIs;
 using StardewValley;
 using StardewValley.Inventories;
 using StardewValley.Menus;
@@ -27,9 +28,7 @@ public static class PouchInventoryHandler
     }
     public static void grabItemFromInventory(Item item, Farmer who)
     {
-        IInventory localInv = GetItemsForPlayer();
-        int slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x?.Stack ?? 0) : pouchLimit;
-        if (slotsRemaining <= 0)
+        if (IsPouchInventoryFull(who, out int slotsRemaining))
         {
             Game1.showRedMessage(KeyTranslator.GetTranslation("ui.Pouch.text"));
             return;
@@ -39,6 +38,7 @@ public static class PouchInventoryHandler
         {
             item.Stack = 1;
         }
+        
         Item tmp = addItem(item,slotsRemaining);
         if (tmp == null)
         {
@@ -99,7 +99,7 @@ public static class PouchInventoryHandler
         return i.Category == -28 && ModAssets.modItems.TryGetValue(i.ItemId, out ModLoadObjects val) && val is PackObject;
     }
     
-    public static bool highlightPacksbyID(string id)
+    public static bool highlightPacks(string id)
     {
         return ModAssets.modItems.TryGetValue(id.Replace("(O)",""), out ModLoadObjects val) && val is PackObject && val.Category == -28;
     }
@@ -107,9 +107,7 @@ public static class PouchInventoryHandler
     public static Item GroundCollect(Item item, Farmer who)
     {
         RecalculateItemCap(who);
-        IInventory localInv = GetItemsForPlayer();
-        int slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x.Stack) : pouchLimit;
-        if (slotsRemaining <= 0)
+        if (IsPouchInventoryFull(who,out int slotsRemaining))
         {
             return item;
         }
@@ -120,14 +118,28 @@ public static class PouchInventoryHandler
 
     public static bool IsPouchInventoryFull(Farmer who)
     {
+        return IsPouchInventoryFull(who, out int slotsRemaining);
+    }
+    
+    public static bool IsPouchInventoryFull(Farmer who, out int slotsRemaining)
+    {
         RecalculateItemCap(who);
         IInventory localInv = GetItemsForPlayer();
-        int slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x.Stack) : pouchLimit;
+        slotsRemaining = localInv.Any(j=>j != null) ? pouchLimit - localInv.Sum(x => x?.Stack ?? 0) : pouchLimit;
         return slotsRemaining <= 0;
     }
 
     private static void RecalculateItemCap(Farmer who)
     {
         pouchLimit = 50 + (LevelsHandler.GetFarmerMagicLevel(who) * 10);
+    }
+
+    public static bool EvaluateCanItemEnterPouch(Farmer who, Debris inst, ISpaceCoreApi api)
+    {
+        return inst.debrisType.Value == Debris.DebrisType.OBJECT && inst.itemId.Value != null &&
+               who.hasOrWillReceiveMail("Tofu.RunescapeSpellbook_RunesFound") &&
+               api.GetItemInEquipmentSlot(who, "Tofu.RunescapeSpellbook.PouchSlot") != null && 
+               PouchInventoryHandler.highlightPacks(inst.itemId.Value) &&
+               !IsPouchInventoryFull(who);
     }
 }

@@ -1087,8 +1087,7 @@ namespace RunescapeSpellbook
             public static bool Prefix(ref bool __result, Debris __instance,Farmer farmer, Chunk chunk)
             {
                 //Check if we should attempt to add this item to a pack inventory
-                if (__instance.debrisType.Value == Debris.DebrisType.OBJECT && __instance.itemId.Value != null && farmer.hasOrWillReceiveMail("Tofu.RunescapeSpellbook_RunesFound") &&
-                    SpaceCoreApi.GetItemInEquipmentSlot(farmer, "Tofu.RunescapeSpellbook.PouchSlot") != null && PouchInventoryHandler.highlightPacksbyID(__instance.itemId.Value))
+                if (PouchInventoryHandler.EvaluateCanItemEnterPouch(farmer,__instance,SpaceCoreApi))
                 {
                     if (__instance.item == null)
                     {
@@ -1107,7 +1106,57 @@ namespace RunescapeSpellbook
                 return true;
             }
         }
+
         
+        [HarmonyPatch(typeof(Debris), "updateChunks")]
+        public class ChunkUpdateTranspiler
+        {
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                try
+                {
+                var helper = AccessTools.Method(typeof(ChunkUpdateTranspiler), nameof(CheckIfPouchPickup));
+                var codes = new List<CodeInstruction>(instructions);
+                var newInstructions = new List<CodeInstruction>();
+
+                bool insertAfterNext = false; //Check if we should skip the next instruction - used for inserting after the result of canMoveTowardPlayer flag is set by the original code
+                foreach (var code in codes)
+                {
+                    newInstructions.Add(code);
+                    
+                    if (insertAfterNext)
+                    {
+                        var canMoveflagOp = code.operand; //Get the operand for this instruction (this is canMoveTowardPlayer flag, so we're getting the reference to it)
+                        newInstructions.Add(new CodeInstruction(OpCodes.Ldarg_0)); //push Debris (this) onto stack
+                        newInstructions.Add(new CodeInstruction(OpCodes.Ldloc_S, canMoveflagOp)); //push canMoveTowardPlayer to stack
+                        newInstructions.Add(new CodeInstruction(OpCodes.Call, helper)); //call the CheckIfPouchPickup function
+                        newInstructions.Add(new CodeInstruction(OpCodes.Stloc, canMoveflagOp)); //get the result of the function and assign it to the canMoveTowardPlayer flag 
+                        insertAfterNext = false;
+                    }
+                    
+                    if (code.opcode == OpCodes.Callvirt && code.operand is MethodInfo inf && inf.Name == "couldInventoryAcceptThisItem")
+                    {
+                        //Skip next item, it is used for setting the canMoveTowardPlayer flag
+                        insertAfterNext = true;
+                    }
+                }
+                return newInstructions;
+                
+                }
+                catch (Exception e)
+                {
+                    Instance.Monitor.Log("Runescape Spellbook failed to setup debris transpiler changes. Falling back to original instructions",LogLevel.Error);
+                    return instructions;
+                }
+            }
+
+            static bool CheckIfPouchPickup(Debris debris, bool canMoveTowardPlayer) //Check if we're already true *or* if we can accept this item into the pouch
+            {
+                return canMoveTowardPlayer ||
+                       PouchInventoryHandler.EvaluateCanItemEnterPouch(Game1.player, debris, SpaceCoreApi);
+            }
+        }
+
         [HarmonyPatch(typeof(Farmer), "OnItemReceived")]
         [HarmonyPatch(new Type[] { typeof(Item), typeof(int), typeof(Item),typeof(bool) })]
         public class FarmerItemRecievedPatcher
