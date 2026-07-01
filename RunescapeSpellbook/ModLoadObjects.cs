@@ -556,8 +556,7 @@ public static class ModAssets
 
     public static List<LoadablePower> loadablePowers = new()
     {
-        new LoadablePower("Tofu.RunescapeSpellbook_StandardSpellbook", "Standard Spellbook",
-            "A set of basic spells for the aspiring runic wizard", "Mods.RunescapeSpellbook.Assets.itemsprites", new Point(0, 0), "PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0")
+        new LoadablePower("Tofu.RunescapeSpellbook_StandardSpellbook", "Spellbook","Mods.RunescapeSpellbook.Assets.itemsprites", new Point(0, 0), "PLAYER_HAS_SEEN_EVENT Current Tofu.RunescapeSpellbook_Event0")
     };
     
     private static MethodInfo cachedBroadcastMethod;
@@ -601,7 +600,7 @@ public static class ModAssets
 
     public static void ApplyMassTranslations()
     {
-        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, staffWeapons ,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs, machineItems  }.SelectMany(x => x);
+        var translationTargets = new IEnumerable<ITranslatable>[] { modItems.Values, modSpells, staffWeapons ,loadableText,loadableEvents.Values.SelectMany(z=>z),loadableBuffs, machineItems, loadablePowers  }.SelectMany(x => x);
         foreach (var obj in translationTargets)
         {
             obj.ApplyTranslations();

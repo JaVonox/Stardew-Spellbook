@@ -438,7 +438,6 @@ public class PotionObject : ModLoadObjects
         base.Buffs = new List<ObjectBuffData>(); 
         ObjectBuffData newBuff = new ObjectBuffData();
         newBuff.BuffId = "Tofu.RunescapeSpellbook_OverhealApplier";
-        //TODO can we pass buff health data as custom fields?
         base.Buffs.Add(newBuff);
 
     }
@@ -689,8 +688,8 @@ public class LoadableEvent : LoadableText
 }
 public abstract class LoadableTV : LoadableText
 {
-    public abstract string channelName { get; set; }
-    public abstract bool isBasicsTranslated { get; set; }
+    public string channelName;
+    public abstract string channelKey { get; set; }
     
     public int day;
     public Season season;
@@ -707,40 +706,23 @@ public abstract class LoadableTV : LoadableText
     
     public override void ApplyTranslations()
     {
-        if (!isBasicsTranslated)
-        {
-            channelName = KeyTranslator.GetTranslation(channelName);
-            isBasicsTranslated = true;
-        }
+        channelName = KeyTranslator.GetTranslation(channelKey);
         base.ApplyTranslations();
     }
 }
 
 public class Gobcast : LoadableTV
 {
-    private static string staticChannelName = "tvchannel.Gobcast.channel-name"; 
-    public override string channelName
+    private static string staticChannelKey = "tvchannel.Gobcast.channel-name";
+    public override string channelKey
     {
         get
         {
-            return staticChannelName;
+            return staticChannelKey;
         }
         set
         {
-            staticChannelName = value;
-        }
-    }
-
-    private static bool staticIsBasicsTranslated = false; 
-    public override bool isBasicsTranslated
-    {
-        get
-        {
-            return staticIsBasicsTranslated;
-        }
-        set
-        {
-            staticIsBasicsTranslated = value;
+            staticChannelKey = value;
         }
     }
 
@@ -812,20 +794,22 @@ public class CustomBuff : BuffData, ITranslatable
     }
 }
 
-public class LoadablePower
+public class LoadablePower : ITranslatable
 {
     private string internalName;
     private string displayName;
     private string description;
+    private string translationKey;
     private string texturePath;
     private Point texturePosition;
     private string unlockedCondition;
-    public LoadablePower(string internalName,string displayName, string description, string texturePath, Point texturePosition,
+    public LoadablePower(string internalName,string translationKey, string texturePath, Point texturePosition,
         string unlockedCondition)
     {
         this.internalName = internalName;
-        this.displayName = displayName;
-        this.description = description;
+        this.displayName = translationKey;
+        this.description = translationKey;
+        this.translationKey = translationKey;
         this.texturePath = texturePath;
         this.texturePosition = texturePosition;
         this.unlockedCondition = unlockedCondition;
@@ -840,5 +824,11 @@ public class LoadablePower
         data.TexturePosition = texturePosition;
         data.UnlockedCondition = unlockedCondition;
         powerDict.Add(this.internalName,data);
+    }
+    
+    public void ApplyTranslations()
+    {
+        this.displayName = KeyTranslator.GetTranslation($"power.{this.translationKey}.display-name");
+        this.description = KeyTranslator.GetTranslation($"power.{this.translationKey}.description");
     }
 }

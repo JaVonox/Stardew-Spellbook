@@ -319,6 +319,12 @@
 	"buff.Battlemage.description":"Combat spells have a 10% chance of not costing any runes",
 	"buff.Overheal.display-name":"Overheal",
 	"buff.Overheal.description":"Your health is over its maximum!",
+	"buff.Overheal.error-invalid":"Overheal item is invalid",
+	"buff.Overheal.error-applier":"Overheal applier buff has not been correctly initialised",
+	"buff.Overheal.error-badassign":"Existing overheal buff is incorrectly assigned",
+	
+	"power.Spellbook.display-name": "Standard Spellbook",
+	"power.Spellbook.description": "A set of basic spells for the aspiring runic wizard",
 	
 	"ui.LevelDisplay.text":"Level {{MagicLevel}}",
 	"ui.RequiresLevel.text":"Requires Lvl. {{MagicLevel}}",

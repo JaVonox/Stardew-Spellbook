@@ -1384,8 +1384,7 @@ namespace RunescapeSpellbook
                 
             }
         }
-
-        //TODO this may be way more reliable using Spacecores GetLocalIndexForMethod
+        
         [HarmonyPatch(typeof(TV), "checkForAction")]
         public class TVChannelTranspiler
         {
@@ -1529,7 +1528,7 @@ namespace RunescapeSpellbook
             error = null;
             if (Game1.player.itemToEat == null || !Game1.objectData.TryGetValue(Game1.player.itemToEat.ItemId, out var objectData) || !(objectData is PotionObject potData))
             {
-                error = "Overheal item is invalid";
+                error = KeyTranslator.GetTranslation("buff.Overheal.error-invalid");
                 return false;
             }
             
@@ -1537,7 +1536,7 @@ namespace RunescapeSpellbook
 
             if (!Game1.player.buffs.IsApplied("Tofu.RunescapeSpellbook_OverhealApplier"))
             {
-                error = "Overheal applier buff has not been correctly initialised";
+                error = KeyTranslator.GetTranslation("buff.Overheal.error-applier");
                 return false;
             }
 
@@ -1562,7 +1561,7 @@ namespace RunescapeSpellbook
                 {
                     if (!int.TryParse(overhealAmount, out int existingOverheal))
                     {
-                        error = "Existing overheal buff is incorrectly assigned";
+                        error = KeyTranslator.GetTranslation("buff.Overheal.error-badassign");
                         return false;
                     }
                     
