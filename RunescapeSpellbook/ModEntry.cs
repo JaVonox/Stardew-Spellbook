@@ -1622,7 +1622,7 @@ namespace RunescapeSpellbook
         private void GrantMagic(string command, string[] args)
         {
             if(HasNoWorldContextReady()){return;}
-        
+
             if (LevelsHandler.HasMagic(Game1.player))
             {
                 this.Monitor.Log(KeyTranslator.GetTranslation("log.AlreadyHaveMagic.text"),LogLevel.Warn);
@@ -1659,6 +1659,7 @@ namespace RunescapeSpellbook
                 Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-name", new {Value = farmerRoot.Name}),LogLevel.Info);
                 Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-hasmagic", new {Value = LevelsHandler.HasMagic(farmerRoot)}),LogLevel.Info);
                 Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-level", new {Value = LevelsHandler.GetFarmerMagicLevel(farmerRoot)}),LogLevel.Info);
+                Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-exp",new {Value = Skills.GetExperienceFor(farmerRoot, "Tofu.RunescapeSpellbook.MagicSkill")}),LogLevel.Info);
                 Monitor.Log(KeyTranslator.GetTranslation("log.PlayerInfo.text-multiplier",new {Value = ModAssets.TryGetModVariable(farmerRoot,"Tofu.RunescapeSpellbook_Setting-MagicExpMultiplier")}),LogLevel.Info);
             }
         }

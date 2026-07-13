@@ -369,6 +369,7 @@
 	
 	"log.NoMagic.text":"You don't have access to magic, use rs_grantmagic to give magic access",
 	"log.NoWorld.text":"World not yet initialised",
+	"log.NoIndexPlayer.text":"Couldn't find player at index {{PlayerIndex}}. Defaulting to main player.",
 	"log.AlreadyHaveMagic.text":"You already have access to magic",
 	"log.AddedMagic.text":"Added magic",
 	"log.SetMagicLevel.text":"Set magic level to {{RequestedLevel}}",
@@ -382,7 +383,7 @@
 	"log.PlayerInfo.text-hasmagic":"HasMagic: {{Value}}",
 	"log.PlayerInfo.text-level":"Level: {{Value}}",
 	"log.PlayerInfo.text-exp":"Exp: {{Value}}",
-	"log.PlayerInfo.text-multiplier":"Exp Multiplier: {{Value}}",
+	"log.PlayerInfo.text-multiplier":"Exp Multiplier: {{Value}}%",
 	"log.PlayerInfo.perk-default":"Unassigned",
 	"log.PlayerInfo.text-perk":"Perk Slot {{PerkIndex}} : {{PerkName}}",
 	"log.GrantRune.text-fail":"Invalid rune set to grant {{RuneReq}}",
