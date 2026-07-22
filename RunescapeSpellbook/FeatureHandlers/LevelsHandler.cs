@@ -87,6 +87,12 @@ public static class LevelsHandler
         expMultiplier = expMultiplier == 0 ? 100 : expMultiplier;
         
         double multiplier = shouldUseMultiplier ? expMultiplier / 100.0 : 1.0;
+        
+        if (ModEntry.CompatTweaks.isWalksOfLifeEnabled) //Walks of life removes Exp Curve, so this overrides any multipliers to stop the exp gain being ridiculously high
+        {
+            multiplier = shouldUseMultiplier ? 0.01 : 1.0;
+        }
+        
         int newAddedExperience = (int)(Math.Floor((gainedExperience * multiplier)));
 
         SpaceCoreApi.AddExperienceForCustomSkill(farmer,"Tofu.RunescapeSpellbook.MagicSkill",newAddedExperience);
@@ -99,6 +105,15 @@ public static class LevelsHandler
 
     public static bool HasPerk(Farmer farmer, string perkID)
     {
+        if (perkID == "magicSapphire")
+        {
+            return farmer.HasCustomProfession(MagicSkill.professionsSet["magicSapphire"]) || farmer.HasCustomProfession(MagicSkill.professionsSet["magicSapphireB"]);
+        }
+        if (perkID == "magicDragon")
+        {
+            return farmer.HasCustomProfession(MagicSkill.professionsSet["magicDragon"]) || farmer.HasCustomProfession(MagicSkill.professionsSet["magicDragonB"]);
+        }
+        
         return farmer.HasCustomProfession(MagicSkill.professionsSet[perkID]);
     }
     
@@ -113,12 +128,15 @@ public static class LevelsHandler
             this.ExperienceCurve = new[] { 10000, 38000, 77000, 130000, 215000, 330000, 400000, 690000, 1000000, 1500000 };
             this.ExperienceBarColor = new Microsoft.Xna.Framework.Color(27, 6, 146);
 
+            //THIS NEEDS TO BE IN ORDER (from level 5 perks to level 10 perks) or spacecore will bug and allow multiple selections
             professionsSet = new Dictionary<string, MagicProfession>()
             {
-                {"magicSapphire",new MagicProfession(this, "magicSapphire", "Sapphire")},
                 {"magicRuby",new MagicProfession(this, "magicRuby", "Ruby")},
                 {"magicEmerald",new MagicProfession(this, "magicEmerald", "Emerald")},
-                {"magicDragon",new MagicProfession(this, "magicDragon", "Dragonstone")}
+                {"magicSapphire",new MagicProfession(this, "magicSapphire", "Sapphire")},
+                {"magicSapphireB",new MagicProfession(this, "magicSapphireB", "Sapphire")},
+                {"magicDragon",new MagicProfession(this, "magicDragon", "Dragonstone")},
+                {"magicDragonB",new MagicProfession(this, "magicDragonB", "Dragonstone")}
             };
 
             foreach (Profession prof in professionsSet.Values)
@@ -126,8 +144,9 @@ public static class LevelsHandler
                 this.Professions.Add(prof);
             }
             
-            this.ProfessionsForLevels.Add(new ProfessionPair(5,professionsSet["magicEmerald"],professionsSet["magicRuby"]));
-            this.ProfessionsForLevels.Add(new ProfessionPair(10,professionsSet["magicSapphire"],professionsSet["magicDragon"]));
+            this.ProfessionsForLevels.Add(new ProfessionPair(5, professionsSet["magicEmerald"], professionsSet["magicRuby"]));
+            this.ProfessionsForLevels.Add(new ProfessionPair(10,professionsSet["magicSapphire"],professionsSet["magicDragon"],professionsSet["magicEmerald"]));
+            this.ProfessionsForLevels.Add(new ProfessionPair(10,professionsSet["magicSapphireB"],professionsSet["magicDragonB"],professionsSet["magicRuby"]));
         }
 
         public override List<string> GetExtraLevelUpInfo(int level)

@@ -358,14 +358,15 @@
 	
 	"ui.Rerun.text":" (Re-run)",
 	
-	"log.ModConfigError.text":"Runescape Spellbook failed to setup GenericModConfigMenuAPI: {{Exception}",
-	"log.GameMenuAPIError.text":"Runescape Spellbook failed to setup BetterGameMenuAPI: {{Exception}",
+	"log.ModConfigError.text":"Runescape Spellbook failed to setup GenericModConfigMenuAPI: {{Exception}}",
+	"log.GameMenuAPIError.text":"Runescape Spellbook failed to setup BetterGameMenuAPI: {{Exception}}",
 	"log.UsingOverlapMod.line-1":"RunescapeSpellbook has discovered one or more mods are enabled that might cause UI overlaps",
 	"log.UsingOverlapMod.line-2":"You might find that certain UI Elements conflict. If this causes you issues, please set the Spellbook to 'Only Keybind' in the mod settings",
 	"log.UsingOverlapMod.line-3":"If you are having trouble accessing the spellbook, you can always access it via the associated keybind (Configurable in the Config)",
 	"log.UsingOverlapMod.line-4":"Your current Spellbook keybind is set to {{Keybind}}",
 	"log.DuplicateMailKey.text":"Duplicate mail key: {{MailKey}}. Attempting to access next available year",
 	"log.TooManyMailKeys.text":"Couldn't find a new year for {{mailKey}} before 255",
+	"log.WalksOfLifeEnabled.text":"Walk Of Life Rebirth is enabled. Experience multiplier settings are not compatible with this mod and previously gained exp may be set to an incorrect value.",
 	
 	"log.NoMagic.text":"You don't have access to magic, use rs_grantmagic to give magic access",
 	"log.NoWorld.text":"World not yet initialised",

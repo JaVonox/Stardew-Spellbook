@@ -40,6 +40,7 @@ namespace RunescapeSpellbook
     {
         public static ModEntry Instance;
         public ModConfig Config;
+        public static CompatibilityTweaks CompatTweaks;
         internal IBetterGameMenuApi? BetterGameMenuApi;
         internal static ISpaceCoreApi SpaceCoreApi;
         
@@ -52,6 +53,7 @@ namespace RunescapeSpellbook
 
             ModAssets.Load(helper);
             Config = helper.ReadConfig<ModConfig>();
+            CompatTweaks = new CompatibilityTweaks();
             ModAssets.GetSpellBaseExpMultiplier = () => Config.SpellBaseExpMultiplier;
             
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
@@ -181,6 +183,12 @@ namespace RunescapeSpellbook
                 () => (KeyTranslator.GetTranslation("ui.PouchSlot.text")),
                 ModAssets.extraTextures,
                 new Rectangle(80, 0, 16, 16));
+
+            if (this.Helper.ModRegistry.IsLoaded("DaLion.Professions"))
+            {
+                Instance.Monitor.Log(KeyTranslator.GetTranslation("log.WalksOfLifeEnabled.text"),LogLevel.Warn);
+                CompatTweaks.isWalksOfLifeEnabled = true;
+            }
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
         {
@@ -1780,6 +1788,8 @@ namespace RunescapeSpellbook
         private void DebugCommand(string command, string[] args)
         {
             if (HasNoWorldContextReady()){return;}
+            
+            Game1.warpFarmer("Sewer", 3, 48, 0);
         }
         private void DebugPosition(string command, string[] args)
         {
