@@ -670,8 +670,3 @@ public sealed class ModConfig
     public string SpellbookTabStyle = "Tab and Keybind";
     public int SpellBaseExpMultiplier = 100;
 }
-
-public sealed class CompatibilityTweaks
-{
-    public bool isWalksOfLifeEnabled = false;
-}

@@ -26,7 +26,7 @@ public static class LevelsHandler
         {
             farmerInstance.modData.Remove("Tofu.RunescapeSpellbook_MagicLevel");
         }
-
+        
         if (farmerInstance.modData.ContainsKey("Tofu.RunescapeSpellbook_MagicExp"))
         {
             IncrementMagicExperience(farmerInstance,100 * double.Parse(ModAssets.TryGetModVariable(farmerInstance, "Tofu.RunescapeSpellbook_MagicExp")));
@@ -87,11 +87,6 @@ public static class LevelsHandler
         expMultiplier = expMultiplier == 0 ? 100 : expMultiplier;
         
         double multiplier = shouldUseMultiplier ? expMultiplier / 100.0 : 1.0;
-        
-        if (ModEntry.CompatTweaks.isWalksOfLifeEnabled) //Walks of life removes Exp Curve, so this overrides any multipliers to stop the exp gain being ridiculously high
-        {
-            multiplier = shouldUseMultiplier ? 0.01 : 1.0;
-        }
         
         int newAddedExperience = (int)(Math.Floor((gainedExperience * multiplier)));
 

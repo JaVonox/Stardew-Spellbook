@@ -7,6 +7,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
+using RunescapeSpellbook.APIs;
 using SpaceCore;
 using SpaceCore.VanillaAssetExpansion;
 using SpaceShared.APIs;
@@ -40,7 +41,6 @@ namespace RunescapeSpellbook
     {
         public static ModEntry Instance;
         public ModConfig Config;
-        public static CompatibilityTweaks CompatTweaks;
         internal IBetterGameMenuApi? BetterGameMenuApi;
         internal static ISpaceCoreApi SpaceCoreApi;
         
@@ -53,7 +53,6 @@ namespace RunescapeSpellbook
 
             ModAssets.Load(helper);
             Config = helper.ReadConfig<ModConfig>();
-            CompatTweaks = new CompatibilityTweaks();
             ModAssets.GetSpellBaseExpMultiplier = () => Config.SpellBaseExpMultiplier;
             
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
@@ -187,7 +186,20 @@ namespace RunescapeSpellbook
             if (this.Helper.ModRegistry.IsLoaded("DaLion.Professions"))
             {
                 Instance.Monitor.Log(KeyTranslator.GetTranslation("log.WalksOfLifeEnabled.text"),LogLevel.Warn);
-                CompatTweaks.isWalksOfLifeEnabled = true;
+                IProfessionsApi WalkOfLifeAPI = ModEntry.Instance.Helper.ModRegistry.GetApi<IProfessionsApi>("DaLion.Professions");
+                if (WalkOfLifeAPI != null) //Walk of life overrides spacecore exp, so we have to change the multiplier in the settings
+                {
+                    WalkOfLifeAPI.GetConfig().Skills.BaseMultipliers.Add("Tofu.RunescapeSpellbook.MagicSkill",0.011f); //Set to 0.011f to account for floating point errors
+                }
+            }
+            
+            if (this.Helper.ModRegistry.IsLoaded("DaLion.Combat")) //This still isn't enough to fix it but it does what it can.
+            {
+                ICombatApi CombatAPI = ModEntry.Instance.Helper.ModRegistry.GetApi<ICombatApi>("DaLion.Combat");
+                if (CombatAPI != null)
+                {
+                    CombatAPI.GetConfig().ComboHitsPerWeaponType.Add("429",4); //Adds combo to list to stop errors on swing - not sure if this fully works since sound is bugged anyway
+                }
             }
         }
         private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
