@@ -367,7 +367,8 @@
 	"log.DuplicateMailKey.text":"Duplicate mail key: {{MailKey}}. Attempting to access next available year",
 	"log.TooManyMailKeys.text":"Couldn't find a new year for {{mailKey}} before 255",
 	"log.WalksOfLifeEnabled.text":"Walk Of Life Rebirth is enabled. Experience multiplier settings are not compatible with this mod and previously gained exp may be set to an incorrect value.",
-	
+	"log.WildCatEnabled.text":"Wildcat Dynamic Combat is enabled. Battlestaves are not compatible with the weapon combo system and will cause errors. You can disable/enable combos through wildcat config to fix this issue",
+
 	"log.NoMagic.text":"You don't have access to magic, use rs_grantmagic to give magic access",
 	"log.NoWorld.text":"World not yet initialised",
 	"log.NoIndexPlayer.text":"Couldn't find player at index {{PlayerIndex}}. Defaulting to main player.",

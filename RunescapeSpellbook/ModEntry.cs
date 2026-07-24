@@ -183,11 +183,12 @@ namespace RunescapeSpellbook
                 ModAssets.extraTextures,
                 new Rectangle(80, 0, 16, 16));
 
+            //TODO WoL is not compatible with the exp multiplier
             if (this.Helper.ModRegistry.IsLoaded("DaLion.Professions"))
             {
                 Instance.Monitor.Log(KeyTranslator.GetTranslation("log.WalksOfLifeEnabled.text"),LogLevel.Warn);
                 IProfessionsApi WalkOfLifeAPI = ModEntry.Instance.Helper.ModRegistry.GetApi<IProfessionsApi>("DaLion.Professions");
-                if (WalkOfLifeAPI != null) //Walk of life overrides spacecore exp, so we have to change the multiplier in the settings
+                if (WalkOfLifeAPI != null && !WalkOfLifeAPI.GetConfig().Skills.BaseMultipliers.ContainsKey("429")) //Walk of life overrides spacecore exp, so we have to change the multiplier in the settings
                 {
                     WalkOfLifeAPI.GetConfig().Skills.BaseMultipliers.Add("Tofu.RunescapeSpellbook.MagicSkill",0.011f); //Set to 0.011f to account for floating point errors
                 }
@@ -195,8 +196,9 @@ namespace RunescapeSpellbook
             
             if (this.Helper.ModRegistry.IsLoaded("DaLion.Combat")) //This still isn't enough to fix it but it does what it can.
             {
+                Instance.Monitor.Log(KeyTranslator.GetTranslation("log.WildCatEnabled.text"),LogLevel.Error);
                 ICombatApi CombatAPI = ModEntry.Instance.Helper.ModRegistry.GetApi<ICombatApi>("DaLion.Combat");
-                if (CombatAPI != null)
+                if (CombatAPI != null && !CombatAPI.GetConfig().ComboHitsPerWeaponType.ContainsKey("429"))
                 {
                     CombatAPI.GetConfig().ComboHitsPerWeaponType.Add("429",4); //Adds combo to list to stop errors on swing - not sure if this fully works since sound is bugged anyway
                 }
